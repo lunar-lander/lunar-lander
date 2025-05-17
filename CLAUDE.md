@@ -66,6 +66,21 @@ ChatAAP is a desktop application that allows users to chat with multiple LLM pro
   - Co-located CSS with component code
   - Typed CSS modules for TypeScript integration
 
+### UI Components
+- **Layout**: `src/renderer/components/Layout/`
+  - Main application layout with sidebar and content area
+- **Sidebar**: `src/renderer/components/Sidebar/`
+  - New chat button
+  - Theme toggle (light/dark mode)
+  - Settings navigation
+  - Chat history list with summaries
+- **Chat Interface**: `src/renderer/components/Chat/`
+  - Empty state for no selected chat
+  - Chat header with title
+  - Placeholder for message display and input
+- **Settings**: `src/renderer/components/Settings/`
+  - Basic settings page structure
+
 ### Directory Structure
 ```
 src/
