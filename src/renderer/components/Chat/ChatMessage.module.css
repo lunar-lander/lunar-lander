@@ -21,14 +21,14 @@
 }
 
 .user .messageContent {
-  background-color: #1a73e8;
+  background-color: var(--primary-color);
   color: white;
   border-top-right-radius: 2px;
 }
 
 .assistant .messageContent {
-  background-color: #f0f0f0;
-  color: #202124;
+  background-color: var(--hover-bg-color);
+  color: var(--text-color);
   border-top-left-radius: 2px;
 }
 
@@ -69,8 +69,8 @@
 .messageText :global(blockquote) {
   margin: 8px 0;
   padding-left: 12px;
-  border-left: 3px solid #dadce0;
-  color: #5f6368;
+  border-left: 3px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .messageText :global(ul), .messageText :global(ol) {
@@ -82,20 +82,6 @@
 .messageText :global(h4), .messageText :global(h5), .messageText :global(h6) {
   margin: 16px 0 8px;
   line-height: 1.25;
-}
-
-/* Style adjustments for dark theme */
-:global(.dark-theme) .messageText :global(pre) {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-:global(.dark-theme) .messageText :global(code) {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-:global(.dark-theme) .messageText :global(blockquote) {
-  border-left-color: #5f6368;
-  color: #9aa0a6;
 }
 
 /* User message markdown (light on dark) */
@@ -124,7 +110,7 @@
 }
 
 .assistant .timestamp {
-  color: #70757a;
+  color: var(--text-secondary);
 }
 
 .modelTag {
@@ -135,7 +121,7 @@
 }
 
 .assistant .modelTag {
-  color: #1a73e8;
+  color: var(--primary-color);
 }
 
 .toggleVisibility {
@@ -170,15 +156,3 @@
   }
 }
 
-:global(.dark-theme) .assistant .messageContent {
-  background-color: #303134;
-  color: #e8eaed;
-}
-
-:global(.dark-theme) .assistant .timestamp {
-  color: #9aa0a6;
-}
-
-:global(.dark-theme) .assistant .modelTag {
-  color: #8ab4f8;
-}

@@ -2,6 +2,7 @@
   border-top: 1px solid #e0e0e0;
   padding: 16px;
   background-color: #f9f9f9;
+  color: #202124;
 }
 
 .controlsBar {
@@ -25,6 +26,7 @@
   font-size: 13px;
   background-color: #f1f3f4;
   border: 1px solid #dadce0;
+  color: #202124;
   cursor: pointer;
   transition: all 0.2s;
   user-select: none;
@@ -48,6 +50,7 @@
   border-radius: 4px;
   border: 1px solid #dadce0;
   background-color: white;
+  color: #202124;
   cursor: pointer;
   font-size: 13px;
 }
@@ -57,6 +60,7 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
+  color: #202124;
 }
 
 .temperatureSlider {
@@ -94,25 +98,7 @@
 
 .mdEditor :global(.w-md-editor-preview) {
   background-color: rgba(247, 247, 247, 0.3);
-}
-
-:global(.dark-theme) .mdEditor :global(.w-md-editor) {
-  background-color: #303134;
-  border-color: #5f6368;
-}
-
-:global(.dark-theme) .mdEditor :global(.w-md-editor-toolbar) {
-  background-color: #303134;
-  border-color: #5f6368;
-}
-
-:global(.dark-theme) .mdEditor :global(.w-md-editor-text) {
-  color: #e8eaed;
-}
-
-:global(.dark-theme) .mdEditor :global(.w-md-editor-preview) {
-  background-color: rgba(30, 30, 30, 0.3);
-  color: #e8eaed;
+  color: #202124;
 }
 
 .sendButton {
@@ -148,21 +134,10 @@
   text-align: right;
 }
 
+/* Dark theme overrides */
 :global(.dark-theme) .container {
   background-color: #202124;
   border-top-color: #5f6368;
-}
-
-:global(.dark-theme) .inputWrapper {
-  border-color: #5f6368;
-  background-color: #303134;
-}
-
-:global(.dark-theme) .inputWrapper:focus-within {
-  border-color: #8ab4f8;
-}
-
-:global(.dark-theme) .textarea {
   color: #e8eaed;
 }
 
@@ -182,6 +157,37 @@
   background-color: #303134;
   border-color: #5f6368;
   color: #e8eaed;
+}
+
+:global(.dark-theme) .temperatureControl {
+  color: #e8eaed;
+}
+
+:global(.dark-theme) .mdEditor :global(.w-md-editor) {
+  background-color: #303134;
+  border-color: #5f6368;
+}
+
+:global(.dark-theme) .mdEditor :global(.w-md-editor-toolbar) {
+  background-color: #303134;
+  border-color: #5f6368;
+}
+
+:global(.dark-theme) .mdEditor :global(.w-md-editor-text) {
+  color: #e8eaed;
+}
+
+:global(.dark-theme) .mdEditor :global(.w-md-editor-preview) {
+  background-color: rgba(30, 30, 30, 0.3);
+  color: #e8eaed;
+}
+
+:global(.dark-theme) .sendButton {
+  background-color: #8ab4f8;
+}
+
+:global(.dark-theme) .sendButton:hover {
+  background-color: #a1c3fa;
 }
 
 :global(.dark-theme) .helpText {

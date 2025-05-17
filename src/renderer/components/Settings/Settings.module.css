@@ -16,29 +16,33 @@
 .header {
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .title {
   font-size: 24px;
   font-weight: 500;
-  color: var(--text-color);
+  color: #202124;
 }
 
 .description {
   margin-top: 8px;
-  color: var(--text-secondary, #5f6368);
+  color: #5f6368;
 }
 
 :global(.dark-theme) .container {
-  background-color: var(--background-color);
-  color: var(--text-color);
+  background-color: #202124;
+  color: #e8eaed;
 }
 
 :global(.dark-theme) .header {
-  border-bottom-color: var(--border-color);
+  border-bottom-color: #5f6368;
+}
+
+:global(.dark-theme) .title {
+  color: #e8eaed;
 }
 
 :global(.dark-theme) .description {
-  color: var(--text-secondary, #9aa0a6);
+  color: #9aa0a6;
 }
