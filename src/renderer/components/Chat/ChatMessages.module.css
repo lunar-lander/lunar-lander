@@ -1,12 +1,15 @@
 .container {
-  flex: 1;
+  flex: 1 1 auto;
   padding: 16px 24px;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  overflow-y: auto;
+  min-height: 0; /* Critical for flexbox scrolling */
+  height: 100%;
 }
 
 .messagesEnd {
   float: left;
   clear: both;
+  padding-bottom: 20px;
 }

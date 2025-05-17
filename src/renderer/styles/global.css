@@ -7,6 +7,12 @@
 html, body, #root {
   height: 100%;
   width: 100%;
+  overflow: hidden; /* Prevent double scrollbars */
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
 }
 
 body {
@@ -16,4 +22,31 @@ body {
   background-color: var(--background-color);
   line-height: 1.5;
   transition: color 0.3s, background-color 0.3s;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
