@@ -1,5 +1,5 @@
 .container {
-  background-color: var(--card-bg-color, white);
+  background-color: var(--card-bg-col);
   border-radius: 8px;
   padding: 24px;
   margin-bottom: 32px;
@@ -18,7 +18,7 @@
 .description {
   margin-bottom: 16px;
   line-height: 1.5;
-  color: var(--text-secondary, #5f6368);
+  color: var(--text-secondary);
 }
 
 .modeSelector {
@@ -27,7 +27,7 @@
 
 .modeItem {
   padding: 16px;
-  border: 1px solid var(--border-color, #dadce0);
+  border: 3px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 12px;
   cursor: pointer;
@@ -35,12 +35,12 @@
 }
 
 .modeItem:hover {
-  border-color: var(--primary-color, #1a73e8);
+  border-color: var(--primary-color);
   background-color: rgba(26, 115, 232, 0.05);
 }
 
 .modeItem.selected {
-  border-color: var(--primary-color, #1a73e8);
+  border-color: var(--primary-color);
   background-color: rgba(26, 115, 232, 0.1);
 }
 
@@ -59,7 +59,7 @@
 .modeDescription {
   font-size: 14px;
   line-height: 1.5;
-  color: var(--text-secondary, #5f6368);
+  color: var(--text-secondary);
 }
 
 .actions {
@@ -76,20 +76,20 @@
   cursor: pointer;
   border: none;
   outline: none;
-  background-color: var(--primary-color, #1a73e8);
+  background-color: var(--primary-color);
   color: white;
 }
 
 .button.secondary {
   background-color: transparent;
-  border: 1px solid var(--border-color, #e0e0e0);
-  color: var(--text-color, #202124);
+  border: 3px solid var(--border-color);
+  color: var(--text-color);
 }
 
 .customConfig {
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid var(--border-color, #e0e0e0);
+  border-top: 1px solid var(--border-color);
 }
 
 .customTitle {
@@ -111,28 +111,28 @@
 .input {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border-color, #dadce0);
+  border: 3px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
-  background-color: var(--input-bg, white);
-  color: var(--text-color, #202124);
+  background-color: var(--input-bg);
+  color: var(--text-color);
 }
 
 .textarea {
   width: 100%;
   min-height: 100px;
   padding: 12px;
-  border: 1px solid var(--border-color, #dadce0);
+  border: 3px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
   line-height: 1.5;
   resize: vertical;
-  background-color: var(--input-bg, white);
-  color: var(--text-color, #202124);
+  background-color: var(--input-bg);
+  color: var(--text-color);
 }
 
 .input:focus, .textarea:focus {
-  border-color: var(--primary-color, #1a73e8);
+  border-color: var(--primary-color);
   outline: none;
 }
 

@@ -6,11 +6,11 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .content {
   flex: 1;
-  overflow-y: auto;
 }
 
 .header {
