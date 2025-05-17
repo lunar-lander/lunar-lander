@@ -1,32 +1,15 @@
 // Preload script
 // This file is loaded before the renderer process starts
 // and has access to both node.js and browser APIs
-const { contextBridge, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 
-// Expose protected APIs to the renderer process through the "electron" global
-contextBridge.exposeInMainWorld('electron', {
-  // Allow invoking IPC methods
-  invoke: (channel, ...args) => {
-    // Whitelist channels that can be invoked
-    const validChannels = [
-      'config:get',
-      'config:update',
-      'config:get-current-theme',
-      'config:save-theme',
-      'config:delete-theme',
-      'config:set-theme',
-      'config:toggle-system-theme',
-      'config:set-summary-model',
-      'config:get-summary-model'
-    ];
-    
-    if (validChannels.includes(channel)) {
-      return ipcRenderer.invoke(channel, ...args);
-    }
-    
-    throw new Error(`Unauthorized IPC channel: ${channel}`);
-  }
-});
+// Since contextIsolation is false, we're making the ipcRenderer available directly
+// We also need to expose any Node.js modules that might be needed in the renderer process
+window.ipcRenderer = ipcRenderer;
+
+// Add other Node.js modules and globals that React needs
+window.process = process;
+window.require = require;
 
 // Also maintain the default DOM content loaded handler
 window.addEventListener('DOMContentLoaded', () => {

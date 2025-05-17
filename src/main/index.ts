@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
-import fs from 'fs';
 import { registerConfigIpcHandlers } from './config/ipc-handlers';
 import { modelManager } from './models/index';
 
@@ -20,30 +19,40 @@ const createWindow = (): void => {
     minHeight: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
+      nodeIntegration: true,
+      contextIsolation: false,  // Must be false to allow direct Node.js access
       sandbox: false, // Required for preload script to work properly
     },
   });
 
   // Load the app
-  if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:3000/index.html');
-  } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  try {
+    console.log('Loading application, environment:', process.env.NODE_ENV);
+    console.log('HTML Path:', path.join(__dirname, '../renderer/index.html'));
+    
+    // Load the main app directly
+    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+      .then(() => {
+        console.log('Application loaded successfully');
+      })
+      .catch(err => {
+        console.error('Error loading index.html:', err);
+      });
+  } catch (error) {
+    console.error('General error loading app:', error);
   }
-  
+
   // Open DevTools in development mode
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
   }
-  
+
   // Register all IPC handlers for configuration
   registerConfigIpcHandlers();
-  
+
   // Register model-related IPC handlers
   registerModelIpcHandlers();
-  
+
   // Emitted when the window is closed
   mainWindow.on('closed', () => {
     mainWindow = null;

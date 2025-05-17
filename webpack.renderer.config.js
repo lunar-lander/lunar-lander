@@ -1,9 +1,10 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
-  entry: './src/renderer/index.tsx',
+  entry: ['./src/renderer/polyfills.js', './src/renderer/index.tsx'],
   target: 'electron-renderer',
   output: {
     path: path.join(__dirname, 'dist/renderer'),
@@ -14,7 +15,22 @@ module.exports = {
     __filename: false
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js']
+    extensions: ['.ts', '.tsx', '.js'],
+    // Add fallbacks for Node.js core modules
+    fallback: {
+      path: false,
+      fs: false,
+      crypto: false,
+      stream: false,
+      buffer: false,
+      util: false,
+      assert: false,
+      http: false,
+      https: false,
+      os: false,
+      url: false,
+      process: false,
+    }
   },
   module: {
     rules: [
@@ -48,7 +64,22 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/renderer/index.html'
+      template: './src/renderer/index.html',
+      filename: 'index.html'
+    }),
+    new HtmlWebpackPlugin({
+      template: './src/renderer/debug.html',
+      filename: 'debug.html'
+    }),
+    // Provide global variables required by some packages
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+      Buffer: ['buffer', 'Buffer']
+    }),
+    // Define Node.js environment variables
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      'process.type': JSON.stringify('renderer')
     })
   ],
   // Enable hot module replacement for CSS changes
