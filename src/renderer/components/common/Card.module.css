@@ -1,0 +1,46 @@
+.card {
+  background-color: var(--card-bg-color, white);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card:hover {
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.07), 0 10px 10px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color, #dadce0);
+}
+
+.body {
+  padding: 16px;
+}
+
+.footer {
+  padding: 16px;
+  border-top: 1px solid var(--border-color, #dadce0);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Card variants */
+.flat {
+  box-shadow: none;
+  border: 1px solid var(--border-color, #dadce0);
+}
+
+.flat:hover {
+  box-shadow: none;
+}
+
+.elevated {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.elevated:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16), 0 4px 8px rgba(0, 0, 0, 0.12);
+}

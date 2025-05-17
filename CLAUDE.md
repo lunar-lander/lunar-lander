@@ -31,6 +31,61 @@ ChatAAP is a desktop application that allows users to chat with multiple LLM pro
   - Model activation/deactivation functionality
   - Persistent configuration storage in user data directory
 
+### Configuration System
+- **Location**: `src/main/config/`
+- **Features**:
+  - Theme configuration (light/dark/custom themes)
+  - UI preferences (fontSize, fontFamily, messageBubbleStyle)
+  - Behavior settings (sendOnEnter, autoSave, notifications)
+  - Privacy settings (saveHistory, anonymizeData)
+  - Advanced settings (logLevel, useGPU, proxy)
+  - IPC handlers for main/renderer process communication
+  - Persistent storage in app user directory
+
+### Build System
+- Replaced Vite with Webpack
+- **Configuration**:
+  - `webpack.main.config.js`: Configuration for Electron main process
+  - `webpack.renderer.config.js`: Configuration for Electron renderer process
+- **Scripts**:
+  - `yarn dev`: Development mode with hot reloading
+  - `yarn build`: Production build
+  - `yarn start`: Run the built application
+
+### UI and Styling
+- CSS Modules for component-scoped styling
+- CSS Variables for theming support
+- **Structure**:
+  - Global styles: `src/renderer/styles/global.css`
+  - CSS Variables: `src/renderer/styles/variables.css`
+  - Component styles: Co-located with components (`Component.module.css`)
+- **Features**:
+  - Light/dark theme support via CSS variables
+  - Consistent design system with shared variables
+  - Scoped styles to prevent conflicts
+  - Co-located CSS with component code
+  - Typed CSS modules for TypeScript integration
+
+### Directory Structure
+```
+src/
+  ├── main/           # Electron main process
+  │   ├── config/     # Application configuration
+  │   │   ├── config-manager.ts
+  │   │   └── ipc-handlers.ts
+  │   ├── models/     # LLM model management
+  │   │   └── index.ts
+  │   └── index.ts    # Main entry point
+  ├── renderer/       # Electron renderer process (UI)
+  │   ├── components/ # React components
+  │   ├── contexts/   # React contexts
+  │   ├── hooks/      # React hooks
+  │   └── index.tsx   # Renderer entry point 
+  └── shared/         # Shared code between processes
+      ├── types/      # TypeScript type definitions
+      └── utils/      # Utility functions
+```
+
 ## Misc
 
 - Create a makefile for all operations
