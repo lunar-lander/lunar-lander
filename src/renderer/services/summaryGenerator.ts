@@ -31,7 +31,7 @@ export class SummaryGenerator {
    * For future implementation:
    * Generate a summary using an LLM by sending it the conversation
    */
-  static async generateLLMSummary(chat: Chat, modelId: string): Promise<string> {
+  static async generateLLMSummary(chat: Chat, _modelId: string): Promise<string> {
     // This is a placeholder for integrating with an LLM-based summarization
     // Will be implemented when the LLM integration is ready
     return this.generateBasicSummary(chat);

@@ -1,0 +1,104 @@
+.messageContainer {
+  display: flex;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.user {
+  justify-content: flex-end;
+}
+
+.assistant {
+  justify-content: flex-start;
+}
+
+.messageContent {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.user .messageContent {
+  background-color: #1a73e8;
+  color: white;
+  border-top-right-radius: 2px;
+}
+
+.assistant .messageContent {
+  background-color: #f0f0f0;
+  color: #202124;
+  border-top-left-radius: 2px;
+}
+
+.timestamp {
+  font-size: 11px;
+  margin-top: 4px;
+  text-align: right;
+  opacity: 0.7;
+}
+
+.user .timestamp {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.assistant .timestamp {
+  color: #70757a;
+}
+
+.modelTag {
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+.assistant .modelTag {
+  color: #1a73e8;
+}
+
+.toggleVisibility {
+  position: absolute;
+  left: -30px;
+  top: 8px;
+  border: none;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.toggleVisibility:hover {
+  opacity: 1;
+}
+
+.hidden .messageContent {
+  opacity: 0.4;
+}
+
+.streaming::after {
+  content: '▌';
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+:global(.dark-theme) .assistant .messageContent {
+  background-color: #303134;
+  color: #e8eaed;
+}
+
+:global(.dark-theme) .assistant .timestamp {
+  color: #9aa0a6;
+}
+
+:global(.dark-theme) .assistant .modelTag {
+  color: #8ab4f8;
+}

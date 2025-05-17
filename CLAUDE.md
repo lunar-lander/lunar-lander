@@ -16,8 +16,9 @@ ChatAAP is a desktop application that allows users to chat with multiple LLM pro
    - Custom semantic discussion configurations
 3. **Conversation Control**:
    - Select which LLMs participate in conversations
-   - Reply to specific LLMs individually
-   - Continue conversations with all LLMs
+   - Toggle message visibility for specific responses
+   - Control temperature and other LLM parameters
+   - Real-time streaming responses from multiple models simultaneously
 4. **Streamlined UI**: Intuitive interface for managing complex multi-LLM interactions
 
 ## Technical Implementation
@@ -75,11 +76,34 @@ ChatAAP is a desktop application that allows users to chat with multiple LLM pro
   - Settings navigation
   - Chat history list with summaries
 - **Chat Interface**: `src/renderer/components/Chat/`
-  - Empty state for no selected chat
-  - Chat header with title
-  - Placeholder for message display and input
+  - **Chat.tsx**: Main chat container with logic for message management
+  - **ChatMessages.tsx**: Scrollable message list with visibility controls
+  - **ChatMessage.tsx**: Individual message bubbles with streaming support
+  - **ChatInput.tsx**: Input area with LLM toggles, temperature control, and mode selection
 - **Settings**: `src/renderer/components/Settings/`
   - Basic settings page structure
+
+### State Management
+- **Context API**: `src/renderer/contexts/AppContext.tsx`
+  - Theme preferences (light/dark mode)
+  - Current view management (chat/settings)
+  - Chat list and active chat state
+  - Model configuration and selection
+  - Persistence integration
+  - Multi-LLM chat orchestration
+
+### Data Storage and Services
+- **Database Service**: `src/renderer/services/db.ts`
+  - LocalStorage-based persistence layer
+  - Future-ready for SQLite or file-based storage
+  - Chat and message data structure
+  - Model configuration storage
+- **Summary Generator**: `src/renderer/services/summaryGenerator.ts`
+  - Automatic summary generation from first message
+  - Prepared for future LLM-based summarization
+- **Mock Data**: `src/renderer/services/mockData.ts`
+  - Development data generation
+  - Sample chats and model configurations for testing
 
 ### Directory Structure
 ```
@@ -93,11 +117,21 @@ src/
   │   └── index.ts    # Main entry point
   ├── renderer/       # Electron renderer process (UI)
   │   ├── components/ # React components
-  │   ├── contexts/   # React contexts
+  │   │   ├── Chat/   # Chat interface components
+  │   │   ├── Layout/ # Application layout components
+  │   │   ├── Settings/ # Settings page components
+  │   │   └── Sidebar/ # Sidebar components
+  │   ├── contexts/   # React contexts for state management
   │   ├── hooks/      # React hooks
+  │   ├── services/   # Frontend services
+  │   │   ├── db.ts   # Database service
+  │   │   └── summaryGenerator.ts # Chat summary generation
+  │   ├── styles/     # Global styles
   │   └── index.tsx   # Renderer entry point 
   └── shared/         # Shared code between processes
       ├── types/      # TypeScript type definitions
+      │   ├── chat.ts # Chat-related type definitions
+      │   └── model.ts # Model-related type definitions
       └── utils/      # Utility functions
 ```
 

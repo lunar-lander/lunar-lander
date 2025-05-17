@@ -84,6 +84,32 @@ export class DbService {
     
     this.saveModels(models);
   }
+  
+  static addModel(model: Omit<Model, 'id'>): Model {
+    const newModel: Model = {
+      id: `model_${Date.now()}`,
+      ...model
+    };
+    
+    this.saveModel(newModel);
+    return newModel;
+  }
+  
+  static updateModel(model: Partial<Model> & { id: string }): Model | null {
+    const existingModel = this.getModel(model.id);
+    
+    if (!existingModel) {
+      return null;
+    }
+    
+    const updatedModel: Model = {
+      ...existingModel,
+      ...model
+    };
+    
+    this.saveModel(updatedModel);
+    return updatedModel;
+  }
 
   static deleteModel(modelId: string): void {
     const models = this.getModels();

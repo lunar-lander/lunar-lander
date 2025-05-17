@@ -1,4 +1,7 @@
 import React from 'react';
+import ModelSettings from './ModelSettings';
+import SystemPrompt from './SystemPrompt';
+import ConversationMode from './ConversationMode';
 import styles from './Settings.module.css';
 
 const Settings: React.FC = () => {
@@ -10,8 +13,9 @@ const Settings: React.FC = () => {
       </div>
       
       <div className={styles.content}>
-        {/* Settings content will go here */}
-        <p>Settings page is under construction.</p>
+        <ModelSettings />
+        <SystemPrompt />
+        <ConversationMode />
       </div>
     </div>
   );

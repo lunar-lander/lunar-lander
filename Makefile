@@ -77,16 +77,21 @@ clean:
 
 # Development mode
 .PHONY: dev
-dev: $(NODE_MODULES)
+dev: $(NODE_MODULES) prepare
 	@echo -e "$(COLOR_BOLD)$(COLOR_GREEN)Starting development server...$(COLOR_RESET)"
 	@NODE_ENV=development $(CONCURRENTLY) \
 		"$(WEBPACK) --config webpack.main.config.js --watch" \
 		"$(WEBPACK) --config webpack.renderer.config.js --watch" \
 		"$(ELECTRON) $(DIST_DIR)/main/index.js"
 
+# Prepare directories
+.PHONY: prepare
+prepare:
+	@mkdir -p $(DIST_DIR)/main $(DIST_DIR)/renderer
+
 # Build for production
 .PHONY: build
-build: $(NODE_MODULES) clean
+build: $(NODE_MODULES) clean prepare
 	@echo -e "$(COLOR_BOLD)$(COLOR_GREEN)Building for production...$(COLOR_RESET)"
 	@NODE_ENV=production $(WEBPACK) --config webpack.main.config.js
 	@NODE_ENV=production $(WEBPACK) --config webpack.renderer.config.js
