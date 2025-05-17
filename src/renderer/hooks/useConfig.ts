@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
 import { AppConfig, ThemeConfig } from '../../main/config/config-manager';
 
-// Import electron API from window
-const { electron } = window as any;
+// Access the electron API exposed by the preload script
+declare global {
+  interface Window {
+    electron?: {
+      invoke: (channel: string, ...args: any[]) => Promise<any>;
+    }
+  }
+}
 
 // Hook for accessing and managing app configuration
 export function useConfig() {
@@ -10,19 +16,37 @@ export function useConfig() {
   const [currentTheme, setCurrentTheme] = useState<ThemeConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [summaryModelId, setSummaryModelId] = useState<string | null>(null);
+  const [electronAvailable, setElectronAvailable] = useState<boolean>(false);
 
-  // Load initial config
+  // Check if electron is available
   useEffect(() => {
+    // Check if electron is available after component mounts
+    const checkElectron = () => {
+      if (window.electron) {
+        setElectronAvailable(true);
+      } else {
+        console.warn('Electron API not available yet, will retry in 500ms');
+        setTimeout(checkElectron, 500);
+      }
+    };
+    
+    checkElectron();
+  }, []);
+
+  // Load initial config once electron is available
+  useEffect(() => {
+    if (!electronAvailable) return;
+    
     const loadConfig = async () => {
       try {
-        const appConfig = await electron.invoke('config:get');
+        const appConfig = await window.electron!.invoke('config:get');
         setConfig(appConfig);
 
-        const theme = await electron.invoke('config:get-current-theme');
+        const theme = await window.electron!.invoke('config:get-current-theme');
         setCurrentTheme(theme);
         
         // Get summary model ID
-        const summaryModel = await electron.invoke('config:get-summary-model');
+        const summaryModel = await window.electron!.invoke('config:get-summary-model');
         setSummaryModelId(summaryModel);
       } catch (error) {
         console.error('Failed to load configuration:', error);
@@ -32,19 +56,24 @@ export function useConfig() {
     };
 
     loadConfig();
-  }, []);
+  }, [electronAvailable]);
 
   // Update partial config
   const updateConfig = async (partialConfig: Partial<AppConfig>) => {
+    if (!window.electron) {
+      console.error('Electron API not available');
+      return false;
+    }
+    
     try {
-      await electron.invoke('config:update', partialConfig);
+      await window.electron.invoke('config:update', partialConfig);
       // Refresh the config after update
-      const updatedConfig = await electron.invoke('config:get');
+      const updatedConfig = await window.electron.invoke('config:get');
       setConfig(updatedConfig);
 
       // Refresh theme if theme settings were updated
       if (partialConfig.theme) {
-        const updatedTheme = await electron.invoke('config:get-current-theme');
+        const updatedTheme = await window.electron.invoke('config:get-current-theme');
         setCurrentTheme(updatedTheme);
       }
       
@@ -62,10 +91,15 @@ export function useConfig() {
 
   // Save custom theme
   const saveTheme = async (theme: ThemeConfig) => {
+    if (!window.electron) {
+      console.error('Electron API not available');
+      return false;
+    }
+    
     try {
-      await electron.invoke('config:save-theme', theme);
+      await window.electron.invoke('config:save-theme', theme);
       // Refresh the config
-      const updatedConfig = await electron.invoke('config:get');
+      const updatedConfig = await window.electron.invoke('config:get');
       setConfig(updatedConfig);
       return true;
     } catch (error) {
@@ -76,14 +110,19 @@ export function useConfig() {
 
   // Delete custom theme
   const deleteTheme = async (themeName: string) => {
+    if (!window.electron) {
+      console.error('Electron API not available');
+      return false;
+    }
+    
     try {
-      const result = await electron.invoke('config:delete-theme', themeName);
+      const result = await window.electron.invoke('config:delete-theme', themeName);
       // Refresh the config
-      const updatedConfig = await electron.invoke('config:get');
+      const updatedConfig = await window.electron.invoke('config:get');
       setConfig(updatedConfig);
 
       // Refresh current theme if it changed
-      const updatedTheme = await electron.invoke('config:get-current-theme');
+      const updatedTheme = await window.electron.invoke('config:get-current-theme');
       setCurrentTheme(updatedTheme);
 
       return result;
@@ -95,11 +134,16 @@ export function useConfig() {
 
   // Set current theme
   const setTheme = async (themeName: string) => {
+    if (!window.electron) {
+      console.error('Electron API not available');
+      return false;
+    }
+    
     try {
-      const result = await electron.invoke('config:set-theme', themeName);
+      const result = await window.electron.invoke('config:set-theme', themeName);
       if (result) {
         // Get updated theme
-        const updatedTheme = await electron.invoke('config:get-current-theme');
+        const updatedTheme = await window.electron.invoke('config:get-current-theme');
         setCurrentTheme(updatedTheme);
       }
       return result;
@@ -111,14 +155,19 @@ export function useConfig() {
 
   // Toggle system theme
   const toggleSystemTheme = async (enabled: boolean) => {
+    if (!window.electron) {
+      console.error('Electron API not available');
+      return false;
+    }
+    
     try {
-      await electron.invoke('config:toggle-system-theme', enabled);
+      await window.electron.invoke('config:toggle-system-theme', enabled);
       // Refresh the config
-      const updatedConfig = await electron.invoke('config:get');
+      const updatedConfig = await window.electron.invoke('config:get');
       setConfig(updatedConfig);
 
       // Refresh current theme
-      const updatedTheme = await electron.invoke('config:get-current-theme');
+      const updatedTheme = await window.electron.invoke('config:get-current-theme');
       setCurrentTheme(updatedTheme);
 
       return true;
@@ -130,8 +179,13 @@ export function useConfig() {
   
   // Set summary model ID
   const setSummaryModel = async (modelId: string) => {
+    if (!window.electron) {
+      console.error('Electron API not available');
+      return false;
+    }
+    
     try {
-      await electron.invoke('config:set-summary-model', modelId);
+      await window.electron.invoke('config:set-summary-model', modelId);
       setSummaryModelId(modelId);
       return true;
     } catch (error) {

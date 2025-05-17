@@ -216,34 +216,48 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       // Add chat history based on conversation mode
       const chatMessages = currentChat.messages.filter(msg => msg.id !== messageId);
       
-      // Determine which messages to include based on conversation mode
-      chatMessages.forEach(msg => {
+      // Filter messages based on conversation mode
+      let filteredMessages = [];
+      
+      // Sort messages by timestamp to maintain correct ordering
+      const sortedChatMessages = [...chatMessages].sort((a, b) => a.timestamp - b.timestamp);
+      
+      if (conversationMode === ConversationModeType.ONE_TO_MANY) {
+        // Only include user messages in one-to-many mode
+        // Each LLM responds independently without seeing other LLM responses
+        filteredMessages = sortedChatMessages.filter(msg => msg.sender === 'user');
+      } else if (conversationMode === ConversationModeType.MANY_TO_MANY) {
+        // In many-to-many mode, all models see all messages (from users and all other models)
+        // This creates a collaborative environment where models can reference each other
+        filteredMessages = sortedChatMessages;
+      } else if (conversationMode === ConversationModeType.ROUND_ROBIN) {
+        // In round-robin mode, models only see user messages and their own previous responses
+        // Each model has its own conversation thread with the user
+        filteredMessages = sortedChatMessages.filter(
+          msg => msg.sender === 'user' || (msg.sender === 'assistant' && msg.modelId === modelId)
+        );
+      } else if (conversationMode === ConversationModeType.CUSTOM) {
+        // For custom mode, default to many-to-many for now
+        // In a full implementation, you would apply custom routing rules here
+        filteredMessages = sortedChatMessages;
+      }
+      
+      console.log(`Conversation mode: ${conversationMode}`);
+      console.log(`Filtered ${chatMessages.length} total messages to ${filteredMessages.length} messages for model ${modelId}`); 
+      console.log('Filtered message IDs:', filteredMessages.map(m => m.id));
+      
+      // Convert filtered messages to API format
+      filteredMessages.forEach(msg => {
         if (msg.sender === 'user') {
           apiMessages.push({
             role: 'user',
             content: msg.content
           });
         } else if (msg.sender === 'assistant' && msg.modelId) {
-          // For assistant messages, check if they should be included based on conversation mode
-          let shouldInclude = false;
-          
-          if (conversationMode === ConversationModeType.MANY_TO_MANY) {
-            // Include all assistant messages
-            shouldInclude = true;
-          } else if (conversationMode === ConversationModeType.ROUND_ROBIN) {
-            // Only include messages from this model
-            shouldInclude = msg.modelId === modelId;
-          } else if (conversationMode === ConversationModeType.ONE_TO_MANY) {
-            // Don't include any assistant messages
-            shouldInclude = false;
-          }
-          
-          if (shouldInclude) {
-            apiMessages.push({
-              role: 'assistant',
-              content: msg.content
-            });
-          }
+          apiMessages.push({
+            role: 'assistant',
+            content: msg.content
+          });
         }
       });
       
@@ -295,32 +309,52 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
           const lines = chunk
             .toString()
             .split('\n')
-            .filter(line => line.trim() !== '' && line.trim() !== 'data: [DONE]');
+            .filter(line => line.trim() !== '');
           
           for (const line of lines) {
             try {
-              const message = line.replace(/^data: /, '');
+              // Handle SSE format properly
+              if (!line.startsWith('data:')) continue;
+              
+              const message = line.replace(/^data: /, '').trim();
+              
+              // Skip [DONE] messages
               if (message === '[DONE]') continue;
               
-              const parsed = JSON.parse(message);
-              const delta = parsed.choices[0]?.delta?.content || '';
-              if (delta) {
-                content += delta;
+              // Skip empty messages
+              if (!message) continue;
+              
+              try {
+                const parsed = JSON.parse(message);
                 
-                // Update message content in the chat
-                const chatData = getChat(chatId);
-                if (chatData) {
-                  const updatedMessages = chatData.messages.map(msg => 
-                    msg.id === messageId ? { ...msg, content } : msg
-                  );
-                  
-                  const updatedChat = { ...chatData, messages: updatedMessages };
-                  updateChat(updatedChat);
-                  setChat(updatedChat);
+                // Extract content from delta - handle case where choices might be undefined
+                if (parsed.choices && parsed.choices.length > 0) {
+                  const delta = parsed.choices[0]?.delta?.content || '';
+                  if (delta) {
+                    content += delta;
+                    
+                    // Update message content in the chat
+                    const chatData = getChat(chatId);
+                    if (chatData) {
+                      const updatedMessages = chatData.messages.map(msg => 
+                        msg.id === messageId ? { ...msg, content } : msg
+                      );
+                      
+                      const updatedChat = { ...chatData, messages: updatedMessages };
+                      updateChat(updatedChat);
+                      setChat(updatedChat);
+                    }
+                  }
                 }
+              } catch (parseError) {
+                // Silently ignore parse errors for individual messages
+                // This happens frequently with partial chunks in streaming
               }
             } catch (e) {
-              console.warn('Error parsing SSE message:', e);
+              // Only log severe errors, not parsing issues
+              if (e instanceof SyntaxError === false) {
+                console.warn('Error processing message:', e);
+              }
             }
           }
           
