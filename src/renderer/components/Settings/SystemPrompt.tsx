@@ -44,9 +44,17 @@ const SystemPrompt: React.FC = () => {
     setHasChanges(true);
   };
 
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+
   const handleSave = () => {
     updateSystemPrompt(prompt);
     setHasChanges(false);
+    setSaveSuccess(true);
+    
+    // Clear the success message after 3 seconds
+    setTimeout(() => {
+      setSaveSuccess(false);
+    }, 3000);
   };
 
   const handleReset = () => {
@@ -77,6 +85,11 @@ const SystemPrompt: React.FC = () => {
       </div>
 
       <div className={styles.actions}>
+        {saveSuccess && (
+          <div className={styles.successMessage}>
+            System prompt saved successfully!
+          </div>
+        )}
         <button 
           className={`${styles.button} ${styles.secondary}`}
           onClick={handleReset}

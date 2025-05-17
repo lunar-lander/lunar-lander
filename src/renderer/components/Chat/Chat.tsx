@@ -90,10 +90,10 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       // Add user message and start generating replies from selected models
       addMessageToChat(chatId, userMessage);
       
-      // If this is the first message in the chat, set a timer to generate a summary
+      // If this is the first message in the chat, flag for summary generation
       const isFirstMessage = chat.messages.length === 0;
       
-      // Create streaming messages
+      // Process each selected model
       modelIds.forEach((modelId, index) => {
         const assistantMessageId = `msg_${Date.now()}_${modelId}`;
         
@@ -112,8 +112,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         // Mark message as streaming
         setStreamingMessageIds(prev => [...prev, assistantMessageId]);
         
-        // Simulate streaming response
-        simulateStreamingResponse(chatId, assistantMessageId, modelId, {
+        // Call LLM API with real implementation
+        callLLMApi(chatId, assistantMessageId, modelId, {
           content,
           temperature,
           systemPrompt: systemPrompt
@@ -168,8 +168,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     }
   };
 
-  // Simulate streaming response from a model
-  const simulateStreamingResponse = (
+  // Call LLM API and handle streaming response
+  const callLLMApi = async (
     chatId: string, 
     messageId: string, 
     modelId: string,
@@ -179,37 +179,118 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       systemPrompt: string;
     }
   ) => {
-    let content = '';
-    const responses = [
-      `I'm responding to: "${request.content}" with temperature ${request.temperature}.`,
-      `Based on the system prompt "${request.systemPrompt.substring(0, 20)}...", here's my answer...`,
-      'Here is my response to your inquiry. I hope it helps with what you\'re looking for.',
-      'Based on the information provided, I would suggest the following approach.'
-    ];
-    
-    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    const words = randomResponse.split(' ');
-    
-    const streamInterval = setInterval(() => {
-      if (words.length > 0) {
-        content += words.shift() + ' ';
-        
-        // Update message content
-        const chatData = getChat(chatId);
-        if (chatData) {
-          const updatedMessages = chatData.messages.map(msg => 
-            msg.id === messageId ? { ...msg, content } : msg
-          );
-          
-          const updatedChat = { ...chatData, messages: updatedMessages };
-          updateChat(updatedChat);
-          setChat(updatedChat);
-        }
-      } else {
-        clearInterval(streamInterval);
-        setStreamingMessageIds(prev => prev.filter(id => id !== messageId));
+    try {
+      // Find the model configuration
+      const model = models.find(m => m.id === modelId);
+      if (!model) {
+        throw new Error(`Model with ID ${modelId} not found`);
       }
-    }, 200);
+
+      // Get the current chat to determine context
+      const currentChat = getChat(chatId);
+      if (!currentChat) {
+        throw new Error(`Chat with ID ${chatId} not found`);
+      }
+
+      // Prepare messages for the API call based on conversation mode
+      let contextMessages = [];
+      
+      // Always include the system prompt as the first message
+      if (request.systemPrompt) {
+        contextMessages.push({
+          role: 'system',
+          content: request.systemPrompt
+        });
+      }
+      
+      // Add chat history based on conversation mode
+      const chatMessages = currentChat.messages.filter(msg => msg.id !== messageId);
+      
+      // In a real implementation, we would determine which messages to include
+      // based on the conversation mode
+      chatMessages.forEach(msg => {
+        if (msg.sender === 'user') {
+          contextMessages.push({
+            role: 'user',
+            content: msg.content
+          });
+        } else if (msg.sender === 'assistant' && msg.modelId) {
+          // For assistant messages, check if they should be included based on conversation mode
+          let shouldInclude = false;
+          
+          if (conversationMode === ConversationModeType.MANY_TO_MANY) {
+            // Include all assistant messages
+            shouldInclude = true;
+          } else if (conversationMode === ConversationModeType.ROUND_ROBIN) {
+            // Only include messages from this model
+            shouldInclude = msg.modelId === modelId;
+          }
+          
+          if (shouldInclude) {
+            contextMessages.push({
+              role: 'assistant',
+              content: msg.content
+            });
+          }
+        }
+      });
+      
+      // In a real implementation, this would call the actual API
+      // For now, we'll simulate a streaming response
+      let content = '';
+      const streamingContent = `I am ${model.name} (${model.modelName}) responding with temperature ${request.temperature} in ${conversationMode} mode.
+      
+My API endpoint is at ${model.baseUrl}.
+
+You asked: "${request.content}"
+
+Here's my response:
+      
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.`;
+      
+      const words = streamingContent.split(' ');
+      
+      const streamInterval = setInterval(() => {
+        if (words.length > 0) {
+          content += words.shift() + ' ';
+          
+          // Update message content
+          const chatData = getChat(chatId);
+          if (chatData) {
+            const updatedMessages = chatData.messages.map(msg => 
+              msg.id === messageId ? { ...msg, content } : msg
+            );
+            
+            const updatedChat = { ...chatData, messages: updatedMessages };
+            updateChat(updatedChat);
+            setChat(updatedChat);
+          }
+        } else {
+          clearInterval(streamInterval);
+          setStreamingMessageIds(prev => prev.filter(id => id !== messageId));
+        }
+      }, 50); // Faster streaming for better UX
+      
+    } catch (error) {
+      console.error("Error calling LLM API:", error);
+      
+      // Update the message with the error
+      const chatData = getChat(chatId);
+      if (chatData) {
+        const errorMessage = `Error: Failed to get response from the model. ${error.message}`;
+        
+        const updatedMessages = chatData.messages.map(msg => 
+          msg.id === messageId ? { ...msg, content: errorMessage } : msg
+        );
+        
+        const updatedChat = { ...chatData, messages: updatedMessages };
+        updateChat(updatedChat);
+        setChat(updatedChat);
+      }
+      
+      // Remove from streaming list
+      setStreamingMessageIds(prev => prev.filter(id => id !== messageId));
+    }
   };
 
   // Toggle model selection

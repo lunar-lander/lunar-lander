@@ -216,8 +216,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     // If this was the summary model, clear the summary model ID
     if (summaryModelId === modelId) {
-      setSummaryModelId(null);
       localStorage.removeItem('summaryModelId');
+      setSummaryModelId(null);
     }
   };
   

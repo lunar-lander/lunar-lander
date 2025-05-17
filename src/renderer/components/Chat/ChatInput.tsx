@@ -31,7 +31,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   currentMode
 }) => {
   const [message, setMessage] = useState('');
-  const [temperature, setTemperature] = useState(0.7);
+  const [temperature, setTemperature] = useState(1.0);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Send message on Ctrl+Enter or Cmd+Enter

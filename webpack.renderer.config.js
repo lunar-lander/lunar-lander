@@ -50,5 +50,16 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/renderer/index.html'
     })
-  ]
+  ],
+  // Enable hot module replacement for CSS changes
+  devServer: {
+    hot: true,
+    contentBase: path.join(__dirname, 'dist/renderer')
+  },
+  // Configure watch options for faster updates
+  watchOptions: {
+    aggregateTimeout: 200,
+    poll: 1000,
+    ignored: /node_modules/
+  }
 };

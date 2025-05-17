@@ -51,6 +51,7 @@ const ConversationMode: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<ConversationModeType>(conversationMode);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [customForm, setCustomForm] = useState<CustomConversationConfig>({
     name: '',
     description: '',
@@ -76,6 +77,12 @@ const ConversationMode: React.FC = () => {
   const handleSave = () => {
     updateConversationMode(selectedMode);
     setHasChanges(false);
+    setSaveSuccess(true);
+    
+    // Clear the success message after 3 seconds
+    setTimeout(() => {
+      setSaveSuccess(false);
+    }, 3000);
   };
 
   const handleReset = () => {
@@ -141,6 +148,11 @@ const ConversationMode: React.FC = () => {
       </div>
 
       <div className={styles.actions}>
+        {saveSuccess && (
+          <div className={styles.successMessage}>
+            Conversation mode saved successfully!
+          </div>
+        )}
         <button 
           className={`${styles.button} ${styles.secondary}`}
           onClick={handleReset}

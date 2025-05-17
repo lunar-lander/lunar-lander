@@ -140,7 +140,17 @@ const ModelSettings: React.FC = () => {
   };
 
   const handleSetAsSummaryModel = (modelId: string) => {
+    localStorage.setItem('summaryModelId', modelId);
     setSummaryModelId(modelId);
+    setTestResult({
+      success: true,
+      message: "Summary model updated successfully!"
+    });
+    
+    // Clear the success message after 3 seconds
+    setTimeout(() => {
+      setTestResult(null);
+    }, 3000);
   };
 
   return (

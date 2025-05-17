@@ -35,72 +35,112 @@ export class SummaryGenerator {
       return 'New conversation';
     }
 
-    // In a real implementation, this would call the LLM API
-    // For now, we'll simulate it with a delay and some logic
+    // This would call the actual LLM API in a real implementation
+    // Here we're generating a more sophisticated summary
     
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Get the first user message and first assistant message
-        const userMessages = chat.messages.filter(msg => msg.sender === 'user');
-        const assistantMessages = chat.messages.filter(msg => msg.sender === 'assistant');
-        
-        const firstUserMessage = userMessages[0];
-        const firstAssistantMessage = assistantMessages[0];
-        
-        if (!firstUserMessage) {
-          resolve('New conversation');
-          return;
-        }
-        
-        // Try to create a more interesting summary using both user and assistant messages
-        const userContent = firstUserMessage.content;
-        const assistantContent = firstAssistantMessage?.content || '';
-        
-        // Process user message for keywords
-        const userWords = userContent.split(' ');
-        const userKeywords = userWords.filter(word => 
-          word.length > 5 &&
-          !['should', 'would', 'could', 'about', 'there', 'their', 'these', 'those'].includes(word.toLowerCase())
-        );
-        
-        // Process assistant message for keywords if available
-        const assistantWords = assistantContent.split(' ');
-        const assistantKeywords = assistantWords.filter(word => 
-          word.length > 5 &&
-          !['should', 'would', 'could', 'about', 'there', 'their', 'these', 'those'].includes(word.toLowerCase())
-        );
-        
-        // Combine keywords from both messages
-        let allKeywords = [...userKeywords];
-        if (assistantKeywords.length > 0) {
-          // Add a couple keywords from assistant response
-          allKeywords = [...allKeywords, ...assistantKeywords.slice(0, 2)];
-        }
-        
-        if (allKeywords.length > 0) {
-          // Take a couple keywords and create a summary
-          const selectedKeywords = allKeywords.slice(0, 3);
-          const capitalized = selectedKeywords.map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase().replace(/[.,;:!?]$/, '')
+        try {
+          // Get all messages up to a point
+          const userMessages = chat.messages.filter(msg => msg.sender === 'user');
+          const assistantMessages = chat.messages.filter(msg => msg.sender === 'assistant');
+          
+          const firstUserMessage = userMessages[0];
+          const firstAssistantMessage = assistantMessages[0];
+          
+          if (!firstUserMessage) {
+            resolve('New conversation');
+            return;
+          }
+          
+          // Extract key information from both user and assistant messages
+          const userContent = firstUserMessage.content;
+          const assistantContent = firstAssistantMessage?.content || '';
+          
+          // Check if message contains code
+          const containsCode = userContent.includes('```') || assistantContent.includes('```');
+          
+          // Check if it's a question
+          const isQuestion = userContent.includes('?') || 
+            userContent.toLowerCase().startsWith('how') ||
+            userContent.toLowerCase().startsWith('what') ||
+            userContent.toLowerCase().startsWith('why') ||
+            userContent.toLowerCase().startsWith('when') ||
+            userContent.toLowerCase().startsWith('where') ||
+            userContent.toLowerCase().startsWith('who') ||
+            userContent.toLowerCase().startsWith('which') ||
+            userContent.toLowerCase().startsWith('can');
+          
+          // Determine message subject and type
+          let messageSubject = '';
+          
+          // Process user message for keywords
+          const userWords = userContent.split(/\s+/);
+          const STOP_WORDS = ['should', 'would', 'could', 'about', 'there', 'their', 'these', 'those', 'from', 'with', 'have', 'here', 'that', 'this'];
+          const userKeywords = userWords.filter(word => {
+            const cleanWord = word.toLowerCase().replace(/[.,;:!?]$/, '');
+            return cleanWord.length > 5 && !STOP_WORDS.includes(cleanWord);
+          });
+          
+          // Process assistant message for keywords
+          const assistantWords = assistantContent.split(/\s+/);
+          const assistantKeywords = assistantWords.filter(word => {
+            const cleanWord = word.toLowerCase().replace(/[.,;:!?]$/, '');
+            return cleanWord.length > 5 && !STOP_WORDS.includes(cleanWord);
+          });
+          
+          // Combine keywords
+          let allKeywords = [...userKeywords];
+          if (assistantKeywords.length > 0) {
+            allKeywords = [...allKeywords, ...assistantKeywords.slice(0, 3)];
+          }
+          
+          // Remove duplicates and take top 3
+          const uniqueKeywords = [...new Set(allKeywords.map(word => 
+            word.toLowerCase().replace(/[.,;:!?]$/, '')
+          ))];
+          
+          const selectedKeywords = uniqueKeywords.slice(0, 3);
+          const formattedKeywords = selectedKeywords.map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
           );
           
-          // Create different summaries based on content patterns
-          if (userContent.includes('?')) {
-            resolve(`Question about ${capitalized.join(' and ')}`);
-          } else if (userKeywords.some(word => word.toLowerCase().includes('help'))) {
-            resolve(`Help with ${capitalized.join(' and ')}`);
-          } else if (assistantContent && assistantContent.toLowerCase().includes('here is')) {
-            resolve(`Explanation of ${capitalized.join(' and ')}`);
-          } else if (assistantContent && assistantContent.toLowerCase().includes('suggest')) {
-            resolve(`Suggestions for ${capitalized.join(' and ')}`);
+          // Generate a more intelligent summary based on content analysis
+          let summaryType = '';
+          
+          if (containsCode) {
+            summaryType = userContent.toLowerCase().includes('fix') || userContent.toLowerCase().includes('error') 
+              ? 'Code fix for' 
+              : 'Code example for';
+          } else if (isQuestion) {
+            summaryType = 'Question about';
+          } else if (userContent.toLowerCase().includes('help')) {
+            summaryType = 'Help with';
+          } else if (assistantContent.toLowerCase().includes('example')) {
+            summaryType = 'Examples of';
+          } else if (assistantContent.toLowerCase().includes('explain') || assistantContent.toLowerCase().includes('explanation')) {
+            summaryType = 'Explanation of';
+          } else if (assistantContent.toLowerCase().includes('suggest') || assistantContent.toLowerCase().includes('recommendation')) {
+            summaryType = 'Suggestions for';
+          } else if (assistantContent.toLowerCase().includes('steps') || assistantContent.toLowerCase().includes('instructions')) {
+            summaryType = 'Steps for';
+          } else if (assistantContent.toLowerCase().includes('comparison') || assistantContent.toLowerCase().includes('difference')) {
+            summaryType = 'Comparison of';
           } else {
-            resolve(`Discussion about ${capitalized.join(' and ')}`);
+            summaryType = 'Discussion about';
           }
-        } else {
-          // Fall back to basic summary
+          
+          // Get topic from formattedKeywords
+          const topic = formattedKeywords.length > 0 
+            ? formattedKeywords.join(' and ')
+            : userContent.substring(0, 30).trim() + (userContent.length > 30 ? '...' : '');
+          
+          resolve(`${summaryType} ${topic}`);
+        } catch (error) {
+          console.error("Error generating summary:", error);
           resolve(this.generateBasicSummary(chat));
         }
-      }, 1000); // Simulate API delay
+      }, 800);
     });
   }
   
