@@ -1,7 +1,7 @@
-import React from 'react';
-import { ChatMessage as ChatMessageType } from '../../../shared/types/chat';
-import ReactMarkdown from 'react-markdown';
-import styles from './ChatMessage.module.css';
+import React from "react";
+import { ChatMessage as ChatMessageType } from "../../../shared/types/chat";
+import ReactMarkdown from "react-markdown";
+import styles from "./ChatMessage.module.css";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -13,7 +13,7 @@ interface ChatMessageProps {
 
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -21,10 +21,10 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   modelName,
   isStreaming = false,
   isVisible = true,
-  onToggleVisibility
+  onToggleVisibility,
 }) => {
   const { id, sender, content, timestamp } = message;
-  const isUser = sender === 'user';
+  const isUser = sender === "user";
 
   const handleToggleVisibility = () => {
     if (onToggleVisibility) {
@@ -33,31 +33,36 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   return (
-    <div className={`${styles.messageContainer} ${styles[sender]} ${!isVisible ? styles.hidden : ''}`}>
+    <div
+      className={`${styles.messageContainer} ${styles[sender]} ${
+        !isVisible ? styles.hidden : ""
+      }`}
+    >
       {!isUser && (
-        <button 
-          className={styles.toggleVisibility} 
+        <button
+          className={styles.toggleVisibility}
           onClick={handleToggleVisibility}
-          aria-label={isVisible ? 'Hide message' : 'Show message'}
-          title={isVisible ? 'Hide message' : 'Show message'}
+          aria-label={isVisible ? "Hide message" : "Show message"}
+          title={isVisible ? "Hide message" : "Show message"}
         >
-          {isVisible ? '👁️' : '👁️‍🗨️'}
+          {isVisible ? "👁️" : "👁️‍🗨️"}
         </button>
       )}
-      
+
       <div className={styles.messageContent}>
         {!isUser && message.modelId && (
           <span className={styles.modelTag}>
             {modelName || `Model ID: ${message.modelId}`}
           </span>
         )}
-        
-        <div className={`${styles.messageText} ${isStreaming ? styles.streaming : ''}`}>
+        <span className={styles.timespacer}></span>
+        <span className={styles.timestamp}>{formatTime(timestamp)}</span>
+        <div
+          className={`${styles.messageText} ${
+            isStreaming ? styles.streaming : ""
+          }`}
+        >
           <ReactMarkdown>{content}</ReactMarkdown>
-        </div>
-        
-        <div className={styles.timestamp}>
-          {formatTime(timestamp)}
         </div>
       </div>
     </div>
