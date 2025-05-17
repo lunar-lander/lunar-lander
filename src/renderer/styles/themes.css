@@ -1,0 +1,159 @@
+/* Theme CSS Variables */
+
+:root {
+  /* Default Light Theme */
+  --primary: #1a73e8;
+  --primary-rgb: 26, 115, 232;
+  --secondary: #4285f4;
+  --secondary-rgb: 66, 133, 244;
+  --background: #ffffff;
+  --text: #202124;
+  --sidebar: #f5f5f5;
+  --accent: #fbbc04;
+  --success: #34a853;
+  --error: #ea4335;
+  --warning: #fbbc04;
+  --info: #4285f4;
+}
+
+/* Dark Theme */
+.theme-Dark {
+  --primary: #8ab4f8;
+  --primary-rgb: 138, 180, 248;
+  --secondary: #4285f4;
+  --secondary-rgb: 66, 133, 244;
+  --background: #202124;
+  --text: #e8eaed;
+  --sidebar: #303134;
+  --accent: #fbbc04;
+  --success: #34a853;
+  --error: #ea4335;
+  --warning: #fbbc04;
+  --info: #8ab4f8;
+}
+
+/* Cyberpunk Theme */
+.theme-Cyberpunk {
+  --primary: #ff2a6d;
+  --primary-rgb: 255, 42, 109;
+  --secondary: #05d9e8;
+  --secondary-rgb: 5, 217, 232;
+  --background: #1a1a2e;
+  --text: #d1f7ff;
+  --sidebar: #0f0f1a;
+  --accent: #f7fd04;
+  --success: #00ff9f;
+  --error: #ff2a6d;
+  --warning: #fdca40;
+  --info: #05d9e8;
+}
+
+/* Solarized Light Theme */
+.theme-Solarized-Light {
+  --primary: #268bd2;
+  --secondary: #2aa198;
+  --background: #fdf6e3;
+  --text: #657b83;
+  --sidebar: #eee8d5;
+  --accent: #b58900;
+  --success: #859900;
+  --error: #dc322f;
+  --warning: #cb4b16;
+  --info: #6c71c4;
+}
+
+/* Solarized Dark Theme */
+.theme-Solarized-Dark {
+  --primary: #268bd2;
+  --secondary: #2aa198;
+  --background: #002b36;
+  --text: #839496;
+  --sidebar: #073642;
+  --accent: #b58900;
+  --success: #859900;
+  --error: #dc322f;
+  --warning: #cb4b16;
+  --info: #6c71c4;
+}
+
+/* Synthwave Theme */
+.theme-Synthwave {
+  --primary: #ff1493;
+  --secondary: #9400d3;
+  --background: #241b2f;
+  --text: #f8f8ff;
+  --sidebar: #120d1a;
+  --accent: #00fffb;
+  --success: #00ff00;
+  --error: #ff00ff;
+  --warning: #ffff00;
+  --info: #00fffb;
+}
+
+/* Nord Theme */
+.theme-Nord {
+  --primary: #5e81ac;
+  --secondary: #81a1c1;
+  --background: #2e3440;
+  --text: #eceff4;
+  --sidebar: #3b4252;
+  --accent: #ebcb8b;
+  --success: #a3be8c;
+  --error: #bf616a;
+  --warning: #d08770;
+  --info: #b48ead;
+}
+
+/* Material Oceanic Theme */
+.theme-Material-Oceanic {
+  --primary: #82AAFF;
+  --secondary: #89DDFF;
+  --background: #0F111A;
+  --text: #EEFFFF;
+  --sidebar: #1A1C25;
+  --accent: #F78C6C;
+  --success: #C3E88D;
+  --error: #FF5370;
+  --warning: #FFCB6B;
+  --info: #C792EA;
+}
+
+/* Apply theme variables to elements */
+body {
+  background-color: var(--background);
+  color: var(--text);
+}
+
+button.primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+button.secondary {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.sidebar {
+  background-color: var(--sidebar);
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.success {
+  color: var(--success);
+}
+
+.error {
+  color: var(--error);
+}
+
+.warning {
+  color: var(--warning);
+}
+
+.info {
+  color: var(--info);
+}

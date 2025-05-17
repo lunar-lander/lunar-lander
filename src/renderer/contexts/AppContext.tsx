@@ -129,17 +129,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [configSummaryModelId, summaryModelId]);
 
+  // Get config for theme management
+  const { currentTheme } = useConfig();
+  
   // Apply theme class to document body
   useEffect(() => {
+    if (!currentTheme) return;
+    
+    // Remove all theme classes
+    document.body.classList.forEach(className => {
+      if (className.startsWith('theme-')) {
+        document.body.classList.remove(className);
+      }
+    });
+    
+    // Add the appropriate theme class with spaces replaced by hyphens
+    const themeClassName = `theme-${currentTheme.name.replace(/\s+/g, '-')}`;
+    document.body.classList.add(themeClassName);
+    
+    // Also set dark/light theme for compatibility
     if (isDarkTheme) {
       document.body.classList.add('dark-theme');
     } else {
       document.body.classList.remove('dark-theme');
     }
+    
     localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
-  }, [isDarkTheme]);
+  }, [isDarkTheme, currentTheme]);
 
   const toggleTheme = () => {
+    // Simple toggle between light and dark themes
     setIsDarkTheme(!isDarkTheme);
   };
 

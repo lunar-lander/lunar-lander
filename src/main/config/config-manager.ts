@@ -1,6 +1,11 @@
 import { app } from 'electron';
 import fs from 'fs';
 import path from 'path';
+import { 
+  lightTheme,
+  darkTheme,
+  getAllPredefinedThemes
+} from '../themes';
 
 // Define the theme interface
 export interface ThemeConfig {
@@ -54,35 +59,6 @@ export interface AppConfig {
     summaryModelId: string | null; // ID of the model used for generating summaries
   };
 }
-
-// Default theme configurations
-const defaultLightTheme: ThemeConfig = {
-  name: 'Light',
-  primary: '#1a73e8',
-  secondary: '#4285f4',
-  background: '#ffffff',
-  text: '#202124',
-  sidebar: '#f5f5f5',
-  accent: '#fbbc04',
-  success: '#34a853',
-  error: '#ea4335',
-  warning: '#fbbc04',
-  info: '#4285f4'
-};
-
-const defaultDarkTheme: ThemeConfig = {
-  name: 'Dark',
-  primary: '#8ab4f8',
-  secondary: '#4285f4',
-  background: '#202124',
-  text: '#e8eaed',
-  sidebar: '#303134',
-  accent: '#fbbc04',
-  success: '#34a853',
-  error: '#ea4335',
-  warning: '#fbbc04',
-  info: '#8ab4f8'
-};
 
 // Default application configuration
 const defaultConfig: AppConfig = {
@@ -138,6 +114,26 @@ export class ConfigManager {
       if (fs.existsSync(this.configPath)) {
         const rawData = fs.readFileSync(this.configPath, 'utf-8');
         const loadedConfig = JSON.parse(rawData);
+        
+        // Ensure all predefined themes are present
+        const predefinedThemeNames = getAllPredefinedThemes().map(theme => theme.name);
+        
+        if (loadedConfig.theme && loadedConfig.theme.custom) {
+          // Filter out existing predefined themes so we can add updated versions
+          loadedConfig.theme.custom = loadedConfig.theme.custom.filter(
+            (theme: ThemeConfig) => !predefinedThemeNames.includes(theme.name) || 
+            theme.name === 'Light' || theme.name === 'Dark'
+          );
+          
+          // Add all predefined themes
+          const existingThemeNames = loadedConfig.theme.custom.map((t: ThemeConfig) => t.name);
+          getAllPredefinedThemes().forEach(theme => {
+            if (!existingThemeNames.includes(theme.name)) {
+              loadedConfig.theme.custom.push(theme);
+            }
+          });
+        }
+        
         // Merge with default config to ensure all properties exist
         return this.mergeConfigs(defaultConfig, loadedConfig);
       }
@@ -145,9 +141,9 @@ export class ConfigManager {
       console.error('Failed to load application configuration:', error);
     }
 
-    // Initialize with default themes if config doesn't exist
+    // Initialize with all predefined themes if config doesn't exist
     const initialConfig = { ...defaultConfig };
-    initialConfig.theme.custom = [defaultLightTheme, defaultDarkTheme];
+    initialConfig.theme.custom = getAllPredefinedThemes();
     return initialConfig;
   }
 
@@ -208,8 +204,22 @@ export class ConfigManager {
       return customTheme;
     }
     
-    // Fallback to default light theme
-    return defaultLightTheme;
+    // Fallback to default light theme if not found
+    return this.config.theme.custom.length > 0 
+      ? this.config.theme.custom[0] 
+      : { 
+          name: 'Light',
+          primary: '#1a73e8',
+          secondary: '#4285f4',
+          background: '#ffffff',
+          text: '#202124',
+          sidebar: '#f5f5f5',
+          accent: '#fbbc04',
+          success: '#34a853',
+          error: '#ea4335',
+          warning: '#fbbc04',
+          info: '#4285f4'
+        };
   }
 
   // Add or update a custom theme

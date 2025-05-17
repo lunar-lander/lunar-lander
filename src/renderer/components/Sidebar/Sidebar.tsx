@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './Sidebar.module.css';
 import { useAppContext } from '../../contexts/AppContext';
+import { useConfig } from '../../hooks/useConfig';
 
 const Sidebar: React.FC = () => {
   const { 
@@ -14,6 +15,25 @@ const Sidebar: React.FC = () => {
     models,
     updateModel
   } = useAppContext();
+  
+  const { config, setTheme } = useConfig();
+  const [themeIndex, setThemeIndex] = useState(0);
+  const [availableThemes, setAvailableThemes] = useState<string[]>([]);
+  
+  // Load available themes
+  useEffect(() => {
+    if (config && config.theme && config.theme.custom) {
+      // Extract theme names
+      const themeNames = config.theme.custom.map(theme => theme.name);
+      setAvailableThemes(themeNames);
+      
+      // Find current theme index
+      const currentIndex = themeNames.findIndex(name => name === config.theme.current);
+      if (currentIndex >= 0) {
+        setThemeIndex(currentIndex);
+      }
+    }
+  }, [config]);
 
   // Handle new chat button click
   const handleNewChat = () => {
@@ -25,12 +45,53 @@ const Sidebar: React.FC = () => {
     setCurrentView('settings');
   };
 
+  // Cycle through themes
+  const cycleTheme = async () => {
+    if (availableThemes.length <= 1) {
+      // If only one theme, just use the simple toggle
+      toggleTheme();
+      return;
+    }
+    
+    // Calculate next theme index
+    const nextIndex = (themeIndex + 1) % availableThemes.length;
+    const nextTheme = availableThemes[nextIndex];
+    
+    // Update theme
+    const success = await setTheme(nextTheme);
+    if (success) {
+      setThemeIndex(nextIndex);
+      
+      // Force a manual refresh of the page to apply theme changes immediately
+      // This is a temporary solution - in production, you'd want to avoid this approach
+      window.location.reload();
+    }
+  };
+
   // Toggle model active state
   const handleToggleModel = (modelId: string, isActive: boolean) => {
     updateModel({
       id: modelId,
       isActive: !isActive
     });
+  };
+  
+  // Get emoji for current theme
+  const getThemeEmoji = () => {
+    if (availableThemes.length <= 0) return '🎨';
+    
+    const currentTheme = availableThemes[themeIndex];
+    switch (currentTheme) {
+      case 'Light': return '☀️';
+      case 'Dark': return '🌙';
+      case 'Cyberpunk': return '🤖';
+      case 'Solarized Light': return '☯️';
+      case 'Solarized Dark': return '🧿';
+      case 'Synthwave': return '🌆';
+      case 'Nord': return '❄️';
+      case 'Material Oceanic': return '🌊';
+      default: return '🎨';
+    }
   };
 
   return (
@@ -47,10 +108,10 @@ const Sidebar: React.FC = () => {
       <div className={styles.actions}>
         <button 
           className={styles.actionButton} 
-          onClick={toggleTheme}
-          title={isDarkTheme ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          onClick={cycleTheme}
+          title={`Current Theme: ${availableThemes[themeIndex] || 'Default'} - Click to cycle themes`}
         >
-          {isDarkTheme ? '☀️' : '🌙'}
+          {getThemeEmoji()}
         </button>
         <button 
           className={styles.actionButton}
