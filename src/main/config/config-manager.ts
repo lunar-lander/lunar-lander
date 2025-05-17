@@ -153,10 +153,10 @@ export class ConfigManager {
     for (const [key, value] of Object.entries(loadedCfg)) {
       if (key in defaultCfg) {
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          merged[key as keyof AppConfig] = this.mergeConfigs(
-            defaultCfg[key as keyof AppConfig] as any, 
-            value as any
-          );
+          merged[key as keyof AppConfig] = {
+            ...defaultCfg[key as keyof AppConfig],
+            ...value
+          } as any;
         } else {
           merged[key as keyof AppConfig] = value as any;
         }

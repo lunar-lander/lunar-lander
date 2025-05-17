@@ -86,9 +86,35 @@ src/
       └── utils/      # Utility functions
 ```
 
-## Misc
+## Project Setup
 
-- Create a makefile for all operations
-- Create a CI to build the app and publish it to GitHub releases
-- Create a README for the project
-- Create a LICENSE file for MIT license
+### Makefile
+- Created comprehensive Makefile for all common operations:
+  - `make install`: Install dependencies
+  - `make dev`: Start development server
+  - `make build`: Build for production
+  - `make start`: Run the built application
+  - `make lint`: Lint code
+  - `make typecheck`: Type check TypeScript code
+  - `make check`: Run all code quality checks
+  - `make package`: Package for current platform
+  - `make package-all`: Package for all platforms
+  - `make release`: Create a release
+  - `make clean`: Clean build files
+
+### CI/CD
+- GitHub Actions workflow for building and releasing:
+  - Automatically builds on push to main and pull requests
+  - Runs tests, linting, and type checking
+  - Builds and packages for all platforms on tagged releases
+  - Publishes releases to GitHub Releases
+  - Supports Linux, macOS, and Windows
+
+### Documentation
+- README.md with comprehensive documentation:
+  - Project overview and features
+  - Installation and development instructions
+  - Project structure
+  - Commands and contribution guidelines
+- LICENSE file with MIT license
+- Electron-builder configuration for creating distributable packages

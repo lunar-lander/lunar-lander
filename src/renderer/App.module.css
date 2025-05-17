@@ -8,49 +8,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-md);
-  background-color: var(--primary-color);
+  padding: 16px;
+  background-color: #1a73e8;
   color: white;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .main {
   flex: 1;
-  padding: var(--spacing-lg);
+  padding: 24px;
   overflow-y: auto;
 }
 
-.demoSection {
+.content {
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.demoSection h2 {
-  margin-bottom: var(--spacing-lg);
-  color: var(--text-color);
-}
-
-.demoSection h3 {
-  margin-bottom: var(--spacing-md);
-  color: var(--text-color);
-}
-
-.buttonsDemo, .cardsDemo {
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg);
-  border-radius: var(--border-radius-md);
-  background-color: var(--card-bg-color);
-  box-shadow: var(--shadow-sm);
-}
-
-.buttonGroup {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-.cardGroup {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
 }

@@ -19,8 +19,14 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        include: /src/,
-        use: [{ loader: 'ts-loader' }]
+        exclude: /node_modules/,
+        use: {
+          loader: 'ts-loader',
+          options: {
+            // Skip type checking to speed up compilation
+            transpileOnly: true
+          }
+        }
       }
     ]
   }

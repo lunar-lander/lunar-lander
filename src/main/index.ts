@@ -6,27 +6,23 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
-let mainWindow: BrowserWindow | null = null;
-
-const createWindow = () => {
+const createWindow = (): void => {
   // Create the browser window
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false,
-      contextIsolation: true,
+      nodeIntegration: true,
+      contextIsolation: false,
     },
   });
 
-  // In development mode, load from vite dev server
+  // Load the app
+  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  
+  // Open DevTools in development mode
   if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
-  } else {
-    // In production, load the built html file
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
 };
 

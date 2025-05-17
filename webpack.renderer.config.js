@@ -19,9 +19,15 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.ts(x?)$/,
-        include: /src/,
-        use: [{ loader: 'ts-loader' }]
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'ts-loader',
+          options: {
+            // Skip type checking to speed up compilation
+            transpileOnly: true
+          }
+        }
       },
       {
         test: /\.css$/,
@@ -33,8 +39,7 @@ module.exports = {
               modules: {
                 localIdentName: '[name]__[local]__[hash:base64:5]',
                 auto: true
-              },
-              importLoaders: 1
+              }
             }
           }
         ]

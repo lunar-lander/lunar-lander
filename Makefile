@@ -3,12 +3,12 @@
 # Environment variables
 SHELL := /bin/bash
 NODE_ENV ?= development
-ELECTRON := ./node_modules/.bin/electron
-WEBPACK := ./node_modules/.bin/webpack
-ESLINT := ./node_modules/.bin/eslint
-TSC := ./node_modules/.bin/tsc
-CONCURRENTLY := ./node_modules/.bin/concurrently
-ELECTRON_BUILDER := ./node_modules/.bin/electron-builder
+ELECTRON := npx electron
+WEBPACK := npx webpack
+ESLINT := npx eslint
+TSC := npx tsc
+CONCURRENTLY := npx concurrently
+ELECTRON_BUILDER := npx electron-builder
 
 # Platform and architecture detection
 ifeq ($(OS),Windows_NT)
@@ -116,13 +116,13 @@ check: lint typecheck
 
 # Package for distribution
 .PHONY: package
-package: $(NODE_MODULES) build
+package: $(NODE_MODULES)
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for $(PLATFORM)-$(ARCH)...$(COLOR_RESET)"
 	@NODE_ENV=production $(ELECTRON_BUILDER) --$(PLATFORM) --$(ARCH)
 
 # Package for all platforms
 .PHONY: package-all
-package-all: $(NODE_MODULES) build
+package-all: $(NODE_MODULES)
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for all platforms...$(COLOR_RESET)"
 	@NODE_ENV=production $(ELECTRON_BUILDER) --mac --win --linux
 
