@@ -46,7 +46,18 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         block: "end"
       });
     }
-  }, [messages.map(m => m.content).join('')]);
+  }, [messages, streamingMessageIds]); // Simplified dependency array to avoid issues
+  
+  // Effect to handle scrolling when message content changes
+  useEffect(() => {
+    // This is a separate effect just for content changes
+    if (streamingMessageIds.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ 
+        behavior: "smooth",
+        block: "end"
+      });
+    }
+  }, [JSON.stringify(messages.map(m => m.id + '-' + m.content.length))]);
 
   // Get model name from model ID
   const getModelName = (modelId?: string): string => {

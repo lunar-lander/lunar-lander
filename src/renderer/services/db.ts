@@ -24,18 +24,47 @@ export class DbService {
     return chats.find(chat => chat.id === chatId) || null;
   }
 
-  static saveChat(chat: Chat): void {
-    const chats = this.getChats();
-    const index = chats.findIndex(c => c.id === chat.id);
-    
-    // Update or add the chat
-    if (index !== -1) {
-      chats[index] = { ...chat, lastUpdated: Date.now() };
-    } else {
-      chats.unshift({ ...chat, lastUpdated: Date.now() });
+  static saveChat(chat: Chat): boolean {
+    try {
+      if (!chat || !chat.id) {
+        console.error('DB: Cannot save chat with invalid ID');
+        return false;
+      }
+      
+      // Get current chats
+      const chats = this.getChats();
+      const index = chats.findIndex(c => c.id === chat.id);
+      
+      // Ensure chat has a lastUpdated timestamp
+      const updatedChat = { 
+        ...chat, 
+        lastUpdated: Date.now() 
+      };
+      
+      // Update or add the chat
+      if (index !== -1) {
+        chats[index] = updatedChat;
+      } else {
+        chats.unshift(updatedChat);
+      }
+      
+      // Save updated chats list
+      this.saveChats(chats);
+      
+      // Verify chat was saved
+      const savedChats = this.getChats();
+      const chatExists = savedChats.some(c => c.id === chat.id);
+      
+      if (!chatExists) {
+        console.error(`DB: Failed to save chat ${chat.id}`);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('DB: Error saving chat:', error);
+      return false;
     }
-    
-    this.saveChats(chats);
   }
 
   static deleteChat(chatId: string): void {
@@ -44,17 +73,45 @@ export class DbService {
   }
 
   static addMessageToChat(chatId: string, message: ChatMessage): Chat | null {
-    const chat = this.getChat(chatId);
-    if (!chat) return null;
+    try {
+      // First get the most current version of the chat
+      const chat = this.getChat(chatId);
+      if (!chat) {
+        console.error(`DB: Chat ${chatId} not found when adding message ${message.id}`);
+        return null;
+      }
 
-    const updatedChat = {
-      ...chat,
-      messages: [...chat.messages, message],
-      lastUpdated: Date.now()
-    };
+      // Ensure message is not already in the chat (prevent duplicates)
+      if (chat.messages.some(m => m.id === message.id)) {
+        console.warn(`DB: Message ${message.id} already exists in chat ${chatId}, not adding duplicate`);
+        return chat;
+      }
 
-    this.saveChat(updatedChat);
-    return updatedChat;
+      // Create updated chat object
+      const updatedChat = {
+        ...chat,
+        messages: [...chat.messages, message],
+        lastUpdated: Date.now()
+      };
+
+      // Save the updated chat
+      this.saveChat(updatedChat);
+      
+      // Verify message was saved
+      const verifyChat = this.getChat(chatId);
+      const messageExists = verifyChat?.messages.some(m => m.id === message.id);
+      
+      if (!messageExists) {
+        console.error(`DB: Failed to save message ${message.id} to chat ${chatId}`);
+      } else {
+        console.log(`DB: Successfully saved message ${message.id} to chat ${chatId}`);
+      }
+      
+      return updatedChat;
+    } catch (error) {
+      console.error(`DB: Error adding message to chat ${chatId}:`, error);
+      return null;
+    }
   }
 
   // Model methods

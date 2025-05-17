@@ -84,6 +84,12 @@ export class SummaryGenerator {
     });
     
     try {
+      console.log(`Making summary API call to ${model.baseUrl} for model ${model.modelName}`);
+      
+      // Set up timeout to prevent long-running requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
+      
       // Make the API call
       const response = await fetch(`${model.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -96,20 +102,45 @@ export class SummaryGenerator {
           messages: apiMessages,
           max_tokens: 60,
           temperature: 0.7
-        })
+        }),
+        signal: controller.signal
       });
       
+      // Clear timeout
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("API error:", errorData);
-        throw new Error(`API returned status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+        let errorMessage = `API returned status ${response.status}`;
+        try {
+          const errorData = await response.json();
+          console.error("API error:", errorData);
+          errorMessage += `: ${errorData.error?.message || 'Unknown error'}`;
+        } catch (parseError) {
+          console.error("Error parsing API error response:", parseError);
+          errorMessage += `: ${await response.text() || 'Unknown error'}`;
+        }
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
-      return data.choices[0].message.content.trim();
+      if (!data.choices || !data.choices.length || !data.choices[0].message) {
+        console.error("Invalid API response:", data);
+        throw new Error("Invalid API response format");
+      }
+      
+      const summary = data.choices[0].message.content.trim();
+      console.log(`Summary API returned: "${summary}"`);
+      return summary;
     } catch (error) {
-      console.error("Error calling LLM API:", error);
-      throw error;
+      // Handle timeout errors explicitly
+      if (error.name === 'AbortError') {
+        console.error("Summary API call timed out");
+        return "New conversation"; // Fallback for timeout
+      }
+      
+      console.error("Error calling summary LLM API:", error);
+      // Return a safe fallback instead of throwing
+      return "New conversation";
     }
   }
 }

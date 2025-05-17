@@ -184,21 +184,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentView('chat');
   };
 
-  const updateChatSummary = (chatId: string, summary: string) => {
-    const chat = chats.find(c => c.id === chatId);
-    if (chat) {
-      const updatedChat = { ...chat, summary };
-      DbService.saveChat(updatedChat);
-      setChats(chats.map(c => c.id === chatId ? updatedChat : c));
+  const updateChatSummary = (chatId: string, summary: string): boolean => {
+    try {
+      console.log(`Updating summary for chat ${chatId} to "${summary}"`);
+      
+      // First get chat from DB to ensure we have the latest version
+      const latestChat = DbService.getChat(chatId);
+      if (!latestChat) {
+        console.error(`Chat ${chatId} not found when updating summary`);
+        return false;
+      }
+      
+      // Make sure we're not losing messages
+      if (!latestChat.messages || latestChat.messages.length === 0) {
+        const stateChat = chats.find(c => c.id === chatId);
+        if (stateChat && stateChat.messages && stateChat.messages.length > 0) {
+          console.warn(`DB chat has no messages but state chat has ${stateChat.messages.length} messages - using state chat`);
+          // Use the state chat instead as it has messages
+          const updatedChat = { ...stateChat, summary };
+          const success = DbService.saveChat(updatedChat);
+          
+          if (success) {
+            setChats(chats.map(c => c.id === chatId ? updatedChat : c));
+            return true;
+          } else {
+            console.error(`Failed to save chat with updated summary`);
+            return false;
+          }
+        }
+      }
+      
+      // Normal case - we have a valid chat with messages
+      const updatedChat = { ...latestChat, summary };
+      
+      // Save to DB first
+      const success = DbService.saveChat(updatedChat);
+      
+      if (success) {
+        // Then update state
+        setChats(prevChats => prevChats.map(c => c.id === chatId ? updatedChat : c));
+        return true;
+      } else {
+        console.error(`Failed to save chat with updated summary`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error updating chat summary:`, error);
+      return false;
     }
   };
 
   // Add a message to chat
   const addMessageToChat = (chatId: string, message: ChatMessage) => {
-    DbService.addMessageToChat(chatId, message);
-    
-    // Refresh chats list
-    setChats(DbService.getChats());
+    try {
+      // First try to get existing chat
+      const existingChat = DbService.getChat(chatId);
+      if (!existingChat) {
+        console.error(`Chat ${chatId} not found when adding message ${message.id}`);
+        return null;
+      }
+      
+      // Update the chat in memory first
+      const updatedChat = {
+        ...existingChat,
+        messages: [...existingChat.messages, message],
+        lastUpdated: Date.now()
+      };
+      
+      // Update state immediately to avoid race conditions
+      setChats(prevChats => {
+        return prevChats.map(c => c.id === chatId ? updatedChat : c);
+      });
+      
+      // Then save to database
+      const result = DbService.addMessageToChat(chatId, message);
+      
+      // Return the updated chat
+      return result;
+    } catch (error) {
+      console.error(`Error adding message to chat ${chatId}:`, error);
+      // Refresh from database in case of error
+      setChats(DbService.getChats());
+      return null;
+    }
   };
   
   // Get a specific chat
@@ -207,11 +275,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   
   // Update an entire chat
-  const updateChat = (chat: Chat) => {
-    DbService.saveChat(chat);
-    
-    // Refresh chats list
-    setChats(DbService.getChats());
+  const updateChat = (chat: Chat): boolean => {
+    try {
+      if (!chat || !chat.id) {
+        console.error('Cannot update chat with invalid ID');
+        return false;
+      }
+      
+      // First update local state directly using the chat object
+      setChats(prevChats => {
+        // Avoid unnecessary rerenders by checking if the chat object is different
+        const chatIndex = prevChats.findIndex(c => c.id === chat.id);
+        
+        if (chatIndex === -1) {
+          // Chat not found in state, add it
+          return [chat, ...prevChats.filter(c => c.id !== chat.id)];
+        } else {
+          // Replace the chat in state
+          return prevChats.map(c => c.id === chat.id ? chat : c);
+        }
+      });
+      
+      // Then save to database
+      const saveResult = DbService.saveChat(chat);
+      
+      if (!saveResult) {
+        console.error(`Failed to save chat ${chat.id} to database`);
+        // In case of error, refresh from DB to ensure consistency
+        setChats(DbService.getChats());
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating chat:', error);
+      // In case of error, refresh from DB to ensure consistency
+      setChats(DbService.getChats());
+      return false;
+    }
   };
   
   // Get a specific model

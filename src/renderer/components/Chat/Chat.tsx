@@ -96,49 +96,114 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       // If this is the first message in the chat, flag for summary generation
       const isFirstMessage = chat.messages.length === 0;
       
-      // Process each selected model
-      modelIds.forEach((modelId, index) => {
-        const assistantMessageId = `msg_${Date.now()}_${modelId}`;
+      // Process each selected model - using Promise.all to ensure all messages are added
+      const messagePromises = modelIds.map((modelId, index) => {
+        // Generate unique ID with timestamp to avoid collisions
+        const timestamp = Date.now() + index;
+        const assistantMessageId = `msg_${timestamp}_${modelId}`;
         
         // Create initial placeholder message
         const assistantMessage: ChatMessageType = {
           id: assistantMessageId,
           sender: 'assistant',
           content: '',
-          timestamp: Date.now() + index, // Add index to ensure unique timestamps
+          timestamp: timestamp, // Ensure unique timestamps
           modelId
         };
         
-        // Add message to chat
-        addMessageToChat(chatId, assistantMessage);
+        console.log(`Creating message ${assistantMessageId} for model ${modelId}`);
         
-        // Mark message as streaming
-        setStreamingMessageIds(prev => [...prev, assistantMessageId]);
-        
-        // Call LLM API with real implementation
-        callLLMApi(chatId, assistantMessageId, modelId, {
-          content,
-          temperature,
-          systemPrompt: systemPrompt
+        // Add message to chat and return a promise wrapper to handle async
+        return new Promise<string>(resolve => {
+          // Add message to chat
+          const result = addMessageToChat(chatId, assistantMessage);
+          
+          // Short delay to ensure DB operations complete
+          setTimeout(() => {
+            // Verify message was added
+            const chatData = getChat(chatId);
+            const messageExists = chatData?.messages.some(m => m.id === assistantMessageId);
+            
+            if (!messageExists) {
+              console.error(`Message ${assistantMessageId} was not properly added to chat ${chatId}`);
+            } else {
+              console.log(`Successfully added message ${assistantMessageId} to chat ${chatId}`);
+            }
+            
+            // Mark message as streaming and make API call inside a try-catch
+            try {
+              // First update state to include message in streaming IDs
+              setStreamingMessageIds(prev => [...prev, assistantMessageId]);
+              
+              // Give time for state update to complete with a small delay
+              setTimeout(() => {
+                // Call LLM API with real implementation
+                callLLMApi(chatId, assistantMessageId, modelId, {
+                  content,
+                  temperature,
+                  systemPrompt: systemPrompt
+                }).catch(error => {
+                  console.error(`Error in API call for ${modelId}:`, error);
+                  
+                  // Cleanup streaming state on error
+                  setStreamingMessageIds(prev => prev.filter(id => id !== assistantMessageId));
+                });
+              }, 100); // Short delay to ensure state updates happen first
+            } catch (error) {
+              console.error(`Error setting up API call for ${modelId}:`, error);
+              setStreamingMessageIds(prev => prev.filter(id => id !== assistantMessageId));
+            }
+            
+            resolve(assistantMessageId);
+          }, 50 * index); // Stagger slightly to avoid race conditions
         });
       });
       
-      // Refresh chat data
-      const updatedChat = getChat(chatId);
-      if (updatedChat) {
-        setChat(updatedChat);
+      // Wait for all messages to be added before refreshing
+      Promise.all(messagePromises).then(messageIds => {
+        console.log(`Successfully added ${messageIds.length} messages to chat ${chatId}`);
         
-        // If this was the first message, wait for first response and then generate summary
-        if (isFirstMessage && summaryModelId) {
-          // Wait for the first model to respond before generating summary
-          const waitForFirstResponse = setInterval(() => {
-            if (streamingMessageIds.length === 0) {
-              clearInterval(waitForFirstResponse);
-              generateChatSummary(chatId);
-            }
-          }, 500);
+        // Refresh chat data after all messages have been added
+        const updatedChat = getChat(chatId);
+        if (updatedChat) {
+          console.log(`Chat ${chatId} now has ${updatedChat.messages.length} messages`);
+          setChat(updatedChat);
+          
+          // If this was the first message, wait for first response and then generate summary
+          if (isFirstMessage && summaryModelId) {
+            // First, we'll wait a moment to let the UI stabilize
+            setTimeout(() => {
+              console.log(`Setting up summary generation wait for chat ${chatId}`);
+              
+              // Then, we'll wait for the first model to respond before generating summary
+              const waitForFirstResponse = setInterval(() => {
+                // Check if there are any messages still streaming
+                if (streamingMessageIds.length === 0) {
+                  clearInterval(waitForFirstResponse);
+                  console.log(`All responses complete, initiating summary generation for ${chatId} with delay`);
+                  
+                  // Wait a bit longer to make sure everything is stable before generating summary
+                  setTimeout(() => {
+                    // Double check that the chat still exists and has messages
+                    const chatToSummarize = getChat(chatId);
+                    if (chatToSummarize && chatToSummarize.messages && chatToSummarize.messages.length > 0) {
+                      generateChatSummary(chatId);
+                    } else {
+                      console.error(`Chat ${chatId} no longer valid before summary generation`);
+                    }
+                  }, 1000);
+                } else {
+                  console.log(`Still waiting for ${streamingMessageIds.length} responses to complete before summary`);
+                }
+              }, 1000);
+            }, 500);
+          }
+        } else {
+          console.error(`Failed to retrieve updated chat ${chatId} after adding messages`);
         }
-      }
+      }).catch(error => {
+        console.error(`Error adding messages to chat ${chatId}:`, error);
+      });
     } finally {
       setIsLoading(false);
     }
@@ -146,33 +211,78 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
 
   // Generate chat summary using the designated summary model
   const generateChatSummary = async (chatId: string) => {
+    console.log(`Attempting to generate summary for chat ${chatId}`);
     // Use config summary model ID if available, otherwise use the one from context
     const effectiveSummaryModelId = configSummaryModelId || summaryModelId;
     
-    if (!effectiveSummaryModelId) return;
+    if (!effectiveSummaryModelId) {
+      console.log(`No summary model ID available, skipping summary generation`);
+      return;
+    }
     
     const currentChat = getChat(chatId);
-    if (!currentChat) return;
+    if (!currentChat) {
+      console.error(`Chat ${chatId} not found for summary generation`);
+      return;
+    }
     
+    // Make a copy of the chat to avoid modifying the original
+    const chatCopy = JSON.parse(JSON.stringify(currentChat));
+    
+    // Check if chat has messages
+    if (!chatCopy.messages || chatCopy.messages.length === 0) {
+      console.warn(`Chat ${chatId} has no messages, skipping summary generation`);
+      return;
+    }
+    
+    console.log(`Starting summary generation for chat ${chatId} with ${chatCopy.messages.length} messages`);
     setSummarizing(true);
     
     try {
-      // Call the LLM API to generate a real summary
-      const summary = await SummaryGenerator.generateLLMSummary(currentChat, effectiveSummaryModelId);
+      // First generate a basic summary as a fallback
+      const basicSummary = SummaryGenerator.generateBasicSummary(chatCopy);
+      console.log(`Generated basic summary: "${basicSummary}"`);
       
-      // Update the chat title and summary
-      updateChatSummary(chatId, summary);
+      // Update with basic summary first to ensure we have something
+      updateChatSummary(chatId, basicSummary);
       
-      // Refresh chat data
+      // Try to generate an LLM summary in a way that won't affect the chat state
+      try {
+        // Call the LLM API to generate a real summary - don't let this affect chat
+        console.log(`Calling LLM API for better summary using model ${effectiveSummaryModelId}`);
+        const llmSummary = await SummaryGenerator.generateLLMSummary(chatCopy, effectiveSummaryModelId);
+        console.log(`Generated LLM summary: "${llmSummary}"`);
+        
+        if (llmSummary && llmSummary.trim() !== '') {
+          // Only update if we got a valid summary
+          updateChatSummary(chatId, llmSummary);
+        }
+      } catch (llmError) {
+        // Just log the error but don't fail - we already have the basic summary
+        console.error("Error generating LLM summary:", llmError);
+        // We don't need to do anything here as we already set the basic summary
+      }
+      
+      // Refresh chat data but with safeguards
       const updatedChat = getChat(chatId);
-      if (updatedChat) {
+      if (updatedChat && updatedChat.messages && updatedChat.messages.length > 0) {
+        // Only update if we still have messages - don't replace a chat with messages with an empty one
+        console.log(`Refreshing chat after summary with ${updatedChat.messages.length} messages`);
         setChat(updatedChat);
+      } else {
+        console.error(`Updated chat has no messages after summary generation!`);
+        // If the updated chat is empty but our original had messages, something went wrong
+        if (currentChat.messages && currentChat.messages.length > 0) {
+          console.log(`Restoring original chat with ${currentChat.messages.length} messages`);
+          // Restore the original chat
+          setChat(currentChat);
+          updateChat(currentChat);
+        }
       }
     } catch (error) {
-      console.error("Error generating summary:", error);
-      // Fallback to basic summary if LLM call fails
-      const basicSummary = SummaryGenerator.generateBasicSummary(currentChat);
-      updateChatSummary(chatId, basicSummary);
+      console.error("Fatal error in summary generation:", error);
+      // If a fatal error occurs, restore original chat data
+      setChat(currentChat);
     } finally {
       setSummarizing(false);
     }
@@ -261,25 +371,51 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         }
       });
       
-      // Make the API call
-      const response = await fetch(`${model.baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${model.apiKey}`
-        },
-        body: JSON.stringify({
-          model: model.modelName,
-          messages: apiMessages,
-          temperature: request.temperature,
-          stream: true // Enable streaming
-        })
-      });
+      console.log(`Making API call to ${model.baseUrl} for model ${model.modelName}`);
       
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error("API error:", errorData);
-        throw new Error(`API returned status ${response.status}: ${errorData || 'Unknown error'}`);
+      // Make the API call with timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      let response;
+      try {
+        response = await fetch(`${model.baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${model.apiKey}`
+          },
+          body: JSON.stringify({
+            model: model.modelName,
+            messages: apiMessages,
+            temperature: request.temperature,
+            stream: true // Enable streaming
+          }),
+          signal: controller.signal
+        });
+        
+        // Clear the timeout since the request completed
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error(`API error for model ${model.name}:`, errorData);
+          throw new Error(`API returned status ${response.status}: ${errorData || 'Unknown error'}`);
+        }
+        
+        console.log(`API call successful for model ${model.name}`);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.error(`API call to ${model.baseUrl} timed out after 30 seconds`);
+          throw new Error(`Request to ${model.name} timed out. Please try again.`);
+        }
+        throw fetchError;
+      }
+      
+      // Make sure we have a valid response object before proceeding
+      if (!response) {
+        throw new Error('No response received from API');
       }
       
       // Process the streaming response
@@ -291,8 +427,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       let content = '';
       const decoder = new TextDecoder();
       
-      // Read stream chunks
-      const readStream = async () => {
+      // Read stream chunks - returns a promise so we can catch errors outside
+      const readStream = async (): Promise<void> => {
         try {
           const { done, value } = await reader.read();
           
@@ -334,15 +470,69 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
                     content += delta;
                     
                     // Update message content in the chat
-                    const chatData = getChat(chatId);
-                    if (chatData) {
+                    try {
+                      console.log(`Processing stream chunk for message ${messageId}, content length: ${content.length}`);
+                      const chatData = getChat(chatId);
+                      if (!chatData) {
+                        console.error(`Chat data not found for ID: ${chatId}`);
+                        return;
+                      }
+                      
+                      // Find the message to make sure it exists
+                      const messageToUpdate = chatData.messages.find(msg => msg.id === messageId);
+                      if (!messageToUpdate) {
+                        console.error(`Message ${messageId} not found in chat ${chatId}`);
+                        
+                        // Recreate the missing message and add it to the chat
+                        console.log(`Attempting to recreate missing message ${messageId}`);
+                        
+                        // Extract model ID from messageId (format is msg_timestamp_modelId)
+                        const recreatedModelId = messageId.split('_').pop() || '';
+                        
+                        const recreatedMessage: ChatMessageType = {
+                          id: messageId,
+                          sender: 'assistant',
+                          content: content,
+                          timestamp: Date.now(),
+                          modelId: recreatedModelId
+                        };
+                        
+                        // Add recreated message to chat
+                        addMessageToChat(chatId, recreatedMessage);
+                        
+                        // Get updated chat data
+                        const refreshedChat = getChat(chatId);
+                        if (!refreshedChat) {
+                          console.error(`Still can't retrieve chat ${chatId} after message recreation`);
+                          return;
+                        }
+                        
+                        // Check if message was successfully recreated
+                        if (!refreshedChat.messages.some(msg => msg.id === messageId)) {
+                          console.error(`Failed to recreate message ${messageId}`);
+                          return;
+                        }
+                        
+                        // Set regenerated chat
+                        setChat(refreshedChat);
+                        return;
+                      }
+                      
                       const updatedMessages = chatData.messages.map(msg => 
                         msg.id === messageId ? { ...msg, content } : msg
                       );
                       
                       const updatedChat = { ...chatData, messages: updatedMessages };
-                      updateChat(updatedChat);
+                      
+                      // First update local state to avoid race conditions
                       setChat(updatedChat);
+                      
+                      // Then update database
+                      updateChat(updatedChat);
+                      
+                      console.log(`Updated message ${messageId}, new content length: ${content.length}`);
+                    } catch (updateError) {
+                      console.error(`Error updating message content:`, updateError);
                     }
                   }
                 }
@@ -362,12 +552,72 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
           readStream();
         } catch (error) {
           console.error('Error reading stream:', error);
+          
+          try {
+            // Make sure we preserve the message even when the stream errors out
+            const chatData = getChat(chatId);
+            if (chatData) {
+              // Find the message to make sure it exists
+              const messageToUpdate = chatData.messages.find(msg => msg.id === messageId);
+              
+              if (messageToUpdate) {
+                // Update with error indication but preserve any content we have
+                const errorMessage = `${content}\n\n[Error: Connection interrupted]`;
+                
+                const updatedMessages = chatData.messages.map(msg => 
+                  msg.id === messageId ? { ...msg, content: errorMessage } : msg
+                );
+                
+                const updatedChat = { ...chatData, messages: updatedMessages };
+                
+                // Update state first to avoid race conditions
+                setChat(updatedChat);
+                
+                // Then update database
+                updateChat(updatedChat);
+                console.log(`Preserved message ${messageId} after stream error`);
+              }
+            }
+          } catch (preserveError) {
+            console.error('Error preserving message after stream error:', preserveError);
+          }
+          
+          // Finally, mark as no longer streaming
           setStreamingMessageIds(prev => prev.filter(id => id !== messageId));
         }
       };
       
-      // Start reading the stream
-      readStream();
+      // Start reading the stream with additional error handling
+      readStream().catch(error => {
+        console.error(`Unhandled error in readStream for ${modelId}:`, error);
+        
+        try {
+          // Ensure the message is preserved with error information
+          const chatData = getChat(chatId);
+          if (chatData) {
+            const messageToUpdate = chatData.messages.find(msg => msg.id === messageId);
+            if (messageToUpdate) {
+              // Include any existing content plus error message
+              const errorContent = messageToUpdate.content 
+                ? `${messageToUpdate.content}\n\n[Error: ${error.message || 'Unknown error'}]`
+                : `[Error: ${error.message || 'Unknown error'}]`;
+              
+              const updatedMessages = chatData.messages.map(msg => 
+                msg.id === messageId ? { ...msg, content: errorContent } : msg
+              );
+              
+              const updatedChat = { ...chatData, messages: updatedMessages };
+              setChat(updatedChat);
+              updateChat(updatedChat);
+            }
+          }
+        } catch (cleanupError) {
+          console.error('Error during error cleanup:', cleanupError);
+        }
+        
+        // Mark message as no longer streaming
+        setStreamingMessageIds(prev => prev.filter(id => id !== messageId));
+      });
       
     } catch (error) {
       console.error("Error calling LLM API:", error);
