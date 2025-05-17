@@ -40,6 +40,24 @@ export function registerConfigIpcHandlers(): void {
     configManager.toggleSystemTheme(enabled);
     return true;
   });
+  
+  // Set summary model ID
+  ipcMain.handle('config:set-summary-model', (_, modelId: string) => {
+    const config = configManager.getConfig();
+    configManager.updateConfig({
+      chat: {
+        ...config.chat,
+        summaryModelId: modelId
+      }
+    });
+    return true;
+  });
+
+  // Get summary model ID
+  ipcMain.handle('config:get-summary-model', () => {
+    const config = configManager.getConfig();
+    return config.chat.summaryModelId;
+  });
 }
 
 // Function to unregister all handlers (useful for cleanup)
@@ -51,4 +69,6 @@ export function unregisterConfigIpcHandlers(): void {
   ipcMain.removeHandler('config:delete-theme');
   ipcMain.removeHandler('config:set-theme');
   ipcMain.removeHandler('config:toggle-system-theme');
+  ipcMain.removeHandler('config:set-summary-model');
+  ipcMain.removeHandler('config:get-summary-model');
 }

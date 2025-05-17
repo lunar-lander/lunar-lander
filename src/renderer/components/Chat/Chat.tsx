@@ -6,6 +6,7 @@ import ChatInput, { ChatMode } from './ChatInput';
 import styles from './Chat.module.css';
 import { SummaryGenerator } from '../../services/summaryGenerator';
 import { ConversationModeType } from '../Settings/ConversationMode';
+import { useConfig } from '../../hooks/useConfig';
 
 // Map between ChatMode and ConversationModeType
 const getModeFromConversationMode = (mode: ConversationModeType): ChatMode => {
@@ -45,6 +46,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     systemPrompt,
     summaryModelId
   } = useAppContext();
+  
+  const { summaryModelId: configSummaryModelId } = useConfig();
 
   // Convert from settings conversation mode to chat mode
   const chatMode = getModeFromConversationMode(conversationMode);
@@ -143,7 +146,10 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
 
   // Generate chat summary using the designated summary model
   const generateChatSummary = async (chatId: string) => {
-    if (!summaryModelId) return;
+    // Use config summary model ID if available, otherwise use the one from context
+    const effectiveSummaryModelId = configSummaryModelId || summaryModelId;
+    
+    if (!effectiveSummaryModelId) return;
     
     const currentChat = getChat(chatId);
     if (!currentChat) return;
@@ -151,9 +157,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     setSummarizing(true);
     
     try {
-      // In a real app, this would use the LLM to generate a summary
-      // For now, we'll simulate it with a delay
-      const summary = await SummaryGenerator.generateLLMSummary(currentChat, summaryModelId);
+      // Call the LLM API to generate a real summary
+      const summary = await SummaryGenerator.generateLLMSummary(currentChat, effectiveSummaryModelId);
       
       // Update the chat title and summary
       updateChatSummary(chatId, summary);
@@ -163,6 +168,11 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       if (updatedChat) {
         setChat(updatedChat);
       }
+    } catch (error) {
+      console.error("Error generating summary:", error);
+      // Fallback to basic summary if LLM call fails
+      const basicSummary = SummaryGenerator.generateBasicSummary(currentChat);
+      updateChatSummary(chatId, basicSummary);
     } finally {
       setSummarizing(false);
     }
@@ -193,11 +203,11 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       }
 
       // Prepare messages for the API call based on conversation mode
-      let contextMessages = [];
+      let apiMessages = [];
       
       // Always include the system prompt as the first message
       if (request.systemPrompt) {
-        contextMessages.push({
+        apiMessages.push({
           role: 'system',
           content: request.systemPrompt
         });
@@ -206,11 +216,10 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       // Add chat history based on conversation mode
       const chatMessages = currentChat.messages.filter(msg => msg.id !== messageId);
       
-      // In a real implementation, we would determine which messages to include
-      // based on the conversation mode
+      // Determine which messages to include based on conversation mode
       chatMessages.forEach(msg => {
         if (msg.sender === 'user') {
-          contextMessages.push({
+          apiMessages.push({
             role: 'user',
             content: msg.content
           });
@@ -224,10 +233,13 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
           } else if (conversationMode === ConversationModeType.ROUND_ROBIN) {
             // Only include messages from this model
             shouldInclude = msg.modelId === modelId;
+          } else if (conversationMode === ConversationModeType.ONE_TO_MANY) {
+            // Don't include any assistant messages
+            shouldInclude = false;
           }
           
           if (shouldInclude) {
-            contextMessages.push({
+            apiMessages.push({
               role: 'assistant',
               content: msg.content
             });
@@ -235,41 +247,93 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         }
       });
       
-      // In a real implementation, this would call the actual API
-      // For now, we'll simulate a streaming response
+      // Make the API call
+      const response = await fetch(`${model.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${model.apiKey}`
+        },
+        body: JSON.stringify({
+          model: model.modelName,
+          messages: apiMessages,
+          temperature: request.temperature,
+          stream: true // Enable streaming
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("API error:", errorData);
+        throw new Error(`API returned status ${response.status}: ${errorData || 'Unknown error'}`);
+      }
+      
+      // Process the streaming response
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('Response body is not readable');
+      }
+      
       let content = '';
-      const streamingContent = `I am ${model.name} (${model.modelName}) responding with temperature ${request.temperature} in ${conversationMode} mode.
+      const decoder = new TextDecoder();
       
-My API endpoint is at ${model.baseUrl}.
-
-You asked: "${request.content}"
-
-Here's my response:
-      
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.`;
-      
-      const words = streamingContent.split(' ');
-      
-      const streamInterval = setInterval(() => {
-        if (words.length > 0) {
-          content += words.shift() + ' ';
+      // Read stream chunks
+      const readStream = async () => {
+        try {
+          const { done, value } = await reader.read();
           
-          // Update message content
-          const chatData = getChat(chatId);
-          if (chatData) {
-            const updatedMessages = chatData.messages.map(msg => 
-              msg.id === messageId ? { ...msg, content } : msg
-            );
-            
-            const updatedChat = { ...chatData, messages: updatedMessages };
-            updateChat(updatedChat);
-            setChat(updatedChat);
+          if (done) {
+            // End of stream, remove from streaming list
+            setStreamingMessageIds(prev => prev.filter(id => id !== messageId));
+            return;
           }
-        } else {
-          clearInterval(streamInterval);
+          
+          // Decode the chunk
+          const chunk = decoder.decode(value, { stream: true });
+          
+          // Process the chunk to extract the content
+          const lines = chunk
+            .toString()
+            .split('\n')
+            .filter(line => line.trim() !== '' && line.trim() !== 'data: [DONE]');
+          
+          for (const line of lines) {
+            try {
+              const message = line.replace(/^data: /, '');
+              if (message === '[DONE]') continue;
+              
+              const parsed = JSON.parse(message);
+              const delta = parsed.choices[0]?.delta?.content || '';
+              if (delta) {
+                content += delta;
+                
+                // Update message content in the chat
+                const chatData = getChat(chatId);
+                if (chatData) {
+                  const updatedMessages = chatData.messages.map(msg => 
+                    msg.id === messageId ? { ...msg, content } : msg
+                  );
+                  
+                  const updatedChat = { ...chatData, messages: updatedMessages };
+                  updateChat(updatedChat);
+                  setChat(updatedChat);
+                }
+              }
+            } catch (e) {
+              console.warn('Error parsing SSE message:', e);
+            }
+          }
+          
+          // Continue reading
+          readStream();
+        } catch (error) {
+          console.error('Error reading stream:', error);
           setStreamingMessageIds(prev => prev.filter(id => id !== messageId));
         }
-      }, 50); // Faster streaming for better UX
+      };
+      
+      // Start reading the stream
+      readStream();
       
     } catch (error) {
       console.error("Error calling LLM API:", error);

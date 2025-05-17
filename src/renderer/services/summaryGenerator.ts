@@ -1,4 +1,6 @@
 import { Chat, ChatMessage } from '../../shared/types/chat';
+import { Model } from '../../shared/types/model';
+import { DbService } from './db';
 
 // Utility to generate a summary of a chat conversation
 export class SummaryGenerator {
@@ -35,121 +37,79 @@ export class SummaryGenerator {
       return 'New conversation';
     }
 
-    // This would call the actual LLM API in a real implementation
-    // Here we're generating a more sophisticated summary
-    
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        try {
-          // Get all messages up to a point
-          const userMessages = chat.messages.filter(msg => msg.sender === 'user');
-          const assistantMessages = chat.messages.filter(msg => msg.sender === 'assistant');
-          
-          const firstUserMessage = userMessages[0];
-          const firstAssistantMessage = assistantMessages[0];
-          
-          if (!firstUserMessage) {
-            resolve('New conversation');
-            return;
-          }
-          
-          // Extract key information from both user and assistant messages
-          const userContent = firstUserMessage.content;
-          const assistantContent = firstAssistantMessage?.content || '';
-          
-          // Check if message contains code
-          const containsCode = userContent.includes('```') || assistantContent.includes('```');
-          
-          // Check if it's a question
-          const isQuestion = userContent.includes('?') || 
-            userContent.toLowerCase().startsWith('how') ||
-            userContent.toLowerCase().startsWith('what') ||
-            userContent.toLowerCase().startsWith('why') ||
-            userContent.toLowerCase().startsWith('when') ||
-            userContent.toLowerCase().startsWith('where') ||
-            userContent.toLowerCase().startsWith('who') ||
-            userContent.toLowerCase().startsWith('which') ||
-            userContent.toLowerCase().startsWith('can');
-          
-          // Determine message subject and type
-          let messageSubject = '';
-          
-          // Process user message for keywords
-          const userWords = userContent.split(/\s+/);
-          const STOP_WORDS = ['should', 'would', 'could', 'about', 'there', 'their', 'these', 'those', 'from', 'with', 'have', 'here', 'that', 'this'];
-          const userKeywords = userWords.filter(word => {
-            const cleanWord = word.toLowerCase().replace(/[.,;:!?]$/, '');
-            return cleanWord.length > 5 && !STOP_WORDS.includes(cleanWord);
-          });
-          
-          // Process assistant message for keywords
-          const assistantWords = assistantContent.split(/\s+/);
-          const assistantKeywords = assistantWords.filter(word => {
-            const cleanWord = word.toLowerCase().replace(/[.,;:!?]$/, '');
-            return cleanWord.length > 5 && !STOP_WORDS.includes(cleanWord);
-          });
-          
-          // Combine keywords
-          let allKeywords = [...userKeywords];
-          if (assistantKeywords.length > 0) {
-            allKeywords = [...allKeywords, ...assistantKeywords.slice(0, 3)];
-          }
-          
-          // Remove duplicates and take top 3
-          const uniqueKeywords = [...new Set(allKeywords.map(word => 
-            word.toLowerCase().replace(/[.,;:!?]$/, '')
-          ))];
-          
-          const selectedKeywords = uniqueKeywords.slice(0, 3);
-          const formattedKeywords = selectedKeywords.map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-          );
-          
-          // Generate a more intelligent summary based on content analysis
-          let summaryType = '';
-          
-          if (containsCode) {
-            summaryType = userContent.toLowerCase().includes('fix') || userContent.toLowerCase().includes('error') 
-              ? 'Code fix for' 
-              : 'Code example for';
-          } else if (isQuestion) {
-            summaryType = 'Question about';
-          } else if (userContent.toLowerCase().includes('help')) {
-            summaryType = 'Help with';
-          } else if (assistantContent.toLowerCase().includes('example')) {
-            summaryType = 'Examples of';
-          } else if (assistantContent.toLowerCase().includes('explain') || assistantContent.toLowerCase().includes('explanation')) {
-            summaryType = 'Explanation of';
-          } else if (assistantContent.toLowerCase().includes('suggest') || assistantContent.toLowerCase().includes('recommendation')) {
-            summaryType = 'Suggestions for';
-          } else if (assistantContent.toLowerCase().includes('steps') || assistantContent.toLowerCase().includes('instructions')) {
-            summaryType = 'Steps for';
-          } else if (assistantContent.toLowerCase().includes('comparison') || assistantContent.toLowerCase().includes('difference')) {
-            summaryType = 'Comparison of';
-          } else {
-            summaryType = 'Discussion about';
-          }
-          
-          // Get topic from formattedKeywords
-          const topic = formattedKeywords.length > 0 
-            ? formattedKeywords.join(' and ')
-            : userContent.substring(0, 30).trim() + (userContent.length > 30 ? '...' : '');
-          
-          resolve(`${summaryType} ${topic}`);
-        } catch (error) {
-          console.error("Error generating summary:", error);
-          resolve(this.generateBasicSummary(chat));
-        }
-      }, 800);
-    });
+    try {
+      // Get up to the first 5 message exchanges
+      const messagesToInclude = chat.messages.slice(0, 10);
+      
+      // Get the model configuration
+      const model = DbService.getModel(modelId);
+      if (!model) {
+        console.error("Model not found:", modelId);
+        return this.generateBasicSummary(chat);
+      }
+      
+      // Call the LLM API
+      return await this.callSummaryLLM(messagesToInclude, model);
+    } catch (error) {
+      console.error("Error generating summary:", error);
+      return this.generateBasicSummary(chat);
+    }
   }
   
   /**
-   * In a real application, this would be the method to actually call the LLM API
+   * Call the LLM API to generate a summary
    */
-  private static async callSummaryLLM(message: string, modelId: string): Promise<string> {
-    // This would be implemented to call the LLM API
-    // For now we'll just return a placeholder
-    return `Summary of: ${message.substring(0, 30)}...`;
+  private static async callSummaryLLM(messages: ChatMessage[], model: Model): Promise<string> {
+    // Prepare the messages for the API
+    const apiMessages = [
+      { 
+        role: 'system', 
+        content: 'You are a helpful assistant. Your task is to create a short, concise title for this conversation. The title should be 5-8 words maximum and capture the main topic being discussed. Return ONLY the title with no quotes, explanations, or additional text.'
+      }
+    ];
+    
+    // Add the conversation messages
+    messages.forEach(message => {
+      if (message.sender === 'user') {
+        apiMessages.push({
+          role: 'user',
+          content: message.content
+        });
+      } else if (message.sender === 'assistant') {
+        apiMessages.push({
+          role: 'assistant',
+          content: message.content
+        });
+      }
+    });
+    
+    try {
+      // Make the API call
+      const response = await fetch(`${model.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${model.apiKey}`
+        },
+        body: JSON.stringify({
+          model: model.modelName,
+          messages: apiMessages,
+          max_tokens: 60,
+          temperature: 0.7
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("API error:", errorData);
+        throw new Error(`API returned status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
+      }
+      
+      const data = await response.json();
+      return data.choices[0].message.content.trim();
+    } catch (error) {
+      console.error("Error calling LLM API:", error);
+      throw error;
+    }
   }
 }

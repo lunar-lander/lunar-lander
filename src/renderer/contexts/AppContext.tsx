@@ -3,6 +3,7 @@ import { Chat, ChatMessage } from '../../shared/types/chat';
 import { Model } from '../../shared/types/model';
 import { DbService } from '../services/db';
 import { initializeMockData } from '../services/mockData';
+import { useConfig } from '../hooks/useConfig';
 
 // Import types from ConversationMode
 import { ConversationModeType } from '../components/Settings/ConversationMode';
@@ -74,6 +75,9 @@ export const useAppContext = () => {
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Access configuration
+  const { summaryModelId: configSummaryModelId, setSummaryModel } = useConfig();
+  
   // Check for dark theme preference in localStorage or system
   const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const savedTheme = localStorage.getItem('theme');
@@ -109,10 +113,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const savedSystemPrompt = localStorage.getItem('systemPrompt') || '';
     setSystemPrompt(savedSystemPrompt);
     
-    // Load summary model id
-    const savedSummaryModelId = localStorage.getItem('summaryModelId') || null;
-    setSummaryModelId(savedSummaryModelId);
-    
     // Load conversation mode
     const savedConversationMode = localStorage.getItem('conversationMode') || ConversationModeType.ONE_TO_MANY;
     setConversationMode(savedConversationMode as ConversationModeType);
@@ -121,6 +121,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const savedCustomConfigs = JSON.parse(localStorage.getItem('customConfigs') || '[]');
     setCustomConfigs(savedCustomConfigs);
   }, []);
+  
+  // Sync summary model ID from config
+  useEffect(() => {
+    if (configSummaryModelId !== undefined && configSummaryModelId !== summaryModelId) {
+      setSummaryModelId(configSummaryModelId);
+    }
+  }, [configSummaryModelId, summaryModelId]);
 
   // Apply theme class to document body
   useEffect(() => {
@@ -273,89 +280,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('customConfigs', JSON.stringify(updatedConfigs));
   };
 
-  // Add user message and generate replies from multiple LLMs
-  const addMessageAndGenerateReplies = (chatId: string, content: string, modelIds: string[]) => {
-    // First add the user message
-    const userMessage: ChatMessage = {
-      id: `msg_${Date.now()}_user`,
-      sender: 'user',
-      content,
-      timestamp: Date.now()
-    };
-    
-    DbService.addMessageToChat(chatId, userMessage);
-    
-    // Generate response for each selected model based on conversation mode
-    modelIds.forEach((modelId, index) => {
-      // Create placeholder message that will be updated
-      const assistantMessage: ChatMessage = {
-        id: `msg_${Date.now()}_${index}`,
-        sender: 'assistant',
-        content: 'Thinking...',
-        timestamp: Date.now() + index, // Add index to ensure unique timestamps
-        modelId
-      };
-      
-      DbService.addMessageToChat(chatId, assistantMessage);
-      
-      // Get full chat context based on conversation mode
-      const chat = DbService.getChat(chatId);
-      let contextMessages = [];
-      
-      if (chat) {
-        if (conversationMode === ConversationModeType.ONE_TO_MANY) {
-          // Only include user messages
-          contextMessages = chat.messages.filter(msg => msg.sender === 'user');
-        } else if (conversationMode === ConversationModeType.MANY_TO_MANY) {
-          // Include all messages
-          contextMessages = chat.messages;
-        } else if (conversationMode === ConversationModeType.ROUND_ROBIN) {
-          // Include user messages and responses from this specific model
-          contextMessages = chat.messages.filter(
-            msg => msg.sender === 'user' || (msg.sender === 'assistant' && msg.modelId === modelId)
-          );
-        } else if (conversationMode === ConversationModeType.CUSTOM) {
-          // For custom modes, find the active custom config and apply its rules
-          const activeConfig = customConfigs[0]; // Default to first config if multiple exist
-          if (activeConfig) {
-            // Here we would implement custom routing logic based on rules
-            // For now, default to many-to-many behavior
-            contextMessages = chat.messages;
-          } else {
-            // Fall back to many-to-many if no config exists
-            contextMessages = chat.messages;
-          }
-        }
-      }
-      
-      // Simulate response generation - in a real app, this would call the API
-      // and would use the contextMessages and systemPrompt
-      setTimeout(() => {
-        const updatedMessage = {
-          ...assistantMessage,
-          content: `This is a simulated response from Model ID: ${modelId}. In a real application, this would be the actual response from the LLM using the ${conversationMode} conversation mode.`
-        };
-        
-        const chat = DbService.getChat(chatId);
-        if (chat) {
-          const updatedChat = {
-            ...chat,
-            messages: chat.messages.map(msg => 
-              msg.id === assistantMessage.id ? updatedMessage : msg
-            )
-          };
-          
-          DbService.saveChat(updatedChat);
-          
-          // Update chat list
-          setChats(DbService.getChats());
-        }
-      }, 1000 + Math.random() * 2000); // Random delay to simulate different response times
-    });
-    
-    // Refresh chats list
-    setChats(DbService.getChats());
-  };
+  // No longer used - function has been replaced by callLLMApi in Chat.tsx
 
   const value = {
     // View management
@@ -382,9 +307,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addModel,
     updateModel,
     deleteModel,
-    
-    // Message handling
-    addMessageAndGenerateReplies,
     
     // System prompt
     systemPrompt,

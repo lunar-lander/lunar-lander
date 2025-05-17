@@ -1,24 +1,29 @@
 import { useEffect, useState } from 'react';
 import { AppConfig, ThemeConfig } from '../../main/config/config-manager';
 
-// Import electron IPC renderer
-const { ipcRenderer } = window.require('electron');
+// Import electron API from window
+const { electron } = window as any;
 
 // Hook for accessing and managing app configuration
 export function useConfig() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [currentTheme, setCurrentTheme] = useState<ThemeConfig | null>(null);
   const [loading, setLoading] = useState(true);
+  const [summaryModelId, setSummaryModelId] = useState<string | null>(null);
 
   // Load initial config
   useEffect(() => {
     const loadConfig = async () => {
       try {
-        const appConfig = await ipcRenderer.invoke('config:get');
+        const appConfig = await electron.invoke('config:get');
         setConfig(appConfig);
 
-        const theme = await ipcRenderer.invoke('config:get-current-theme');
+        const theme = await electron.invoke('config:get-current-theme');
         setCurrentTheme(theme);
+        
+        // Get summary model ID
+        const summaryModel = await electron.invoke('config:get-summary-model');
+        setSummaryModelId(summaryModel);
       } catch (error) {
         console.error('Failed to load configuration:', error);
       } finally {
@@ -32,15 +37,20 @@ export function useConfig() {
   // Update partial config
   const updateConfig = async (partialConfig: Partial<AppConfig>) => {
     try {
-      await ipcRenderer.invoke('config:update', partialConfig);
+      await electron.invoke('config:update', partialConfig);
       // Refresh the config after update
-      const updatedConfig = await ipcRenderer.invoke('config:get');
+      const updatedConfig = await electron.invoke('config:get');
       setConfig(updatedConfig);
 
       // Refresh theme if theme settings were updated
       if (partialConfig.theme) {
-        const updatedTheme = await ipcRenderer.invoke('config:get-current-theme');
+        const updatedTheme = await electron.invoke('config:get-current-theme');
         setCurrentTheme(updatedTheme);
+      }
+      
+      // Refresh summary model if chat settings were updated
+      if (partialConfig.chat?.summaryModelId !== undefined) {
+        setSummaryModelId(partialConfig.chat.summaryModelId);
       }
 
       return true;
@@ -53,9 +63,9 @@ export function useConfig() {
   // Save custom theme
   const saveTheme = async (theme: ThemeConfig) => {
     try {
-      await ipcRenderer.invoke('config:save-theme', theme);
+      await electron.invoke('config:save-theme', theme);
       // Refresh the config
-      const updatedConfig = await ipcRenderer.invoke('config:get');
+      const updatedConfig = await electron.invoke('config:get');
       setConfig(updatedConfig);
       return true;
     } catch (error) {
@@ -67,13 +77,13 @@ export function useConfig() {
   // Delete custom theme
   const deleteTheme = async (themeName: string) => {
     try {
-      const result = await ipcRenderer.invoke('config:delete-theme', themeName);
+      const result = await electron.invoke('config:delete-theme', themeName);
       // Refresh the config
-      const updatedConfig = await ipcRenderer.invoke('config:get');
+      const updatedConfig = await electron.invoke('config:get');
       setConfig(updatedConfig);
 
       // Refresh current theme if it changed
-      const updatedTheme = await ipcRenderer.invoke('config:get-current-theme');
+      const updatedTheme = await electron.invoke('config:get-current-theme');
       setCurrentTheme(updatedTheme);
 
       return result;
@@ -86,10 +96,10 @@ export function useConfig() {
   // Set current theme
   const setTheme = async (themeName: string) => {
     try {
-      const result = await ipcRenderer.invoke('config:set-theme', themeName);
+      const result = await electron.invoke('config:set-theme', themeName);
       if (result) {
         // Get updated theme
-        const updatedTheme = await ipcRenderer.invoke('config:get-current-theme');
+        const updatedTheme = await electron.invoke('config:get-current-theme');
         setCurrentTheme(updatedTheme);
       }
       return result;
@@ -102,13 +112,13 @@ export function useConfig() {
   // Toggle system theme
   const toggleSystemTheme = async (enabled: boolean) => {
     try {
-      await ipcRenderer.invoke('config:toggle-system-theme', enabled);
+      await electron.invoke('config:toggle-system-theme', enabled);
       // Refresh the config
-      const updatedConfig = await ipcRenderer.invoke('config:get');
+      const updatedConfig = await electron.invoke('config:get');
       setConfig(updatedConfig);
 
       // Refresh current theme
-      const updatedTheme = await ipcRenderer.invoke('config:get-current-theme');
+      const updatedTheme = await electron.invoke('config:get-current-theme');
       setCurrentTheme(updatedTheme);
 
       return true;
@@ -117,15 +127,29 @@ export function useConfig() {
       return false;
     }
   };
+  
+  // Set summary model ID
+  const setSummaryModel = async (modelId: string) => {
+    try {
+      await electron.invoke('config:set-summary-model', modelId);
+      setSummaryModelId(modelId);
+      return true;
+    } catch (error) {
+      console.error('Failed to set summary model:', error);
+      return false;
+    }
+  };
 
   return {
     config,
     currentTheme,
     loading,
+    summaryModelId,
     updateConfig,
     saveTheme,
     deleteTheme,
     setTheme,
-    toggleSystemTheme
+    toggleSystemTheme,
+    setSummaryModel
   };
 }

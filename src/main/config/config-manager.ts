@@ -50,6 +50,9 @@ export interface AppConfig {
     proxyUrl: string;
     maxConcurrentRequests: number;
   };
+  chat: {
+    summaryModelId: string | null; // ID of the model used for generating summaries
+  };
 }
 
 // Default theme configurations
@@ -113,6 +116,9 @@ const defaultConfig: AppConfig = {
     useGPU: true,
     proxyUrl: '',
     maxConcurrentRequests: 3
+  },
+  chat: {
+    summaryModelId: null
   }
 };
 

@@ -65,7 +65,7 @@
   --error-color: #ea4335;
   --warning-color: #fbbc04;
   --info-color: #8ab4f8;
-  --border-color: #392539;
+  --border-color: rgba(0,0,0,0.3);
   --card-bg-color: #303134;
   --hover-bg-color: rgba(232, 234, 237, 0.08);
   --input-bg: #303134;
