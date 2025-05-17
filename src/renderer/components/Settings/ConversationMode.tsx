@@ -133,9 +133,9 @@ const ConversationMode: React.FC = () => {
             <div className={styles.modeHeader}>
               <span className={styles.modeName}>{mode.name}</span>
             </div>
-            <ReactMarkdown className={styles.modeDescription}>
-              {mode.description}
-            </ReactMarkdown>
+            <div className={styles.modeDescription}>
+              <ReactMarkdown>{mode.description}</ReactMarkdown>
+            </div>
           </div>
         ))}
       </div>
@@ -175,9 +175,9 @@ const ConversationMode: React.FC = () => {
                     </button>
                   </div>
                   <p className={styles.modeDescription}>{config.description}</p>
-                  <ReactMarkdown className={styles.modeDescription}>
-                    {config.rules}
-                  </ReactMarkdown>
+                  <div className={styles.modeDescription}>
+                    <ReactMarkdown>{config.rules}</ReactMarkdown>
+                  </div>
                 </div>
               ))}
               <button 

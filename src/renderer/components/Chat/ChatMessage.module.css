@@ -32,6 +32,86 @@
   border-top-left-radius: 2px;
 }
 
+/* Markdown styling */
+.messageText {
+  line-height: 1.5;
+}
+
+.messageText :global(p) {
+  margin: 0 0 12px;
+}
+
+.messageText :global(p:last-child) {
+  margin-bottom: 0;
+}
+
+.messageText :global(pre) {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.messageText :global(code) {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.messageText :global(pre code) {
+  padding: 0;
+  background-color: transparent;
+}
+
+.messageText :global(blockquote) {
+  margin: 8px 0;
+  padding-left: 12px;
+  border-left: 3px solid #dadce0;
+  color: #5f6368;
+}
+
+.messageText :global(ul), .messageText :global(ol) {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.messageText :global(h1), .messageText :global(h2), .messageText :global(h3),
+.messageText :global(h4), .messageText :global(h5), .messageText :global(h6) {
+  margin: 16px 0 8px;
+  line-height: 1.25;
+}
+
+/* Style adjustments for dark theme */
+:global(.dark-theme) .messageText :global(pre) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+:global(.dark-theme) .messageText :global(code) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+:global(.dark-theme) .messageText :global(blockquote) {
+  border-left-color: #5f6368;
+  color: #9aa0a6;
+}
+
+/* User message markdown (light on dark) */
+.user .messageText :global(pre) {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.user .messageText :global(code) {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.user .messageText :global(blockquote) {
+  border-left-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .timestamp {
   font-size: 11px;
   margin-top: 4px;

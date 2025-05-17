@@ -54,6 +54,88 @@
   background-color: #1765cc;
 }
 
+.sectionTitle {
+  font-size: 0.9em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #5f6368;
+  margin: 16px 0 8px 12px;
+}
+
+:global(.dark-theme) .sectionTitle {
+  color: #9aa0a6;
+}
+
+.modelToggles {
+  padding: 0 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+:global(.dark-theme) .modelToggles {
+  border-bottom-color: #5f6368;
+}
+
+.modelList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+}
+
+.modelToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: #f1f3f4;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9em;
+}
+
+.modelToggle:hover {
+  background-color: #e8eaec;
+}
+
+.modelToggle.active {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+}
+
+.modelName {
+  font-weight: 500;
+}
+
+.toggleIndicator {
+  font-size: 1.2em;
+}
+
+.noModels {
+  padding: 12px;
+  color: #5f6368;
+  font-style: italic;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+:global(.dark-theme) .modelToggle {
+  background-color: #303134;
+}
+
+:global(.dark-theme) .modelToggle:hover {
+  background-color: #3c4043;
+}
+
+:global(.dark-theme) .modelToggle.active {
+  background-color: #394457;
+  color: #8ab4f8;
+}
+
+:global(.dark-theme) .noModels {
+  color: #9aa0a6;
+}
+
 .chatList {
   flex: 1;
   overflow-y: auto;

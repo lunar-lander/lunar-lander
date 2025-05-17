@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Model } from '../../../shared/types/model';
 import styles from './ChatInput.module.css';
+import MDEditor from '@uiw/react-md-editor';
 
 // Chat mode options
 export enum ChatMode {
@@ -31,15 +32,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [message, setMessage] = useState('');
   const [temperature, setTemperature] = useState(0.7);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Auto-resize textarea as content grows
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [message]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Send message on Ctrl+Enter or Cmd+Enter
@@ -112,16 +104,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       </div>
       
-      <div className={styles.inputWrapper}>
-        <textarea
-          ref={textareaRef}
-          className={styles.textarea}
+      <div className={styles.editorWrapper} onKeyDown={handleKeyDown}>
+        <MDEditor
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
+          onChange={(value) => setMessage(value || '')}
+          preview="edit"
+          height={150}
+          className={styles.mdEditor}
           disabled={disabled}
-          rows={1}
+          textareaProps={{
+            placeholder: "Type a message using Markdown...",
+          }}
         />
         <button
           className={styles.sendButton}

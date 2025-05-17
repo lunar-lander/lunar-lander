@@ -4,6 +4,24 @@ import { useAppContext } from '../../contexts/AppContext';
 import ChatMessages from './ChatMessages';
 import ChatInput, { ChatMode } from './ChatInput';
 import styles from './Chat.module.css';
+import { SummaryGenerator } from '../../services/summaryGenerator';
+import { ConversationModeType } from '../Settings/ConversationMode';
+
+// Map between ChatMode and ConversationModeType
+const getModeFromConversationMode = (mode: ConversationModeType): ChatMode => {
+  switch (mode) {
+    case ConversationModeType.ONE_TO_MANY:
+      return ChatMode.ONE_TO_MANY;
+    case ConversationModeType.MANY_TO_MANY:
+      return ChatMode.MANY_TO_MANY;
+    case ConversationModeType.ROUND_ROBIN:
+      return ChatMode.ROUND_ROBIN;
+    case ConversationModeType.CUSTOM:
+      return ChatMode.CUSTOM;
+    default:
+      return ChatMode.ONE_TO_MANY;
+  }
+};
 
 interface ChatProps {
   chatId?: string;
@@ -12,17 +30,24 @@ interface ChatProps {
 const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const [chat, setChat] = useState<ChatType | null>(null);
   const [activeModelIds, setActiveModelIds] = useState<string[]>([]);
-  const [chatMode, setChatMode] = useState<ChatMode>(ChatMode.ONE_TO_MANY);
   const [streamingMessageIds, setStreamingMessageIds] = useState<string[]>([]);
   const [hiddenMessageIds, setHiddenMessageIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [summarizing, setSummarizing] = useState<boolean>(false);
 
   const { 
     models, 
     getChat, 
     addMessageToChat, 
-    updateChat 
+    updateChat,
+    updateChatSummary,
+    conversationMode,
+    systemPrompt,
+    summaryModelId
   } = useAppContext();
+
+  // Convert from settings conversation mode to chat mode
+  const chatMode = getModeFromConversationMode(conversationMode);
 
   // Load chat data when chatId changes
   useEffect(() => {
@@ -46,8 +71,8 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const handleSendMessage = async (
     content: string, 
     modelIds: string[], 
-    _temperature: number, // Unused for now, but will be used for real API calls
-    _mode: ChatMode       // Unused for now, but will be used for conversation modes
+    temperature: number,
+    mode: ChatMode
   ) => {
     if (!chatId || !chat) return;
     
@@ -64,6 +89,9 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       
       // Add user message and start generating replies from selected models
       addMessageToChat(chatId, userMessage);
+      
+      // If this is the first message in the chat, set a timer to generate a summary
+      const isFirstMessage = chat.messages.length === 0;
       
       // Create streaming messages
       modelIds.forEach((modelId, index) => {
@@ -85,8 +113,50 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         setStreamingMessageIds(prev => [...prev, assistantMessageId]);
         
         // Simulate streaming response
-        simulateStreamingResponse(chatId, assistantMessageId, modelId);
+        simulateStreamingResponse(chatId, assistantMessageId, modelId, {
+          content,
+          temperature,
+          systemPrompt: systemPrompt
+        });
       });
+      
+      // Refresh chat data
+      const updatedChat = getChat(chatId);
+      if (updatedChat) {
+        setChat(updatedChat);
+        
+        // If this was the first message, wait for first response and then generate summary
+        if (isFirstMessage && summaryModelId) {
+          // Wait for the first model to respond before generating summary
+          const waitForFirstResponse = setInterval(() => {
+            if (streamingMessageIds.length === 0) {
+              clearInterval(waitForFirstResponse);
+              generateChatSummary(chatId);
+            }
+          }, 500);
+        }
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Generate chat summary using the designated summary model
+  const generateChatSummary = async (chatId: string) => {
+    if (!summaryModelId) return;
+    
+    const currentChat = getChat(chatId);
+    if (!currentChat) return;
+    
+    setSummarizing(true);
+    
+    try {
+      // In a real app, this would use the LLM to generate a summary
+      // For now, we'll simulate it with a delay
+      const summary = await SummaryGenerator.generateLLMSummary(currentChat, summaryModelId);
+      
+      // Update the chat title and summary
+      updateChatSummary(chatId, summary);
       
       // Refresh chat data
       const updatedChat = getChat(chatId);
@@ -94,7 +164,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         setChat(updatedChat);
       }
     } finally {
-      setIsLoading(false);
+      setSummarizing(false);
     }
   };
 
@@ -102,12 +172,17 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   const simulateStreamingResponse = (
     chatId: string, 
     messageId: string, 
-    _modelId: string // Unused in simulation, but would be used for real API calls
+    modelId: string,
+    request: {
+      content: string;
+      temperature: number;
+      systemPrompt: string;
+    }
   ) => {
     let content = '';
     const responses = [
-      'I am thinking about your question...',
-      'That\'s an interesting question. Let me consider it...',
+      `I'm responding to: "${request.content}" with temperature ${request.temperature}.`,
+      `Based on the system prompt "${request.systemPrompt.substring(0, 20)}...", here's my answer...`,
       'Here is my response to your inquiry. I hope it helps with what you\'re looking for.',
       'Based on the information provided, I would suggest the following approach.'
     ];
@@ -148,7 +223,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
 
   // Change chat mode
   const handleModeChange = (mode: ChatMode) => {
-    setChatMode(mode);
+    // This is now handled by settings, but we'll keep the handler for the UI
   };
 
   // Toggle message visibility
@@ -165,10 +240,27 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       {chatId && chat ? (
         <>
           <div className={styles.header}>
-            <h2 className={styles.title}>{chat.title}</h2>
+            <h2 className={styles.title}>
+              {chat.title === 'New Chat' && chat.summary !== 'Start a new conversation'
+                ? chat.summary
+                : chat.title}
+              {summarizing && <span className={styles.summarizing}> (Summarizing...)</span>}
+            </h2>
             <div className={styles.headerActions}>
-              <button className={styles.headerButton} title="Clear hidden messages">
+              <button 
+                className={styles.headerButton} 
+                title="Clear hidden messages"
+                onClick={() => setHiddenMessageIds([])}
+              >
                 👁️
+              </button>
+              <button 
+                className={styles.headerButton} 
+                title="Regenerate Summary"
+                onClick={() => chat && chatId && generateChatSummary(chatId)}
+                disabled={!summaryModelId || chat.messages.length === 0}
+              >
+                🔄
               </button>
               <button className={styles.headerButton} title="Export chat">
                 📤

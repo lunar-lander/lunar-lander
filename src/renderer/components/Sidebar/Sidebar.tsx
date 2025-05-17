@@ -10,7 +10,9 @@ const Sidebar: React.FC = () => {
     toggleTheme, 
     createChat, 
     selectChat, 
-    setCurrentView 
+    setCurrentView,
+    models,
+    updateModel
   } = useAppContext();
 
   // Handle new chat button click
@@ -21,6 +23,14 @@ const Sidebar: React.FC = () => {
   // Handle settings click
   const handleSettingsClick = () => {
     setCurrentView('settings');
+  };
+
+  // Toggle model active state
+  const handleToggleModel = (modelId: string, isActive: boolean) => {
+    updateModel({
+      id: modelId,
+      isActive: !isActive
+    });
   };
 
   return (
@@ -51,7 +61,30 @@ const Sidebar: React.FC = () => {
         </button>
       </div>
 
+      <div className={styles.modelToggles}>
+        <h3 className={styles.sectionTitle}>Models</h3>
+        {models.length === 0 ? (
+          <div className={styles.noModels}>
+            No models configured yet
+          </div>
+        ) : (
+          <div className={styles.modelList}>
+            {models.map(model => (
+              <div 
+                key={model.id}
+                className={`${styles.modelToggle} ${model.isActive ? styles.active : ''}`}
+                onClick={() => handleToggleModel(model.id, model.isActive)}
+              >
+                <span className={styles.modelName}>{model.name}</span>
+                <span className={styles.toggleIndicator}>{model.isActive ? '✓' : '○'}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className={styles.chatList}>
+        <h3 className={styles.sectionTitle}>Conversations</h3>
         {chats.length === 0 ? (
           <div className={styles.noChats}>
             No chat history yet

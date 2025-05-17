@@ -37,6 +37,24 @@
   background-color: rgba(0, 0, 0, 0.05);
 }
 
+.headerButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.summarizing {
+  font-size: 0.8em;
+  font-weight: normal;
+  color: #5f6368;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
 .messagesContainer {
   flex: 1;
   overflow: hidden;

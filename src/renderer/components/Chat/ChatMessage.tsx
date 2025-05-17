@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChatMessage as ChatMessageType } from '../../../shared/types/chat';
+import ReactMarkdown from 'react-markdown';
 import styles from './ChatMessage.module.css';
 
 interface ChatMessageProps {
@@ -51,8 +52,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           </span>
         )}
         
-        <div className={isStreaming ? styles.streaming : ''}>
-          {content}
+        <div className={`${styles.messageText} ${isStreaming ? styles.streaming : ''}`}>
+          <ReactMarkdown>{content}</ReactMarkdown>
         </div>
         
         <div className={styles.timestamp}>
