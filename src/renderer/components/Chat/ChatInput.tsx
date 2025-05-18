@@ -3,6 +3,7 @@ import { Model } from "../../../shared/types/model";
 import styles from "./ChatInput.module.css";
 import MDEditor from "@uiw/react-md-editor";
 import LaTeXHelper from "./LaTeXHelper";
+import { ConversationModeType } from "../Settings/ConversationMode";
 
 // Chat mode options - aligned with settings definitions
 export enum ChatMode {

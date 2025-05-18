@@ -5,6 +5,7 @@ import ChatInput from "./ChatInput";
 import styles from "./Chat.module.css";
 import { getModeFromConversationMode } from "../../services/chatLogic";
 import { useChat } from "../../hooks/useChat";
+import { ConversationModeType } from "../Settings/ConversationMode";
 
 interface ChatProps {
   chatId?: string;

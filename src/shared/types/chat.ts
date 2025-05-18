@@ -2,7 +2,6 @@
 
 export interface Chat {
   id: string;
-  title: string;
   summary: string;
   date: string;
   messages: ChatMessage[];

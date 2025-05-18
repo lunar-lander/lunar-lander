@@ -38,6 +38,7 @@ interface AppContextType {
   starChat: (chatId: string) => void;
   unstarChat: (chatId: string) => void;
   deleteChat: (chatId: string) => void;
+  deleteAllChats: () => void;
 
   // Models
   models: Model[];
@@ -197,7 +198,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     const newChatId = `chat_${Date.now()}`;
     const newChat: Chat = {
       id: newChatId,
-      title: "", // Empty title for new chats
       summary: "Start a new conversation",
       date: new Date().toLocaleDateString(),
       messages: [],
@@ -552,6 +552,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       return false;
     }
   };
+  
+  // Delete all chats
+  const deleteAllChats = () => {
+    try {
+      // Clear active chat
+      setActiveChat(null);
+      
+      // Remove all chats from database
+      chats.forEach(chat => {
+        DbService.deleteChat(chat.id);
+      });
+      
+      // Update state
+      setChats([]);
+      return true;
+    } catch (error) {
+      console.error('Error deleting all chats:', error);
+      return false;
+    }
+  };
 
   const value = {
     // View management
@@ -575,6 +595,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     starChat,
     unstarChat,
     deleteChat,
+    deleteAllChats,
 
     // Models
     models,
