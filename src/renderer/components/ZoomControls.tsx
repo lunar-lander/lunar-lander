@@ -8,7 +8,7 @@ const ZoomControls: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Handle Ctrl/Cmd + Plus to zoom in
-      if ((event.ctrlKey || event.metaKey) && event.key === '=') {
+      if ((event.ctrlKey || event.metaKey) && (event.key === '=' || event.key === '+')) {
         event.preventDefault();
         if (zoomLevel < 2.0) {
           setZoom(Math.min(2.0, Math.round((zoomLevel + 0.1) * 10) / 10));
