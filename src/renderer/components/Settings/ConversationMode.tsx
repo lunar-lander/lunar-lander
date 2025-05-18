@@ -4,8 +4,8 @@ import { useAppContext } from '../../contexts/AppContext';
 import styles from './ConversationMode.module.css';
 
 export enum ConversationModeType {
-  ONE_TO_MANY = 'one-to-many',
-  MANY_TO_MANY = 'many-to-many',
+  ISOLATED = 'isolated',
+  DISCUSS = 'discuss',
   ROUND_ROBIN = 'round-robin',
   CUSTOM = 'custom'
 }
@@ -24,19 +24,19 @@ export interface CustomConversationConfig {
 
 const CONVERSATION_MODES: ConversationModeOption[] = [
   {
-    id: ConversationModeType.ONE_TO_MANY,
-    name: 'One-to-Many',
-    description: 'Your message is sent to all selected models independently. Each model responds without seeing responses from other models. This mode is ideal for comparing different models on the same task.'
+    id: ConversationModeType.ISOLATED,
+    name: 'Isolated',
+    description: 'Each LLM can only see its own chat and output. This creates separate, independent conversations with each model, without any cross-sharing of information. Perfect for comparing responses without models influencing each other.'
   },
   {
-    id: ConversationModeType.MANY_TO_MANY,
-    name: 'Many-to-Many',
-    description: 'All models see all previous messages, including responses from other models. Models can reference and build upon each other\'s responses. This creates a collaborative environment where models can enhance each other\'s thinking.'
+    id: ConversationModeType.DISCUSS,
+    name: 'Discuss',
+    description: 'All LLMs respond concurrently, but each can see all messages from everyone. This creates a collaborative discussion where models can reference and build upon each other\'s thinking, similar to a group chat.'
   },
   {
     id: ConversationModeType.ROUND_ROBIN,
     name: 'Round Robin',
-    description: 'Models take turns responding to your messages. Each model only sees your messages and its own previous responses. This simulates a conversation with multiple independent assistants, allowing you to get diverse perspectives.'
+    description: 'LLMs respond in sequence, one after another. Each model can see all previous responses from all models. This creates a structured conversation flow where each model can build on what came before it.'
   },
   {
     id: ConversationModeType.CUSTOM,

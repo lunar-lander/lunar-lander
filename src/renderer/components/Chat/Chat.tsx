@@ -11,16 +11,16 @@ import { useConfig } from '../../hooks/useConfig';
 // Map between ChatMode and ConversationModeType
 const getModeFromConversationMode = (mode: ConversationModeType): ChatMode => {
   switch (mode) {
-    case ConversationModeType.ONE_TO_MANY:
-      return ChatMode.ONE_TO_MANY;
-    case ConversationModeType.MANY_TO_MANY:
-      return ChatMode.MANY_TO_MANY;
+    case ConversationModeType.ISOLATED:
+      return ChatMode.ISOLATED;
+    case ConversationModeType.DISCUSS:
+      return ChatMode.DISCUSS;
     case ConversationModeType.ROUND_ROBIN:
       return ChatMode.ROUND_ROBIN;
     case ConversationModeType.CUSTOM:
       return ChatMode.CUSTOM;
     default:
-      return ChatMode.ONE_TO_MANY;
+      return ChatMode.ISOLATED;
   }
 };
 
@@ -96,68 +96,161 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       // If this is the first message in the chat, flag for summary generation
       const isFirstMessage = chat.messages.length === 0;
       
-      // Process each selected model - using Promise.all to ensure all messages are added
-      const messagePromises = modelIds.map((modelId, index) => {
-        // Generate unique ID with timestamp to avoid collisions
-        const timestamp = Date.now() + index;
-        const assistantMessageId = `msg_${timestamp}_${modelId}`;
+      // Process selected models differently based on conversation mode
+      let messagePromises;
+      
+      if (conversationMode === ConversationModeType.ROUND_ROBIN) {
+        // In Round Robin mode, we'll create all placeholders but only start the first one talking
+        console.log(`Starting Round Robin conversation mode with ${modelIds.length} models`);
         
-        // Create initial placeholder message
-        const assistantMessage: ChatMessageType = {
-          id: assistantMessageId,
-          sender: 'assistant',
-          content: '',
-          timestamp: timestamp, // Ensure unique timestamps
-          modelId
-        };
+        // Create a copy of model IDs in the order they should respond
+        const orderedModelIds = [...modelIds];
         
-        console.log(`Creating message ${assistantMessageId} for model ${modelId}`);
-        
-        // Add message to chat and return a promise wrapper to handle async
-        return new Promise<string>(resolve => {
-          // Add message to chat
-          const result = addMessageToChat(chatId, assistantMessage);
+        messagePromises = orderedModelIds.map((modelId, index) => {
+          // Generate unique ID with timestamp to avoid collisions
+          const timestamp = Date.now() + index;
+          const assistantMessageId = `msg_${timestamp}_${modelId}`;
           
-          // Short delay to ensure DB operations complete
-          setTimeout(() => {
-            // Verify message was added
-            const chatData = getChat(chatId);
-            const messageExists = chatData?.messages.some(m => m.id === assistantMessageId);
+          // Create initial placeholder message
+          const assistantMessage: ChatMessageType = {
+            id: assistantMessageId,
+            sender: 'assistant',
+            content: '',
+            timestamp: timestamp, // Ensure unique timestamps
+            modelId
+          };
+          
+          console.log(`Creating message ${assistantMessageId} for model ${modelId} (round robin position: ${index + 1})`);
+          
+          // Add message to chat and return a promise wrapper to handle async
+          return new Promise<string>(resolve => {
+            // Add message to chat
+            const result = addMessageToChat(chatId, assistantMessage);
             
-            if (!messageExists) {
-              console.error(`Message ${assistantMessageId} was not properly added to chat ${chatId}`);
-            } else {
-              console.log(`Successfully added message ${assistantMessageId} to chat ${chatId}`);
-            }
-            
-            // Mark message as streaming and make API call inside a try-catch
-            try {
-              // First update state to include message in streaming IDs
-              setStreamingMessageIds(prev => [...prev, assistantMessageId]);
+            // Short delay to ensure DB operations complete
+            setTimeout(() => {
+              // Verify message was added
+              const chatData = getChat(chatId);
+              const messageExists = chatData?.messages.some(m => m.id === assistantMessageId);
               
-              // Give time for state update to complete with a small delay
-              setTimeout(() => {
-                // Call LLM API with real implementation
-                callLLMApi(chatId, assistantMessageId, modelId, {
-                  content,
-                  temperature,
-                  systemPrompt: systemPrompt
-                }).catch(error => {
-                  console.error(`Error in API call for ${modelId}:`, error);
+              if (!messageExists) {
+                console.error(`Message ${assistantMessageId} was not properly added to chat ${chatId}`);
+              } else {
+                console.log(`Successfully added message ${assistantMessageId} to chat ${chatId}`);
+              }
+              
+              // In Round Robin mode, only start the first model talking right away
+              if (index === 0) {
+                try {
+                  // Mark first message as streaming
+                  setStreamingMessageIds(prev => [...prev, assistantMessageId]);
                   
-                  // Cleanup streaming state on error
+                  // Give time for state update to complete with a small delay
+                  setTimeout(() => {
+                    // Start the first model talking
+                    callLLMApi(chatId, assistantMessageId, modelId, {
+                      content,
+                      temperature,
+                      systemPrompt: systemPrompt
+                    }).then(() => {
+                      // When it's done, trigger the next model in sequence
+                      console.log(`Model ${modelId} finished. Starting next model in Round Robin sequence.`);
+                      if (index + 1 < orderedModelIds.length) {
+                        const nextModelId = orderedModelIds[index + 1];
+                        const nextMessageId = `msg_${timestamp + 1}_${nextModelId}`;
+                        
+                        // Mark next message as streaming
+                        setStreamingMessageIds(prev => [...prev, nextMessageId]);
+                        
+                        // Now call the next model
+                        callLLMApi(chatId, nextMessageId, nextModelId, {
+                          content,
+                          temperature,
+                          systemPrompt: systemPrompt
+                        }).catch(error => {
+                          console.error(`Error in sequential API call for ${nextModelId}:`, error);
+                          setStreamingMessageIds(prev => prev.filter(id => id !== nextMessageId));
+                        });
+                      }
+                    }).catch(error => {
+                      console.error(`Error in API call for ${modelId}:`, error);
+                      setStreamingMessageIds(prev => prev.filter(id => id !== assistantMessageId));
+                    });
+                  }, 100);
+                } catch (error) {
+                  console.error(`Error setting up API call for ${modelId}:`, error);
                   setStreamingMessageIds(prev => prev.filter(id => id !== assistantMessageId));
-                });
-              }, 100); // Short delay to ensure state updates happen first
-            } catch (error) {
-              console.error(`Error setting up API call for ${modelId}:`, error);
-              setStreamingMessageIds(prev => prev.filter(id => id !== assistantMessageId));
-            }
-            
-            resolve(assistantMessageId);
-          }, 50 * index); // Stagger slightly to avoid race conditions
+                }
+              }
+              
+              resolve(assistantMessageId);
+            }, 50 * index); // Stagger slightly to avoid race conditions
+          });
         });
-      });
+      } else {
+        // For Isolated and Discuss modes, call all LLMs in parallel
+        messagePromises = modelIds.map((modelId, index) => {
+          // Generate unique ID with timestamp to avoid collisions
+          const timestamp = Date.now() + index;
+          const assistantMessageId = `msg_${timestamp}_${modelId}`;
+          
+          // Create initial placeholder message
+          const assistantMessage: ChatMessageType = {
+            id: assistantMessageId,
+            sender: 'assistant',
+            content: '',
+            timestamp: timestamp, // Ensure unique timestamps
+            modelId
+          };
+          
+          console.log(`Creating message ${assistantMessageId} for model ${modelId}`);
+          
+          // Add message to chat and return a promise wrapper to handle async
+          return new Promise<string>(resolve => {
+            // Add message to chat
+            const result = addMessageToChat(chatId, assistantMessage);
+            
+            // Short delay to ensure DB operations complete
+            setTimeout(() => {
+              // Verify message was added
+              const chatData = getChat(chatId);
+              const messageExists = chatData?.messages.some(m => m.id === assistantMessageId);
+              
+              if (!messageExists) {
+                console.error(`Message ${assistantMessageId} was not properly added to chat ${chatId}`);
+              } else {
+                console.log(`Successfully added message ${assistantMessageId} to chat ${chatId}`);
+              }
+              
+              // Mark message as streaming and make API call inside a try-catch
+              try {
+                // First update state to include message in streaming IDs
+                setStreamingMessageIds(prev => [...prev, assistantMessageId]);
+                
+                // Give time for state update to complete with a small delay
+                setTimeout(() => {
+                  // Call LLM API with real implementation
+                  callLLMApi(chatId, assistantMessageId, modelId, {
+                    content,
+                    temperature,
+                    systemPrompt: systemPrompt
+                  }).catch(error => {
+                    console.error(`Error in API call for ${modelId}:`, error);
+                    
+                    // Cleanup streaming state on error
+                    setStreamingMessageIds(prev => prev.filter(id => id !== assistantMessageId));
+                  });
+                }, 100); // Short delay to ensure state updates happen first
+              } catch (error) {
+                console.error(`Error setting up API call for ${modelId}:`, error);
+                setStreamingMessageIds(prev => prev.filter(id => id !== assistantMessageId));
+              }
+              
+              resolve(assistantMessageId);
+            }, 50 * index); // Stagger slightly to avoid race conditions
+          });
+        });
+      }
       
       // Wait for all messages to be added before refreshing
       Promise.all(messagePromises).then(messageIds => {
@@ -332,24 +425,51 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       // Sort messages by timestamp to maintain correct ordering
       const sortedChatMessages = [...chatMessages].sort((a, b) => a.timestamp - b.timestamp);
       
-      if (conversationMode === ConversationModeType.ONE_TO_MANY) {
-        // Only include user messages in one-to-many mode
-        // Each LLM responds independently without seeing other LLM responses
-        filteredMessages = sortedChatMessages.filter(msg => msg.sender === 'user');
-      } else if (conversationMode === ConversationModeType.MANY_TO_MANY) {
-        // In many-to-many mode, all models see all messages (from users and all other models)
-        // This creates a collaborative environment where models can reference each other
-        filteredMessages = sortedChatMessages;
-      } else if (conversationMode === ConversationModeType.ROUND_ROBIN) {
-        // In round-robin mode, models only see user messages and their own previous responses
-        // Each model has its own conversation thread with the user
+      if (conversationMode === ConversationModeType.ISOLATED) {
+        // In isolated mode, models only see user messages and their own previous responses
+        // Each model has its own private conversation with the user
         filteredMessages = sortedChatMessages.filter(
           msg => msg.sender === 'user' || (msg.sender === 'assistant' && msg.modelId === modelId)
         );
-      } else if (conversationMode === ConversationModeType.CUSTOM) {
-        // For custom mode, default to many-to-many for now
-        // In a full implementation, you would apply custom routing rules here
+        console.log(`ISOLATED mode: Model ${modelId} only sees user messages and its own responses`);
+      } else if (conversationMode === ConversationModeType.DISCUSS) {
+        // In discuss mode, all models see all messages (from users and all other models) in parallel
+        // This creates a collaborative environment where models can reference each other
         filteredMessages = sortedChatMessages;
+        console.log(`DISCUSS mode: Model ${modelId} sees all messages from all participants`);
+      } else if (conversationMode === ConversationModeType.ROUND_ROBIN) {
+        // In round-robin mode, we need to determine if it's this model's turn to respond
+        // All models see all previous messages, but they respond in sequence
+
+        // Get all assistant messages for the last user message
+        const lastUserMessageIndex = [...sortedChatMessages].reverse().findIndex(msg => msg.sender === 'user');
+        
+        if (lastUserMessageIndex !== -1) {
+          // Get messages after the last user message
+          const messagesAfterLastUser = sortedChatMessages.slice(sortedChatMessages.length - lastUserMessageIndex);
+          const assistantResponses = messagesAfterLastUser.filter(msg => msg.sender === 'assistant');
+          
+          // Check if this model is next in the sequence
+          const respondedModels = new Set(assistantResponses.map(msg => msg.modelId));
+          const isThisModelsTurn = !respondedModels.has(modelId);
+          
+          console.log(`ROUND_ROBIN mode: It ${isThisModelsTurn ? 'is' : 'is not'} ${modelId}'s turn to respond`);
+          
+          if (!isThisModelsTurn) {
+            // It's not this model's turn, so let it see all messages
+            filteredMessages = sortedChatMessages;
+          } else {
+            // It's this model's turn, so it sees all messages
+            filteredMessages = sortedChatMessages;
+          }
+        } else {
+          // No user messages found (unlikely), so just use all messages
+          filteredMessages = sortedChatMessages;
+        }
+      } else if (conversationMode === ConversationModeType.CUSTOM) {
+        // For custom mode, default to discuss mode for now
+        filteredMessages = sortedChatMessages;
+        console.log(`CUSTOM mode: Using default behavior (all messages visible)`);
       }
       
       console.log(`Conversation mode: ${conversationMode}`);

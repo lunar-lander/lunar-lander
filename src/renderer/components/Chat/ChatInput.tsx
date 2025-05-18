@@ -3,10 +3,10 @@ import { Model } from '../../../shared/types/model';
 import styles from './ChatInput.module.css';
 import MDEditor from '@uiw/react-md-editor';
 
-// Chat mode options
+// Chat mode options - aligned with settings definitions
 export enum ChatMode {
-  ONE_TO_MANY = 'one-to-many',
-  MANY_TO_MANY = 'many-to-many',
+  ISOLATED = 'isolated',
+  DISCUSS = 'discuss',
   ROUND_ROBIN = 'round-robin',
   CUSTOM = 'custom'
 }
@@ -97,8 +97,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
             value={currentMode}
             onChange={handleModeChange}
           >
-            <option value={ChatMode.ONE_TO_MANY}>One to Many</option>
-            <option value={ChatMode.MANY_TO_MANY}>Many to Many</option>
+            <option value={ChatMode.ISOLATED}>Isolated</option>
+            <option value={ChatMode.DISCUSS}>Discuss</option>
             <option value={ChatMode.ROUND_ROBIN}>Round Robin</option>
             <option value={ChatMode.CUSTOM}>Custom</option>
           </select>
