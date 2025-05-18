@@ -8,6 +8,13 @@ import rehypeRaw from "rehype-raw";
 import "katex/dist/katex.min.css";
 import styles from "./ChatMessage.module.css";
 
+// Simple function to detect language from code blocks
+const detectLanguage = (className: string | undefined) => {
+  if (!className) return "";
+  const match = className.match(/language-(\w+)/);
+  return match ? match[1] : "";
+};
+
 interface ChatMessageProps {
   message: ChatMessageType;
   modelName?: string;
@@ -113,11 +120,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             components={{
               // Improve paragraph spacing
               p: ({node, ...props}) => <p style={{marginBottom: '0.6em'}} {...props} />,
-              // Make code blocks more readable
-              code: ({node, inline, ...props}) => 
-                inline ? 
-                  <code {...props} /> : 
-                  <code style={{display: 'block', padding: '0.5em'}} {...props} />,
+              // Make code blocks more readable with language labels
+              code: ({node, inline, className, ...props}) => {
+                const language = detectLanguage(className);
+                return inline ? (
+                  <code className={className} {...props} />
+                ) : (
+                  <div className={styles.codeBlock}>
+                    {language && <div className={styles.codeLanguage}>{language}</div>}
+                    <code className={className} {...props} />
+                  </div>
+                );
+              },
               // Make lists more readable
               li: ({node, ...props}) => <li style={{marginBottom: '0.3em'}} {...props} />
             }}

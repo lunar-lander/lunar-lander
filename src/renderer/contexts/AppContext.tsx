@@ -34,7 +34,7 @@ interface AppContextType {
   addMessageToChat: (chatId: string, message: ChatMessage) => void;
   getChat: (chatId: string) => Chat | null;
   updateChat: (chat: Chat) => void;
-  updateChatTitle: (chatId: string, title: string) => boolean;
+  updateChatSummaryManual: (chatId: string, summary: string) => boolean;
   starChat: (chatId: string) => void;
   unstarChat: (chatId: string) => void;
   deleteChat: (chatId: string) => void;
@@ -197,7 +197,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     const newChatId = `chat_${Date.now()}`;
     const newChat: Chat = {
       id: newChatId,
-      title: "New Chat",
+      title: "", // Empty title for new chats
       summary: "Start a new conversation",
       date: new Date().toLocaleDateString(),
       messages: [],
@@ -353,23 +353,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
   
-  // Update chat title
-  const updateChatTitle = (chatId: string, title: string): boolean => {
+  // Update chat summary
+  const updateChatSummaryManual = (chatId: string, summary: string): boolean => {
     try {
       // Get the chat from database
       const chat = DbService.getChat(chatId);
       if (!chat) {
-        console.error(`Chat ${chatId} not found when updating title`);
+        console.error(`Chat ${chatId} not found when updating summary manually`);
         return false;
       }
       
-      // Update the title
-      const updatedChat = { ...chat, title };
+      // Update the summary
+      const updatedChat = { ...chat, summary };
       
       // Save to database and update state
       return updateChat(updatedChat);
     } catch (error) {
-      console.error(`Error updating chat title:`, error);
+      console.error(`Error updating chat summary manually:`, error);
       return false;
     }
   };
@@ -571,7 +571,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     addMessageToChat,
     getChat,
     updateChat,
-    updateChatTitle,
+    updateChatSummaryManual,
     starChat,
     unstarChat,
     deleteChat,

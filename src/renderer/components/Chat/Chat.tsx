@@ -63,10 +63,10 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         <>
           <div className={styles.header}>
             <h2 className={styles.title}>
-              {chat.title === "New Chat" &&
+              {(!chat.title || chat.title === "New Chat") && 
               chat.summary !== "Start a new conversation"
                 ? chat.summary
-                : chat.title}
+                : chat.title || "New Conversation"}
               {summarizing && (
                 <span className={styles.summarizing}> (Summarizing...)</span>
               )}

@@ -22,7 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     starChat,
     unstarChat,
     deleteChat,
-    updateChatTitle,
+    updateChatSummaryManual,
   } = useAppContext();
 
   const { config, setTheme, zoomLevel, setZoom } = useConfig();
@@ -134,18 +134,19 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     }
   }, [editingChatId]);
   
-  // Handle starting to edit a chat title
+  // Handle starting to edit a chat summary
   const startEditingChat = (chat: Chat, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingChatId(chat.id);
-    setEditedTitle(chat.title);
+    // Set the current summary as the initial value to edit
+    setEditedTitle(chat.summary !== "Start a new conversation" ? chat.summary : "");
   };
   
-  // Handle saving an edited chat title
-  const saveEditedTitle = (chatId: string, e: React.FormEvent) => {
+  // Handle saving an edited chat summary
+  const saveEditedSummary = (chatId: string, e: React.FormEvent) => {
     e.preventDefault();
     if (editedTitle.trim()) {
-      updateChatTitle(chatId, editedTitle.trim());
+      updateChatSummaryManual(chatId, editedTitle.trim());
     }
     setEditingChatId(null);
   };
@@ -250,7 +251,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               onClick={() => selectChat(chat.id)}
             >
               {editingChatId === chat.id ? (
-                <form onSubmit={(e) => saveEditedTitle(chat.id, e)} className={styles.editTitleForm}>
+                <form onSubmit={(e) => saveEditedSummary(chat.id, e)} className={styles.editTitleForm}>
                   <input
                     ref={editInputRef}
                     type="text"
@@ -264,13 +265,12 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               ) : (
                 <>
                   <div 
-                    className={styles.chatTitle}
+                    className={styles.chatSummary}
                     onClick={(e) => startEditingChat(chat, e)}
-                    title="Double-click to edit title"
+                    title="Click to edit title"
                   >
-                    {chat.title}
+                    {chat.summary !== "Start a new conversation" ? chat.summary : "New conversation"}
                   </div>
-                  <div className={styles.chatSummary}>{chat.summary}</div>
                   <div className={styles.chatDate}>{chat.date}</div>
                   <div className={styles.chatControls}>
                     <button

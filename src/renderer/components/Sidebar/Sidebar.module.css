@@ -175,21 +175,16 @@
   background-color: rgba(var(--primary-rgb, 26, 115, 232), 0.1);
 }
 
-.chatTitle {
+/* Note: Removed chatTitle class as we're now using chatSummary for display */
+
+.chatSummary {
+  font-size: 0.94em;
   font-weight: 500;
-  margin-bottom: 4px;
+  color: var(--text-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: text;
-}
-
-.chatSummary {
-  font-size: 0.9em;
-  color: #5f6368;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .chatDate {
