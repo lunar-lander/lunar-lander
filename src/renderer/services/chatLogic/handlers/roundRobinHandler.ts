@@ -3,6 +3,9 @@ import { BaseChatHandler } from "./baseHandler";
 import { ChatHandlerDeps, StreamingStateHandlers } from "../chatHandler";
 
 export class RoundRobinChatHandler extends BaseChatHandler {
+  private activeRoundRobinIndex: number = 0;
+  private completedMessages: Set<string> = new Set();
+  
   constructor(
     deps: ChatHandlerDeps,
     streamHandlers: StreamingStateHandlers,
@@ -12,7 +15,6 @@ export class RoundRobinChatHandler extends BaseChatHandler {
   }
   
   // Filter messages for round robin mode
-  // In round robin mode, all models see all messages
   public filterMessages(chatId: string, messageId: string, modelId: string): ChatMessage[] {
     // Get the current chat
     const currentChat = this.deps.getChat(chatId);
@@ -28,176 +30,173 @@ export class RoundRobinChatHandler extends BaseChatHandler {
       (a, b) => a.timestamp - b.timestamp
     );
     
-    // Get all assistant messages for the last user message
-    const lastUserMessageIndex = [...sortedChatMessages]
+    // Get the latest user message
+    const lastUserMessage = [...sortedChatMessages]
       .reverse()
-      .findIndex((msg) => msg.sender === "user");
+      .find((msg) => msg.sender === "user");
     
-    if (lastUserMessageIndex !== -1) {
-      // Get messages after the last user message
-      const messagesAfterLastUser = sortedChatMessages.slice(
-        sortedChatMessages.length - lastUserMessageIndex
-      );
-      const assistantResponses = messagesAfterLastUser.filter(
-        (msg) => msg.sender === "assistant"
-      );
-
-      // Check if this model is next in the sequence
-      const respondedModels = new Set(
-        assistantResponses.map((msg) => msg.modelId)
-      );
-      const isThisModelsTurn = !respondedModels.has(modelId);
-
-      // Log detailed information about Round Robin state
-      console.log(`ROUND_ROBIN mode - Analysis for model ${modelId}:`);
-      console.log(`- Last user message index: ${lastUserMessageIndex}`);
-      console.log(
-        `- Already responded models: ${
-          Array.from(respondedModels).join(", ") || "none"
-        }`
-      );
-      console.log(
-        `- Message stream for this model: ${
-          isThisModelsTurn ? "ACTIVE" : "ON HOLD"
-        }`
-      );
-
-      console.log(
-        `ROUND_ROBIN mode: It ${
-          isThisModelsTurn ? "is" : "is not"
-        } ${modelId}'s turn to respond`
-      );
-    }
+    // Get all assistant messages that are part of the current round robin "turn"
+    // i.e., responses to the latest user message
+    const latestConversationTurn: ChatMessage[] = [];
     
-    // In Round Robin mode, models always see all messages
-    return sortedChatMessages;
-  }
-  
-  // Find which model should respond next in round robin sequence
-  private _getNextModelInSequence(chatId: string, modelIds: string[]): string | null {
-    const currentChat = this.deps.getChat(chatId);
-    if (!currentChat || currentChat.messages.length === 0) return modelIds[0];
-    
-    // Sort messages by timestamp
-    const sortedMessages = [...currentChat.messages].sort(
-      (a, b) => a.timestamp - b.timestamp
-    );
-    
-    // Find the last user message
-    const lastUserMessageIndex = [...sortedMessages]
-      .reverse()
-      .findIndex((msg) => msg.sender === "user");
-    
-    if (lastUserMessageIndex === -1) {
-      // No user messages, return the first model
-      return modelIds[0];
-    }
-    
-    // Get messages after the last user message
-    const messagesAfterLastUser = sortedMessages.slice(
-      sortedMessages.length - lastUserMessageIndex
-    );
-    const assistantResponses = messagesAfterLastUser.filter(
-      (msg) => msg.sender === "assistant"
-    );
-    
-    // Get all models that have already responded
-    const respondedModels = new Set(
-      assistantResponses.map((msg) => msg.modelId || "")
-    );
-    
-    // Find the first model that hasn't responded yet
-    for (const modelId of modelIds) {
-      if (!respondedModels.has(modelId)) {
-        return modelId;
+    if (lastUserMessage) {
+      // First add the user message
+      latestConversationTurn.push(lastUserMessage);
+      
+      // Then add all assistant messages that came after this user message
+      // These are the messages from other models in this round robin turn
+      const isAfterLastUserMessage = (msg: ChatMessage) => 
+        msg.timestamp > lastUserMessage.timestamp && 
+        msg.sender === "assistant";
+      
+      const assistantMessagesThisTurn = sortedChatMessages
+        .filter(isAfterLastUserMessage)
+        .sort((a, b) => a.timestamp - b.timestamp);
+      
+      latestConversationTurn.push(...assistantMessagesThisTurn);
+      
+      console.log(`ROUND_ROBIN mode - Model ${modelId} will see:`);
+      console.log(`- Last user message: "${lastUserMessage.content.substring(0, 30)}..."`);
+      console.log(`- ${assistantMessagesThisTurn.length} previous AI responses in this turn`);
+      if (assistantMessagesThisTurn.length > 0) {
+        assistantMessagesThisTurn.forEach((msg, i) => {
+          const modelName = this.deps.models.find(m => m.id === msg.modelId)?.name || msg.modelId;
+          console.log(`  ${i+1}. ${modelName}: "${msg.content.substring(0, 30)}..."`);
+        });
       }
+    } else {
+      console.log(`ROUND_ROBIN mode - No user message found, model ${modelId} will see all messages`);
+      return sortedChatMessages;
     }
     
-    // If all models have responded or no valid models, return null
-    return null;
+    // For round robin, we include:
+    // 1. The full conversation history before the latest user message
+    // 2. The latest user message
+    // 3. All AI responses to that message that came before this model's turn
+    
+    // Get all messages before the latest user message for context
+    const messagesBeforeLatestTurn = lastUserMessage 
+      ? sortedChatMessages.filter(msg => msg.timestamp < lastUserMessage.timestamp)
+      : sortedChatMessages;
+    
+    // Combine the previous history with the current turn
+    const filteredMessages = [...messagesBeforeLatestTurn, ...latestConversationTurn];
+    
+    console.log(`ROUND_ROBIN mode: Model ${modelId} will see ${filteredMessages.length} total messages`);
+    
+    return filteredMessages;
   }
   
-  // Handle sending a message in round robin mode
+  // Process models in sequence, each one building on previous responses
   public async handleSendMessage(
     chatId: string,
     content: string,
     modelIds: string[],
     temperature: number
   ): Promise<string[]> {
-    console.log(`Starting Round Robin conversation mode with ${modelIds.length} models`);
+    if (modelIds.length === 0) return [];
     
-    // Create a copy of model IDs in the order they should respond
-    const orderedModelIds = [...modelIds];
+    console.log(`Starting Round Robin conversation mode with ${modelIds.length} models in sequence`);
     
-    // Create message placeholders for all models
-    const messagePromises = orderedModelIds.map((modelId, index) => {
-      return this.createModelMessage(chatId, modelId, index)
-        .then(assistantMessageId => {
-          // Only start the first model talking right away
-          if (index === 0) {
-            // Mark first message as streaming
-            this.streamHandlers.setStreamingMessageIds((prev) => [
-              ...prev,
-              assistantMessageId,
-            ]);
-            
-            // Start the first model with a slight delay
-            setTimeout(() => {
-              this.callLLMApi(chatId, assistantMessageId, modelId, {
-                content,
-                temperature,
-                systemPrompt: this.systemPrompt,
-              })
-                .then(() => {
-                  // When it's done, trigger the next model in sequence
-                  console.log(
-                    `Model ${modelId} finished. Starting next model in Round Robin sequence.`
-                  );
-                  
-                  if (index + 1 < orderedModelIds.length) {
-                    const nextModelId = orderedModelIds[index + 1];
-                    const nextMessageId = `msg_${
-                      Date.now() + index + 1
-                    }_${nextModelId}`;
-                    
-                    // Mark next message as streaming
-                    this.streamHandlers.setStreamingMessageIds((prev) => [
-                      ...prev,
-                      nextMessageId,
-                    ]);
-                    
-                    // Call the next model
-                    this.callLLMApi(chatId, nextMessageId, nextModelId, {
-                      content,
-                      temperature,
-                      systemPrompt: this.systemPrompt,
-                    }).catch((error) => {
-                      console.error(
-                        `Error in sequential API call for ${nextModelId}:`,
-                        error
-                      );
-                      this.streamHandlers.setStreamingMessageIds((prev) =>
-                        prev.filter((id) => id !== nextMessageId)
-                      );
-                    });
-                  }
-                })
-                .catch((error) => {
-                  console.error(
-                    `Error in API call for ${modelId}:`,
-                    error
-                  );
-                  this.streamHandlers.setStreamingMessageIds((prev) =>
-                    prev.filter((id) => id !== assistantMessageId)
-                  );
-                });
-            }, 100);
-          }
-          
-          return assistantMessageId;
-        });
-    });
+    // Reset round robin state
+    this.activeRoundRobinIndex = 0;
+    this.completedMessages.clear();
     
-    return Promise.all(messagePromises);
+    // Create placeholder messages for all models but only start the first one
+    const allMessageIds: string[] = [];
+    
+    // Create first model message and start processing
+    const firstModelId = modelIds[0];
+    const firstMessageId = await this.createModelMessage(chatId, firstModelId, 0);
+    allMessageIds.push(firstMessageId);
+    
+    // Create placeholder messages for remaining models (will be processed later)
+    for (let i = 1; i < modelIds.length; i++) {
+      const modelId = modelIds[i];
+      const messageId = await this.createModelMessage(chatId, modelId, i);
+      allMessageIds.push(messageId);
+    }
+    
+    // Start the first model
+    this.startNextModelInSequence(
+      chatId, 
+      content, 
+      temperature, 
+      modelIds, 
+      allMessageIds
+    );
+    
+    return allMessageIds;
+  }
+  
+  // Helper method to start the next model in the sequence
+  private startNextModelInSequence(
+    chatId: string,
+    userContent: string,
+    temperature: number,
+    modelIds: string[],
+    messageIds: string[]
+  ) {
+    // If we've processed all models, we're done
+    if (this.activeRoundRobinIndex >= modelIds.length) {
+      console.log(`Round Robin complete - all ${modelIds.length} models have responded`);
+      return;
+    }
+    
+    const currentModelId = modelIds[this.activeRoundRobinIndex];
+    const currentMessageId = messageIds[this.activeRoundRobinIndex];
+    
+    console.log(`Starting model ${this.activeRoundRobinIndex + 1}/${modelIds.length}: ${currentModelId}`);
+    
+    // Mark message as streaming
+    this.streamHandlers.setStreamingMessageIds(
+      prev => [...prev, currentMessageId]
+    );
+    
+    // Call the API with a short delay to ensure state is updated
+    setTimeout(() => {
+      this.callLLMApi(
+        chatId, 
+        currentMessageId, 
+        currentModelId, 
+        {
+          content: userContent,
+          temperature,
+          systemPrompt: this.systemPrompt
+        }
+      ).then(() => {
+        // When this model finishes, mark it as completed
+        this.completedMessages.add(currentMessageId);
+        console.log(`Model ${currentModelId} completed (${this.activeRoundRobinIndex + 1}/${modelIds.length})`);
+        
+        // Move to the next model
+        this.activeRoundRobinIndex++;
+        
+        // Start the next model in sequence
+        this.startNextModelInSequence(
+          chatId,
+          userContent,
+          temperature,
+          modelIds,
+          messageIds
+        );
+      }).catch(error => {
+        console.error(`Error in Round Robin API call for ${currentModelId}:`, error);
+        
+        // Even if there's an error, move to the next model
+        this.streamHandlers.setStreamingMessageIds(
+          prev => prev.filter(id => id !== currentMessageId)
+        );
+        
+        this.activeRoundRobinIndex++;
+        this.startNextModelInSequence(
+          chatId,
+          userContent,
+          temperature,
+          modelIds,
+          messageIds
+        );
+      });
+    }, 100);
   }
 }
