@@ -93,6 +93,8 @@ jobs:
             artifacts/**/*.deb
             artifacts/**/*.rpm
             artifacts/**/*.snap
+            artifacts/**/*.pacman
+            artifacts/**/*.pkg.tar.zst
           draft: ${{ startsWith(github.ref, 'refs/tags/v') }}
           generate_release_notes: true
           prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}

@@ -135,23 +135,13 @@ endif
 .PHONY: package-linux
 package-linux: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for Linux...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:linux
+	@NODE_ENV=production yarn run dist:linux-manual
 
 # Package for specific Linux formats
-.PHONY: package-appimage
-package-appimage: $(NODE_MODULES) build
-	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application as AppImage...$(COLOR_RESET)"
-	@NODE_ENV=production $(ELECTRON_BUILDER) --linux AppImage
-
-.PHONY: package-deb
-package-deb: $(NODE_MODULES) build
-	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application as .deb...$(COLOR_RESET)"
-	@NODE_ENV=production $(ELECTRON_BUILDER) --linux deb
-
-.PHONY: package-pacman
-package-pacman: $(NODE_MODULES) build
-	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application as Arch package...$(COLOR_RESET)"
-	@NODE_ENV=production $(ELECTRON_BUILDER) --linux pacman
+.PHONY: package-linux-all
+package-linux-all: $(NODE_MODULES) build
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for all Linux formats...$(COLOR_RESET)"
+	@NODE_ENV=production yarn run dist:linux-all
 
 # Package for Windows only
 .PHONY: package-win
@@ -169,8 +159,11 @@ package-mac: $(NODE_MODULES) build
 .PHONY: package-all
 package-all: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for all platforms...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:linux
+	@echo -e "$(COLOR_BOLD)$(COLOR_BLUE)Building Linux packages...$(COLOR_RESET)"
+	@NODE_ENV=production yarn run dist:linux-all
+	@echo -e "$(COLOR_BOLD)$(COLOR_BLUE)Building Windows package...$(COLOR_RESET)"
 	@NODE_ENV=production yarn run dist:win-manual
+	@echo -e "$(COLOR_BOLD)$(COLOR_BLUE)Building macOS package...$(COLOR_RESET)"
 	@NODE_ENV=production yarn run dist:mac-manual
 
 # Create release

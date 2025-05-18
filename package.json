@@ -15,7 +15,9 @@
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac",
     "dist:win-manual": "node scripts/package-win.js",
-    "dist:mac-manual": "node scripts/package-mac.js"
+    "dist:mac-manual": "node scripts/package-mac.js",
+    "dist:linux-manual": "node scripts/package-linux.js",
+    "dist:linux-all": "node scripts/package-linux.js"
   },
   "dependencies": {
     "@uiw/react-md-editor": "^4.0.6",
@@ -88,7 +90,10 @@
     },
     "linux": {
       "target": [
-        "zip"
+        "zip",
+        "AppImage",
+        "deb",
+        "pacman"
       ],
       "maintainer": "Lunar Lander Support <support@lunar-lander.blackmetal.tech>",
       "category": "Utility",
