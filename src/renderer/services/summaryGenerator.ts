@@ -21,11 +21,11 @@ export class SummaryGenerator {
     // Truncate and return as summary
     const maxLength = 60;
     let summary = firstUserMessage.content;
-    
+
     if (summary.length > maxLength) {
       summary = summary.substring(0, maxLength) + '...';
     }
-    
+
     return summary;
   }
 
@@ -40,14 +40,14 @@ export class SummaryGenerator {
     try {
       // Get up to the first 5 message exchanges
       const messagesToInclude = chat.messages.slice(0, 10);
-      
+
       // Get the model configuration
       const model = DbService.getModel(modelId);
       if (!model) {
         console.error("Model not found:", modelId);
         return this.generateBasicSummary(chat);
       }
-      
+
       // Call the LLM API
       return await this.callSummaryLLM(messagesToInclude, model);
     } catch (error) {
@@ -55,19 +55,19 @@ export class SummaryGenerator {
       return this.generateBasicSummary(chat);
     }
   }
-  
+
   /**
    * Call the LLM API to generate a summary
    */
   private static async callSummaryLLM(messages: ChatMessage[], model: Model): Promise<string> {
     // Prepare the messages for the API
     const apiMessages = [
-      { 
-        role: 'system', 
+      {
+        role: 'system',
         content: 'You are a helpful assistant. Your task is to create a short, concise title for this conversation. The title should be 5-8 words maximum and capture the main topic being discussed. Return ONLY the title with no quotes, explanations, or additional text.'
       }
     ];
-    
+
     // Add the conversation messages
     messages.forEach(message => {
       if (message.sender === 'user') {
@@ -82,14 +82,14 @@ export class SummaryGenerator {
         });
       }
     });
-    
+
     try {
       console.log(`Making summary API call to ${model.baseUrl} for model ${model.modelName}`);
-      
+
       // Set up timeout to prevent long-running requests
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10-second timeout
-      
+
       // Make the API call
       const response = await fetch(`${model.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -105,10 +105,10 @@ export class SummaryGenerator {
         }),
         signal: controller.signal
       });
-      
+
       // Clear timeout
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         let errorMessage = `API returned status ${response.status}`;
         try {
@@ -121,13 +121,13 @@ export class SummaryGenerator {
         }
         throw new Error(errorMessage);
       }
-      
+
       const data = await response.json();
       if (!data.choices || !data.choices.length || !data.choices[0].message) {
         console.error("Invalid API response:", data);
         throw new Error("Invalid API response format");
       }
-      
+
       const summary = data.choices[0].message.content.trim();
       console.log(`Summary API returned: "${summary}"`);
       return summary;
@@ -137,7 +137,7 @@ export class SummaryGenerator {
         console.error("Summary API call timed out");
         return "New conversation"; // Fallback for timeout
       }
-      
+
       console.error("Error calling summary LLM API:", error);
       // Return a safe fallback instead of throwing
       return "New conversation";

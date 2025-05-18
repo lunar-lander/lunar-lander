@@ -23,15 +23,15 @@ export const electron = {
       'models:get-all',
       'models:get-active',
       'models:add',
-      'models:update', 
+      'models:update',
       'models:delete',
       'models:toggle-active'
     ];
-    
+
     if (validChannels.includes(channel)) {
       return ipcRenderer.invoke(channel, ...args);
     }
-    
+
     throw new Error(`Unauthorized IPC channel: ${channel}`);
   }
 };

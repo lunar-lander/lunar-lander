@@ -1,8 +1,8 @@
-import React from 'react';
-import styles from './Button.module.css';
+import React from "react";
+import styles from "./Button.module.css";
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
-type ButtonSize = 'small' | 'medium' | 'large';
+type ButtonVariant = "primary" | "secondary" | "ghost";
+type ButtonSize = "small" | "medium" | "large";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -12,9 +12,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button: React.FC<ButtonProps> = ({
-  variant = 'primary',
-  size = 'medium',
-  className = '',
+  variant = "primary",
+  size = "medium",
+  className = "",
   children,
   ...props
 }) => {
@@ -22,8 +22,10 @@ const Button: React.FC<ButtonProps> = ({
     styles.button,
     styles[variant],
     styles[size],
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <button className={buttonClasses} {...props}>

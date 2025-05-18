@@ -1,6 +1,6 @@
-import React from 'react';
-import Sidebar from '../Sidebar/Sidebar';
-import styles from './Layout.module.css';
+import React from "react";
+import Sidebar from "../Sidebar/Sidebar";
+import styles from "./Layout.module.css";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,9 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <aside className={styles.sidebar}>
         <Sidebar />
       </aside>
-      <main className={styles.content}>
-        {children}
-      </main>
+      <main className={styles.content}>{children}</main>
     </div>
   );
 };

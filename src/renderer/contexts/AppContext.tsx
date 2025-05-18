@@ -1,12 +1,12 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { Chat, ChatMessage } from '../../shared/types/chat';
-import { Model } from '../../shared/types/model';
-import { DbService } from '../services/db';
-import { initializeMockData } from '../services/mockData';
-import { useConfig } from '../hooks/useConfig';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { Chat, ChatMessage } from "../../shared/types/chat";
+import { Model } from "../../shared/types/model";
+import { DbService } from "../services/db";
+import { initializeMockData } from "../services/mockData";
+import { useConfig } from "../hooks/useConfig";
 
 // Import types from ConversationMode
-import { ConversationModeType } from '../components/Settings/ConversationMode';
+import { ConversationModeType } from "../components/Settings/ConversationMode";
 
 // Define the CustomConfig interface
 export interface CustomConfig {
@@ -18,13 +18,13 @@ export interface CustomConfig {
 
 interface AppContextType {
   // View management
-  currentView: 'chat' | 'settings';
-  setCurrentView: (view: 'chat' | 'settings') => void;
-  
+  currentView: "chat" | "settings";
+  setCurrentView: (view: "chat" | "settings") => void;
+
   // Theme
   isDarkTheme: boolean;
   toggleTheme: () => void;
-  
+
   // Chats
   chats: Chat[];
   activeChat: string | null;
@@ -34,32 +34,36 @@ interface AppContextType {
   addMessageToChat: (chatId: string, message: ChatMessage) => void;
   getChat: (chatId: string) => Chat | null;
   updateChat: (chat: Chat) => void;
-  
+
   // Models
   models: Model[];
   getModel: (modelId: string) => Model | null;
-  addModel: (model: Omit<Model, 'id'>) => void;
+  addModel: (model: Omit<Model, "id">) => void;
   updateModel: (model: Partial<Model> & { id: string }) => void;
   deleteModel: (modelId: string) => void;
-  
+
   // Message handling
-  addMessageAndGenerateReplies: (chatId: string, content: string, modelIds: string[]) => void;
-  
+  addMessageAndGenerateReplies: (
+    chatId: string,
+    content: string,
+    modelIds: string[]
+  ) => void;
+
   // System prompt
   systemPrompt: string;
   updateSystemPrompt: (prompt: string) => void;
-  
+
   // Summary model
   summaryModelId: string | null;
   setSummaryModelId: (modelId: string) => void;
-  
+
   // Conversation mode
   conversationMode: ConversationModeType;
   updateConversationMode: (mode: ConversationModeType) => void;
-  
+
   // Custom configurations
   customConfigs: CustomConfig[];
-  addCustomConfig: (config: Omit<CustomConfig, 'id'> & { id?: string }) => void;
+  addCustomConfig: (config: Omit<CustomConfig, "id"> & { id?: string }) => void;
   updateCustomConfig: (config: Partial<CustomConfig> & { id: string }) => void;
   deleteCustomConfig: (configId: string) => void;
 }
@@ -69,92 +73,101 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
+    throw new Error("useAppContext must be used within an AppProvider");
   }
   return context;
 };
 
-export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   // Access configuration
   const { summaryModelId: configSummaryModelId, setSummaryModel } = useConfig();
-  
-  // Check for dark theme preference in localStorage or system
-  const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const savedTheme = localStorage.getItem('theme');
-  const initialDarkTheme = savedTheme 
-    ? savedTheme === 'dark' 
-    : prefersDarkMode;
 
-  const [currentView, setCurrentView] = useState<'chat' | 'settings'>('chat');
+  // Check for dark theme preference in localStorage or system
+  const prefersDarkMode =
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const savedTheme = localStorage.getItem("theme");
+  const initialDarkTheme = savedTheme ? savedTheme === "dark" : prefersDarkMode;
+
+  const [currentView, setCurrentView] = useState<"chat" | "settings">("chat");
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(initialDarkTheme);
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChat, setActiveChat] = useState<string | null>(null);
 
   const [models, setModels] = useState<Model[]>([]);
-  const [systemPrompt, setSystemPrompt] = useState<string>('');
+  const [systemPrompt, setSystemPrompt] = useState<string>("");
   const [summaryModelId, setSummaryModelId] = useState<string | null>(null);
-  const [conversationMode, setConversationMode] = useState<ConversationModeType>(ConversationModeType.ONE_TO_MANY);
+  const [conversationMode, setConversationMode] =
+    useState<ConversationModeType>(ConversationModeType.ISOLATED);
   const [customConfigs, setCustomConfigs] = useState<CustomConfig[]>([]);
 
   // Initialize app data on first load
   useEffect(() => {
     // Load mock data for development
     initializeMockData();
-    
+
     // Load chats from database
     const savedChats = DbService.getChats();
     setChats(savedChats);
-    
+
     // Load models from database
     const savedModels = DbService.getModels();
     setModels(savedModels);
-    
+
     // Load system prompt
-    const savedSystemPrompt = localStorage.getItem('systemPrompt') || '';
+    const savedSystemPrompt = localStorage.getItem("systemPrompt") || "";
     setSystemPrompt(savedSystemPrompt);
-    
+
     // Load conversation mode
-    const savedConversationMode = localStorage.getItem('conversationMode') || ConversationModeType.ONE_TO_MANY;
+    const savedConversationMode =
+      localStorage.getItem("conversationMode") || ConversationModeType.ISOLATED;
     setConversationMode(savedConversationMode as ConversationModeType);
-    
+
     // Load custom configs
-    const savedCustomConfigs = JSON.parse(localStorage.getItem('customConfigs') || '[]');
+    const savedCustomConfigs = JSON.parse(
+      localStorage.getItem("customConfigs") || "[]"
+    );
     setCustomConfigs(savedCustomConfigs);
   }, []);
-  
+
   // Sync summary model ID from config
   useEffect(() => {
-    if (configSummaryModelId !== undefined && configSummaryModelId !== summaryModelId) {
+    if (
+      configSummaryModelId !== undefined &&
+      configSummaryModelId !== summaryModelId
+    ) {
       setSummaryModelId(configSummaryModelId);
     }
   }, [configSummaryModelId, summaryModelId]);
 
   // Get config for theme management
   const { currentTheme } = useConfig();
-  
+
   // Apply theme class to document body
   useEffect(() => {
     if (!currentTheme) return;
-    
+
     // Remove all theme classes
-    document.body.classList.forEach(className => {
-      if (className.startsWith('theme-')) {
+    document.body.classList.forEach((className) => {
+      if (className.startsWith("theme-")) {
         document.body.classList.remove(className);
       }
     });
-    
+
     // Add the appropriate theme class with spaces replaced by hyphens
-    const themeClassName = `theme-${currentTheme.name.replace(/\s+/g, '-')}`;
+    const themeClassName = `theme-${currentTheme.name.replace(/\s+/g, "-")}`;
     document.body.classList.add(themeClassName);
-    
+
     // Also set dark/light theme for compatibility
     if (isDarkTheme) {
-      document.body.classList.add('dark-theme');
+      document.body.classList.add("dark-theme");
     } else {
-      document.body.classList.remove('dark-theme');
+      document.body.classList.remove("dark-theme");
     }
-    
-    localStorage.setItem('theme', isDarkTheme ? 'dark' : 'light');
+
+    localStorage.setItem("theme", isDarkTheme ? "dark" : "light");
   }, [isDarkTheme, currentTheme]);
 
   const toggleTheme = () => {
@@ -166,13 +179,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newChatId = `chat_${Date.now()}`;
     const newChat: Chat = {
       id: newChatId,
-      title: 'New Chat',
-      summary: 'Start a new conversation',
+      title: "New Chat",
+      summary: "Start a new conversation",
       date: new Date().toLocaleDateString(),
       messages: [],
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
     };
-    
+
     DbService.saveChat(newChat);
     setChats([newChat, ...chats]);
     setActiveChat(newChatId);
@@ -181,31 +194,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const selectChat = (chatId: string) => {
     setActiveChat(chatId);
-    setCurrentView('chat');
+    setCurrentView("chat");
   };
 
   const updateChatSummary = (chatId: string, summary: string): boolean => {
     try {
       console.log(`Updating summary for chat ${chatId} to "${summary}"`);
-      
+
       // First get chat from DB to ensure we have the latest version
       const latestChat = DbService.getChat(chatId);
       if (!latestChat) {
         console.error(`Chat ${chatId} not found when updating summary`);
         return false;
       }
-      
+
       // Make sure we're not losing messages
       if (!latestChat.messages || latestChat.messages.length === 0) {
-        const stateChat = chats.find(c => c.id === chatId);
+        const stateChat = chats.find((c) => c.id === chatId);
         if (stateChat && stateChat.messages && stateChat.messages.length > 0) {
-          console.warn(`DB chat has no messages but state chat has ${stateChat.messages.length} messages - using state chat`);
+          console.warn(
+            `DB chat has no messages but state chat has ${stateChat.messages.length} messages - using state chat`
+          );
           // Use the state chat instead as it has messages
           const updatedChat = { ...stateChat, summary };
           const success = DbService.saveChat(updatedChat);
-          
+
           if (success) {
-            setChats(chats.map(c => c.id === chatId ? updatedChat : c));
+            setChats(chats.map((c) => (c.id === chatId ? updatedChat : c)));
             return true;
           } else {
             console.error(`Failed to save chat with updated summary`);
@@ -213,16 +228,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         }
       }
-      
+
       // Normal case - we have a valid chat with messages
       const updatedChat = { ...latestChat, summary };
-      
+
       // Save to DB first
       const success = DbService.saveChat(updatedChat);
-      
+
       if (success) {
         // Then update state
-        setChats(prevChats => prevChats.map(c => c.id === chatId ? updatedChat : c));
+        setChats((prevChats) =>
+          prevChats.map((c) => (c.id === chatId ? updatedChat : c))
+        );
         return true;
       } else {
         console.error(`Failed to save chat with updated summary`);
@@ -240,25 +257,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // First try to get existing chat
       const existingChat = DbService.getChat(chatId);
       if (!existingChat) {
-        console.error(`Chat ${chatId} not found when adding message ${message.id}`);
+        console.error(
+          `Chat ${chatId} not found when adding message ${message.id}`
+        );
         return null;
       }
-      
+
       // Update the chat in memory first
       const updatedChat = {
         ...existingChat,
         messages: [...existingChat.messages, message],
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
       };
-      
+
       // Update state immediately to avoid race conditions
-      setChats(prevChats => {
-        return prevChats.map(c => c.id === chatId ? updatedChat : c);
+      setChats((prevChats) => {
+        return prevChats.map((c) => (c.id === chatId ? updatedChat : c));
       });
-      
+
       // Then save to database
       const result = DbService.addMessageToChat(chatId, message);
-      
+
       // Return the updated chat
       return result;
     } catch (error) {
@@ -268,136 +287,147 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
   };
-  
+
   // Get a specific chat
   const getChat = (chatId: string): Chat | null => {
     return DbService.getChat(chatId);
   };
-  
+
   // Update an entire chat
   const updateChat = (chat: Chat): boolean => {
     try {
       if (!chat || !chat.id) {
-        console.error('Cannot update chat with invalid ID');
+        console.error("Cannot update chat with invalid ID");
         return false;
       }
-      
+
       // First update local state directly using the chat object
-      setChats(prevChats => {
+      setChats((prevChats) => {
         // Avoid unnecessary rerenders by checking if the chat object is different
-        const chatIndex = prevChats.findIndex(c => c.id === chat.id);
-        
+        const chatIndex = prevChats.findIndex((c) => c.id === chat.id);
+
         if (chatIndex === -1) {
           // Chat not found in state, add it
-          return [chat, ...prevChats.filter(c => c.id !== chat.id)];
+          return [chat, ...prevChats.filter((c) => c.id !== chat.id)];
         } else {
           // Replace the chat in state
-          return prevChats.map(c => c.id === chat.id ? chat : c);
+          return prevChats.map((c) => (c.id === chat.id ? chat : c));
         }
       });
-      
+
       // Then save to database
       const saveResult = DbService.saveChat(chat);
-      
+
       if (!saveResult) {
         console.error(`Failed to save chat ${chat.id} to database`);
         // In case of error, refresh from DB to ensure consistency
         setChats(DbService.getChats());
         return false;
       }
-      
+
       return true;
     } catch (error) {
-      console.error('Error updating chat:', error);
+      console.error("Error updating chat:", error);
       // In case of error, refresh from DB to ensure consistency
       setChats(DbService.getChats());
       return false;
     }
   };
-  
+
   // Get a specific model
   const getModel = (modelId: string): Model | null => {
     return DbService.getModel(modelId);
   };
-  
+
   // Add a new model
-  const addModel = (model: Omit<Model, 'id'>) => {
+  const addModel = (model: Omit<Model, "id">) => {
     const newModel = DbService.addModel(model);
     setModels([...models, newModel]);
     return newModel;
   };
-  
+
   // Update an existing model
   const updateModel = (model: Partial<Model> & { id: string }) => {
     const updatedModel = DbService.updateModel(model);
     if (updatedModel) {
-      setModels(models.map(m => m.id === model.id ? updatedModel : m));
+      setModels(models.map((m) => (m.id === model.id ? updatedModel : m)));
     }
     return updatedModel;
   };
-  
+
   // Delete a model
   const deleteModel = (modelId: string) => {
     DbService.deleteModel(modelId);
-    setModels(models.filter(model => model.id !== modelId));
-    
+    setModels(models.filter((model) => model.id !== modelId));
+
     // If this was the summary model, clear the summary model ID
     if (summaryModelId === modelId) {
-      localStorage.removeItem('summaryModelId');
+      localStorage.removeItem("summaryModelId");
       setSummaryModelId(null);
     }
   };
-  
+
   // Update system prompt
   const updateSystemPrompt = (prompt: string) => {
     setSystemPrompt(prompt);
-    localStorage.setItem('systemPrompt', prompt);
+    localStorage.setItem("systemPrompt", prompt);
   };
-  
+
   // Update conversation mode
   const updateConversationMode = (mode: ConversationModeType) => {
     setConversationMode(mode);
-    localStorage.setItem('conversationMode', mode);
+    localStorage.setItem("conversationMode", mode);
   };
-  
+
   // Add a custom configuration
-  const addCustomConfig = (config: Omit<CustomConfig, 'id'> & { id?: string }) => {
+  const addCustomConfig = (
+    config: Omit<CustomConfig, "id"> & { id?: string }
+  ) => {
     const newConfig: CustomConfig = {
       id: config.id || `config_${Date.now()}`,
       name: config.name,
       description: config.description,
-      rules: config.rules
+      rules: config.rules,
     };
-    
+
     setCustomConfigs([...customConfigs, newConfig]);
-    localStorage.setItem('customConfigs', JSON.stringify([...customConfigs, newConfig]));
+    localStorage.setItem(
+      "customConfigs",
+      JSON.stringify([...customConfigs, newConfig])
+    );
     return newConfig;
   };
-  
+
   // Update a custom configuration
-  const updateCustomConfig = (config: Partial<CustomConfig> & { id: string }) => {
-    const existingConfigIndex = customConfigs.findIndex(c => c.id === config.id);
-    
+  const updateCustomConfig = (
+    config: Partial<CustomConfig> & { id: string }
+  ) => {
+    const existingConfigIndex = customConfigs.findIndex(
+      (c) => c.id === config.id
+    );
+
     if (existingConfigIndex !== -1) {
       const updatedConfigs = [...customConfigs];
       updatedConfigs[existingConfigIndex] = {
         ...updatedConfigs[existingConfigIndex],
-        ...config
+        ...config,
       };
-      
+
       setCustomConfigs(updatedConfigs);
-      localStorage.setItem('customConfigs', JSON.stringify(updatedConfigs));
+      localStorage.setItem("customConfigs", JSON.stringify(updatedConfigs));
       return updatedConfigs[existingConfigIndex];
     }
-    
+
     return null;
   };
-  
+
   // Delete a custom configuration
   const deleteCustomConfig = (configId: string) => {
-    const updatedConfigs = customConfigs.filter(config => config.id !== configId);
+    const updatedConfigs = customConfigs.filter(
+      (config) => config.id !== configId
+    );
     setCustomConfigs(updatedConfigs);
-    localStorage.setItem('customConfigs', JSON.stringify(updatedConfigs));
+    localStorage.setItem("customConfigs", JSON.stringify(updatedConfigs));
   };
 
   // No longer used - function has been replaced by callLLMApi in Chat.tsx
@@ -406,11 +436,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // View management
     currentView,
     setCurrentView,
-    
+
     // Theme
     isDarkTheme,
     toggleTheme,
-    
+
     // Chats
     chats,
     activeChat,
@@ -420,32 +450,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addMessageToChat,
     getChat,
     updateChat,
-    
+
     // Models
     models,
     getModel,
     addModel,
     updateModel,
     deleteModel,
-    
+
     // System prompt
     systemPrompt,
     updateSystemPrompt,
-    
+
     // Summary model
     summaryModelId,
     setSummaryModelId,
-    
+
     // Conversation mode
     conversationMode,
     updateConversationMode,
-    
+
     // Custom configurations
     customConfigs,
     addCustomConfig,
     updateCustomConfig,
-    deleteCustomConfig
+    deleteCustomConfig,
   };
 
+  // @ts-ignore
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

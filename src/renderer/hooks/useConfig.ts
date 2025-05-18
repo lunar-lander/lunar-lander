@@ -59,9 +59,9 @@ export function useConfig() {
   const [currentTheme, setCurrentTheme] = useState<ThemeConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [summaryModelId, setSummaryModelId] = useState<string | null>(null);
-  
+
   // Load initial config
-  useEffect(() => {    
+  useEffect(() => {
     const loadConfig = async () => {
       try {
         const appConfig = await electron.invoke('config:get');
@@ -69,7 +69,7 @@ export function useConfig() {
 
         const theme = await electron.invoke('config:get-current-theme');
         setCurrentTheme(theme);
-        
+
         // Get summary model ID
         const summaryModel = await electron.invoke('config:get-summary-model');
         setSummaryModelId(summaryModel);
@@ -98,7 +98,7 @@ export function useConfig() {
         const updatedTheme = await electron.invoke('config:get-current-theme');
         setCurrentTheme(updatedTheme);
       }
-      
+
       // Refresh summary model if chat settings were updated
       if (partialConfig.chat?.summaryModelId !== undefined) {
         setSummaryModelId(partialConfig.chat.summaryModelId);
@@ -178,7 +178,7 @@ export function useConfig() {
       return false;
     }
   };
-  
+
   // Set summary model ID
   const setSummaryModel = async (modelId: string) => {
     try {

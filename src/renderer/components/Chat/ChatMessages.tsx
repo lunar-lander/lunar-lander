@@ -26,38 +26,38 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     if (messagesEndRef.current) {
       // Force scroll to bottom with a slight delay to ensure DOM is updated
       setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ 
+        messagesEndRef.current?.scrollIntoView({
           behavior: "smooth",
-          block: "end"
+          block: "end",
         });
       }, 50);
     }
   }, [messages, streamingMessageIds]);
-  
+
   // Also scroll when specific message content changes (like during streaming)
   useEffect(() => {
-    const streamingMessages = messages.filter(msg => 
+    const streamingMessages = messages.filter((msg) =>
       streamingMessageIds.includes(msg.id)
     );
-    
+
     if (streamingMessages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ 
+      messagesEndRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: "end"
+        block: "end",
       });
     }
   }, [messages, streamingMessageIds]); // Simplified dependency array to avoid issues
-  
+
   // Effect to handle scrolling when message content changes
   useEffect(() => {
     // This is a separate effect just for content changes
     if (streamingMessageIds.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ 
+      messagesEndRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: "end"
+        block: "end",
       });
     }
-  }, [JSON.stringify(messages.map(m => m.id + '-' + m.content.length))]);
+  }, [JSON.stringify(messages.map((m) => m.id + "-" + m.content.length))]);
 
   // Get model name from model ID
   const getModelName = (modelId?: string): string => {

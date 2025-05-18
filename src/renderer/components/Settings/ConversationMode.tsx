@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { useAppContext } from '../../contexts/AppContext';
-import styles from './ConversationMode.module.css';
+import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import { useAppContext } from "../../contexts/AppContext";
+import styles from "./ConversationMode.module.css";
 
 export enum ConversationModeType {
-  ISOLATED = 'isolated',
-  DISCUSS = 'discuss',
-  ROUND_ROBIN = 'round-robin',
-  CUSTOM = 'custom'
+  ISOLATED = "isolated",
+  DISCUSS = "discuss",
+  ROUND_ROBIN = "round-robin",
+  CUSTOM = "custom",
 }
 
 interface ConversationModeOption {
@@ -25,37 +25,49 @@ export interface CustomConversationConfig {
 const CONVERSATION_MODES: ConversationModeOption[] = [
   {
     id: ConversationModeType.ISOLATED,
-    name: 'Isolated',
-    description: 'Each LLM can only see its own chat and output. This creates separate, independent conversations with each model, without any cross-sharing of information. Perfect for comparing responses without models influencing each other.'
+    name: "Isolated",
+    description:
+      "Each LLM can only see its own chat and output. This creates separate, independent conversations with each model, without any cross-sharing of information. Perfect for comparing responses without models influencing each other.",
   },
   {
     id: ConversationModeType.DISCUSS,
-    name: 'Discuss',
-    description: 'All LLMs respond concurrently, but each can see all messages from everyone. This creates a collaborative discussion where models can reference and build upon each other\'s thinking, similar to a group chat.'
+    name: "Discuss",
+    description:
+      "All LLMs respond concurrently, but each can see all messages from everyone. This creates a collaborative discussion where models can reference and build upon each other's thinking, similar to a group chat.",
   },
   {
     id: ConversationModeType.ROUND_ROBIN,
-    name: 'Round Robin',
-    description: 'LLMs respond in sequence, one after another. Each model can see all previous responses from all models. This creates a structured conversation flow where each model can build on what came before it.'
+    name: "Round Robin",
+    description:
+      "LLMs respond in sequence, one after another. Each model can see all previous responses from all models. This creates a structured conversation flow where each model can build on what came before it.",
   },
   {
     id: ConversationModeType.CUSTOM,
-    name: 'Custom Configuration',
-    description: 'Create a specialized conversation flow with custom rules. Define how models interact, what context they receive, and special instructions for different scenarios.'
-  }
+    name: "Custom Configuration",
+    description:
+      "Create a specialized conversation flow with custom rules. Define how models interact, what context they receive, and special instructions for different scenarios.",
+  },
 ];
 
 const ConversationMode: React.FC = () => {
-  const { conversationMode, updateConversationMode, customConfigs, addCustomConfig, updateCustomConfig, deleteCustomConfig } = useAppContext();
-  
-  const [selectedMode, setSelectedMode] = useState<ConversationModeType>(conversationMode);
+  const {
+    conversationMode,
+    updateConversationMode,
+    customConfigs,
+    addCustomConfig,
+    updateCustomConfig,
+    deleteCustomConfig,
+  } = useAppContext();
+
+  const [selectedMode, setSelectedMode] =
+    useState<ConversationModeType>(conversationMode);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [customForm, setCustomForm] = useState<CustomConversationConfig>({
-    name: '',
-    description: '',
-    rules: ''
+    name: "",
+    description: "",
+    rules: "",
   });
 
   useEffect(() => {
@@ -66,7 +78,7 @@ const ConversationMode: React.FC = () => {
   const handleModeSelect = (mode: ConversationModeType) => {
     setSelectedMode(mode);
     setHasChanges(true);
-    
+
     if (mode === ConversationModeType.CUSTOM && customConfigs.length === 0) {
       setShowCustomForm(true);
     } else {
@@ -78,7 +90,7 @@ const ConversationMode: React.FC = () => {
     updateConversationMode(selectedMode);
     setHasChanges(false);
     setSaveSuccess(true);
-    
+
     // Clear the success message after 3 seconds
     setTimeout(() => {
       setSaveSuccess(false);
@@ -91,11 +103,13 @@ const ConversationMode: React.FC = () => {
     setShowCustomForm(false);
   };
 
-  const handleCustomFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleCustomFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setCustomForm(prev => ({
+    setCustomForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -103,21 +117,25 @@ const ConversationMode: React.FC = () => {
     if (customForm.name && customForm.rules) {
       addCustomConfig({
         ...customForm,
-        id: `custom_${Date.now()}`
+        id: `custom_${Date.now()}`,
       });
-      
+
       setCustomForm({
-        name: '',
-        description: '',
-        rules: ''
+        name: "",
+        description: "",
+        rules: "",
       });
-      
+
       setShowCustomForm(false);
     }
   };
 
   const handleDeleteCustomConfig = (configId: string) => {
-    if (window.confirm('Are you sure you want to delete this custom configuration?')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this custom configuration?"
+      )
+    ) {
       deleteCustomConfig(configId);
     }
   };
@@ -126,15 +144,18 @@ const ConversationMode: React.FC = () => {
     <div className={styles.container}>
       <h2 className={styles.title}>🔄 Conversation Mode</h2>
       <p className={styles.description}>
-        Choose how multiple language models interact with you and with each other during conversations.
-        Different modes provide varied experiences and insights.
+        Choose how multiple language models interact with you and with each
+        other during conversations. Different modes provide varied experiences
+        and insights.
       </p>
 
       <div className={styles.modeSelector}>
-        {CONVERSATION_MODES.map(mode => (
-          <div 
+        {CONVERSATION_MODES.map((mode) => (
+          <div
             key={mode.id}
-            className={`${styles.modeItem} ${selectedMode === mode.id ? styles.selected : ''}`}
+            className={`${styles.modeItem} ${
+              selectedMode === mode.id ? styles.selected : ""
+            }`}
             onClick={() => handleModeSelect(mode.id)}
           >
             <div className={styles.modeHeader}>
@@ -153,14 +174,14 @@ const ConversationMode: React.FC = () => {
             Conversation mode saved successfully!
           </div>
         )}
-        <button 
+        <button
           className={`${styles.button} ${styles.secondary}`}
           onClick={handleReset}
           disabled={!hasChanges}
         >
           Reset
         </button>
-        <button 
+        <button
           className={styles.button}
           onClick={handleSave}
           disabled={!hasChanges}
@@ -171,15 +192,17 @@ const ConversationMode: React.FC = () => {
 
       {(selectedMode === ConversationModeType.CUSTOM || showCustomForm) && (
         <div className={styles.customConfig}>
-          <h3 className={styles.customTitle}>Custom Conversation Configurations</h3>
-          
+          <h3 className={styles.customTitle}>
+            Custom Conversation Configurations
+          </h3>
+
           {customConfigs.length > 0 && !showCustomForm && (
             <div className={styles.customConfigList}>
-              {customConfigs.map(config => (
+              {customConfigs.map((config) => (
                 <div key={config.id} className={styles.modeItem}>
                   <div className={styles.modeHeader}>
                     <span className={styles.modeName}>{config.name}</span>
-                    <button 
+                    <button
                       className={`${styles.button} ${styles.secondary}`}
                       onClick={() => handleDeleteCustomConfig(config.id)}
                     >
@@ -192,7 +215,7 @@ const ConversationMode: React.FC = () => {
                   </div>
                 </div>
               ))}
-              <button 
+              <button
                 className={`${styles.button} ${styles.secondary}`}
                 onClick={() => setShowCustomForm(true)}
               >
@@ -200,11 +223,13 @@ const ConversationMode: React.FC = () => {
               </button>
             </div>
           )}
-          
+
           {showCustomForm && (
             <div className={styles.customForm}>
               <div className={styles.formGroup}>
-                <label className={styles.label} htmlFor="name">Configuration Name</label>
+                <label className={styles.label} htmlFor="name">
+                  Configuration Name
+                </label>
                 <input
                   id="name"
                   name="name"
@@ -215,7 +240,7 @@ const ConversationMode: React.FC = () => {
                   required
                 />
               </div>
-              
+
               <div className={styles.formGroup}>
                 <label className={styles.label} htmlFor="description">
                   Short Description
@@ -229,7 +254,7 @@ const ConversationMode: React.FC = () => {
                   placeholder="Brief explanation of this conversation mode"
                 />
               </div>
-              
+
               <div className={styles.formGroup}>
                 <label className={styles.label} htmlFor="rules">
                   Configuration Rules (Markdown supported)
@@ -244,15 +269,15 @@ const ConversationMode: React.FC = () => {
                   required
                 />
               </div>
-              
+
               <div className={styles.actions}>
-                <button 
+                <button
                   className={`${styles.button} ${styles.secondary}`}
                   onClick={() => setShowCustomForm(false)}
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   className={styles.button}
                   onClick={handleAddCustomConfig}
                 >

@@ -30,36 +30,36 @@ export class DbService {
         console.error('DB: Cannot save chat with invalid ID');
         return false;
       }
-      
+
       // Get current chats
       const chats = this.getChats();
       const index = chats.findIndex(c => c.id === chat.id);
-      
+
       // Ensure chat has a lastUpdated timestamp
-      const updatedChat = { 
-        ...chat, 
-        lastUpdated: Date.now() 
+      const updatedChat = {
+        ...chat,
+        lastUpdated: Date.now()
       };
-      
+
       // Update or add the chat
       if (index !== -1) {
         chats[index] = updatedChat;
       } else {
         chats.unshift(updatedChat);
       }
-      
+
       // Save updated chats list
       this.saveChats(chats);
-      
+
       // Verify chat was saved
       const savedChats = this.getChats();
       const chatExists = savedChats.some(c => c.id === chat.id);
-      
+
       if (!chatExists) {
         console.error(`DB: Failed to save chat ${chat.id}`);
         return false;
       }
-      
+
       return true;
     } catch (error) {
       console.error('DB: Error saving chat:', error);
@@ -96,17 +96,17 @@ export class DbService {
 
       // Save the updated chat
       this.saveChat(updatedChat);
-      
+
       // Verify message was saved
       const verifyChat = this.getChat(chatId);
       const messageExists = verifyChat?.messages.some(m => m.id === message.id);
-      
+
       if (!messageExists) {
         console.error(`DB: Failed to save message ${message.id} to chat ${chatId}`);
       } else {
         console.log(`DB: Successfully saved message ${message.id} to chat ${chatId}`);
       }
-      
+
       return updatedChat;
     } catch (error) {
       console.error(`DB: Error adding message to chat ${chatId}:`, error);
@@ -132,38 +132,38 @@ export class DbService {
   static saveModel(model: Model): void {
     const models = this.getModels();
     const index = models.findIndex(m => m.id === model.id);
-    
+
     if (index !== -1) {
       models[index] = model;
     } else {
       models.push(model);
     }
-    
+
     this.saveModels(models);
   }
-  
+
   static addModel(model: Omit<Model, 'id'>): Model {
     const newModel: Model = {
       id: `model_${Date.now()}`,
       ...model
     };
-    
+
     this.saveModel(newModel);
     return newModel;
   }
-  
+
   static updateModel(model: Partial<Model> & { id: string }): Model | null {
     const existingModel = this.getModel(model.id);
-    
+
     if (!existingModel) {
       return null;
     }
-    
+
     const updatedModel: Model = {
       ...existingModel,
       ...model
     };
-    
+
     this.saveModel(updatedModel);
     return updatedModel;
   }
@@ -177,19 +177,19 @@ export class DbService {
   static generateChatSummary(chatId: string): string {
     const chat = this.getChat(chatId);
     if (!chat || chat.messages.length < 2) return 'New conversation';
-    
+
     // Get the first user message
     const firstUserMessage = chat.messages[0];
     if (firstUserMessage.sender !== 'user') return 'New conversation';
-    
+
     // Truncate and return as summary
     const maxLength = 60;
     let summary = firstUserMessage.content;
-    
+
     if (summary.length > maxLength) {
       summary = summary.substring(0, maxLength) + '...';
     }
-    
+
     return summary;
   }
 }

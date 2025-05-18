@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Model } from '../../../shared/types/model';
-import styles from './ChatInput.module.css';
-import MDEditor from '@uiw/react-md-editor';
+import React, { useState, useEffect } from "react";
+import { Model } from "../../../shared/types/model";
+import styles from "./ChatInput.module.css";
+import MDEditor from "@uiw/react-md-editor";
 
 // Chat mode options - aligned with settings definitions
 export enum ChatMode {
-  ISOLATED = 'isolated',
-  DISCUSS = 'discuss',
-  ROUND_ROBIN = 'round-robin',
-  CUSTOM = 'custom'
+  ISOLATED = "isolated",
+  DISCUSS = "discuss",
+  ROUND_ROBIN = "round-robin",
+  CUSTOM = "custom",
 }
 
 interface ChatInputProps {
   models: Model[];
   activeModelIds: string[];
-  onSendMessage: (message: string, modelIds: string[], temperature: number, mode: ChatMode) => void;
+  onSendMessage: (
+    message: string,
+    modelIds: string[],
+    temperature: number,
+    mode: ChatMode
+  ) => void;
   onToggleModel: (modelId: string) => void;
   onModeChange: (mode: ChatMode) => void;
   disabled?: boolean;
@@ -28,15 +33,15 @@ const ChatInput: React.FC<ChatInputProps> = ({
   onToggleModel,
   onModeChange,
   disabled = false,
-  currentMode
+  currentMode,
 }) => {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [temperature, setTemperature] = useState(1.0);
   const [editorHeight, setEditorHeight] = useState(150);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Send message on Ctrl+Enter or Cmd+Enter
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
       e.preventDefault();
       handleSendMessage();
     }
@@ -45,7 +50,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleSendMessage = () => {
     if (message.trim() && activeModelIds.length > 0 && !disabled) {
       onSendMessage(message, activeModelIds, temperature, currentMode);
-      setMessage('');
+      setMessage("");
     }
   };
 
@@ -65,17 +70,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
     <div className={styles.container}>
       <div className={styles.controlsBar}>
         <div className={styles.modelToggles}>
-          {models.map(model => (
+          {models.map((model) => (
             <div
               key={model.id}
-              className={`${styles.modelToggle} ${activeModelIds.includes(model.id) ? styles.active : ''}`}
+              className={`${styles.modelToggle} ${
+                activeModelIds.includes(model.id) ? styles.active : ""
+              }`}
               onClick={() => handleToggleModel(model.id)}
             >
               {model.name}
             </div>
           ))}
         </div>
-        
+
         <div className={styles.chatControls}>
           <div className={styles.temperatureControl}>
             <span>Temperature:</span>
@@ -91,7 +98,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             />
             <span>{temperature}</span>
           </div>
-          
+
           <select
             className={styles.modeSelect}
             value={currentMode}
@@ -104,17 +111,17 @@ const ChatInput: React.FC<ChatInputProps> = ({
           </select>
         </div>
       </div>
-      
+
       <div className={styles.editorWrapper} onKeyDown={handleKeyDown}>
         <MDEditor
           value={message}
-          onChange={(value) => setMessage(value || '')}
+          onChange={(value) => setMessage(value || "")}
           preview="edit"
           height={150}
           className={styles.mdEditor}
-          disabled={disabled}
           textareaProps={{
             placeholder: "Type a message using Markdown...",
+            disabled: disabled,
           }}
         />
         <button
@@ -126,10 +133,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
           →
         </button>
       </div>
-      
-      <div className={styles.helpText}>
-        Press Ctrl+Enter to send
-      </div>
+
+      <div className={styles.helpText}>Press Ctrl+Enter to send</div>
     </div>
   );
 };
