@@ -2,11 +2,11 @@ name: Build and Release
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
     tags:
       - 'v*'
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   test:
@@ -32,7 +32,7 @@ jobs:
   build:
     needs: test
     runs-on: ${{ matrix.os }}
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -55,11 +55,11 @@ jobs:
       - name: Package
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-            yarn electron-builder --linux
+            yarn dist:linux
           elif [ "$RUNNER_OS" == "macOS" ]; then
-            yarn electron-builder --mac
+            yarn dist:mac-manual
           else
-            yarn electron-builder --win
+            yarn dist:win-manual
           fi
         shell: bash
         
@@ -72,7 +72,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master'
     
     steps:
       - uses: actions/checkout@v3
@@ -93,6 +93,8 @@ jobs:
             artifacts/**/*.deb
             artifacts/**/*.rpm
             artifacts/**/*.snap
-          draft: true
+          draft: ${{ startsWith(github.ref, 'refs/tags/v') }}
           generate_release_notes: true
           prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('auto-release-{0}', github.sha) }}
+          name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('Auto Release {0}', github.sha) }}
