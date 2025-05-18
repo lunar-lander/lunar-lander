@@ -1,11 +1,11 @@
 .messageContainer {
   display: flex;
-  margin-bottom: 16px;
-  position: relative; /* Re-enable this - needed for eye icon positioning */
+  margin-bottom: 12px; /* Reduced from 16px */
+  position: relative;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 20px;
+  border-radius: 16px; /* Reduced from 20px */
   transition: all 0.2s ease;
-  width: 100%; /* Ensure full width within container */
+  width: 100%;
 }
 
 .user {
@@ -17,9 +17,9 @@
 }
 
 .messageContent {
-  max-width: 85%;
-  padding: 12px 16px;
-  border-radius: 12px;
+  max-width: 90%; /* Increased from 85% */
+  padding: 10px 14px; /* Reduced from 12px 16px */
+  border-radius: 10px; /* Reduced from 12px */
   position: relative;
   overflow: hidden;
 }
@@ -38,14 +38,14 @@
 
 /* Markdown styling */
 .messageText {
-  line-height: 1.5;
+  line-height: 1.4;
   white-space: pre-wrap;
   word-break: break-word;
   width: 100%;
 }
 
 .messageText :global(p) {
-  margin: 0 0 12px;
+  margin: 0 0 8px;
 }
 
 .messageText :global(p:last-child) {
@@ -54,17 +54,17 @@
 
 .messageText :global(pre) {
   background-color: rgba(0, 0, 0, 0.05);
-  padding: 8px;
-  border-radius: 4px;
+  padding: 6px;
+  border-radius: 3px;
   overflow-x: auto;
-  margin: 8px 0;
+  margin: 6px 0;
 }
 
 .messageText :global(code) {
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 0.9em;
-  padding: 2px 4px;
-  border-radius: 3px;
+  padding: 1px 3px;
+  border-radius: 2px;
   background-color: rgba(0, 0, 0, 0.05);
 }
 
@@ -74,22 +74,33 @@
 }
 
 .messageText :global(blockquote) {
-  margin: 8px 0;
-  padding-left: 12px;
-  border-left: 3px solid var(--border-color);
+  margin: 6px 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--border-color);
   color: var(--text-secondary);
 }
 
 .messageText :global(ul), .messageText :global(ol) {
-  margin: 8px 0;
-  padding-left: 24px;
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.messageText :global(li) {
+  margin-bottom: 2px;
 }
 
 .messageText :global(h1), .messageText :global(h2), .messageText :global(h3),
 .messageText :global(h4), .messageText :global(h5), .messageText :global(h6) {
-  margin: 16px 0 8px;
-  line-height: 1.25;
+  margin: 12px 0 6px;
+  line-height: 1.2;
 }
+
+.messageText :global(h1) { font-size: 1.5em; }
+.messageText :global(h2) { font-size: 1.3em; }
+.messageText :global(h3) { font-size: 1.15em; }
+.messageText :global(h4) { font-size: 1.1em; }
+.messageText :global(h5) { font-size: 1.05em; }
+.messageText :global(h6) { font-size: 1em; }
 
 /* User message markdown (light on dark) */
 .user .messageText :global(pre) {
