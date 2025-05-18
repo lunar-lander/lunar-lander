@@ -5,7 +5,7 @@ const archiver = require('archiver');
 
 // Configuration
 const electronVersion = '28.3.3'; // Match your electron version
-const appName = 'ChatAAP';
+const appName = 'Lunar Lander';
 const appVersion = '0.1.0';
 
 // Create the build directory if it doesn't exist
@@ -47,7 +47,7 @@ async function createWindowsPackage() {
   
   // Create and add a simplified package.json for the app root
   const appPackageJson = {
-    name: 'chataap',
+    name: 'lunar-lander',
     version: appVersion,
     main: 'resources/app/dist/main/index.js',
     description: 'A multi-LLM chat application with flexible conversation modes'
@@ -57,7 +57,7 @@ async function createWindowsPackage() {
   // Add batch file to start the app
   const batchContent = `@echo off
 echo Starting ${appName}...
-.\\chataap.exe
+.\\lunar-lander.exe
 `;
   archive.append(batchContent, { name: 'start.bat' });
   
@@ -71,7 +71,7 @@ This is a portable version of ${appName} for Windows.
 1. Extract all files in this zip to a folder
 2. Double-click on start.bat to run the application
 
-Visit https://chataap.blackmetal.tech for more information.
+Visit https://lunar-lander.blackmetal.tech for more information.
 `;
   archive.append(readmeContent, { name: 'README.txt' });
   

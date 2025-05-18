@@ -13,7 +13,7 @@ const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.
 const version = packageJson.version;
 
 // Output file path
-const outputPath = path.join(__dirname, `../build/ChatAAP-${version}-mac-x64.zip`);
+const outputPath = path.join(__dirname, `../build/Lunar-Lander-${version}-mac-x64.zip`);
 
 // Create a file to stream archive data to
 const output = fs.createWriteStream(outputPath);
@@ -58,7 +58,7 @@ cd "\$(dirname "\$0")"
 archive.append(startScript, { name: 'start.sh', mode: 0o755 });
 
 // Add a README with instructions
-const readmeContent = `# ChatAAP for macOS
+const readmeContent = `# Lunar Lander for macOS
 
 ## Running the Application
 

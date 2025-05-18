@@ -1,5 +1,5 @@
 {
-  "name": "chataap",
+  "name": "lunar-lander",
   "version": "0.1.0",
   "description": "A multi-LLM chat application with flexible conversation modes",
   "main": "dist/main/index.js",
@@ -54,14 +54,14 @@
     "webpack-cli": "^5.1.4"
   },
   "author": {
-    "name": "ChatAAP Team",
-    "email": "info@chataap.blackmetal.tech"
+    "name": "Lunar Lander Team",
+    "email": "info@lunar-lander.blackmetal.tech"
   },
-  "homepage": "https://chataap.blackmetal.tech",
+  "homepage": "https://lunar-lander.blackmetal.tech",
   "license": "MIT",
   "build": {
-    "appId": "tech.blackmetal.chataap",
-    "productName": "ChatAAP",
+    "appId": "tech.blackmetal.lunar-lander",
+    "productName": "Lunar Lander",
     "files": [
       "dist/**/*",
       "package.json"
@@ -90,7 +90,7 @@
       "target": [
         "zip"
       ],
-      "maintainer": "ChatAAP Support <support@chataap.blackmetal.tech>",
+      "maintainer": "Lunar Lander Support <support@lunar-lander.blackmetal.tech>",
       "category": "Utility",
       "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
     },

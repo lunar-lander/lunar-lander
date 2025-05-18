@@ -186,7 +186,7 @@ $(NODE_MODULES):
 # Help menu
 .PHONY: help
 help:
-	@echo -e "$(COLOR_BOLD)$(COLOR_CYAN)ChatAAP - Multi-LLM Chat Application Makefile$(COLOR_RESET)"
+	@echo -e "$(COLOR_BOLD)$(COLOR_CYAN)Lunar Lander - Multi-LLM Chat Application Makefile$(COLOR_RESET)"
 	@echo -e "$(COLOR_BOLD)Usage:$(COLOR_RESET)"
 	@echo -e "  $(COLOR_GREEN)make [target]$(COLOR_RESET)"
 	@echo

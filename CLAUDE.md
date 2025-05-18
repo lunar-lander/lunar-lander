@@ -1,10 +1,10 @@
-# Multi-LLM Chat Application (ChatAAP)
+# Multi-LLM Chat Application (Lunar Lander)
 
 # DO NOT DO CHANGES IN MORE THAN ONE FOLDER AT A TIME!
 
 ## Project Overview
 
-ChatAAP is a desktop application that allows users to chat with multiple LLM providers concurrently. The app supports various conversation modes and provides intuitive UI controls for managing multi-LLM interactions.
+Lunar Lander is a desktop application that allows users to chat with multiple LLM providers concurrently. The app supports various conversation modes and provides intuitive UI controls for managing multi-LLM interactions.
 
 ### Key Features
 
@@ -182,9 +182,9 @@ src/
 
 ### CI/CD
 - GitHub Actions workflow for building and releasing:
-  - Automatically builds on push to main and pull requests
+  - Automatically builds on push to main/master and pull requests
   - Runs tests, linting, and type checking
-  - Builds and packages for all platforms on tagged releases
+  - Builds and packages for all platforms on tagged releases or master pushes
   - Publishes releases to GitHub Releases
   - Supports Linux, macOS, and Windows
 
