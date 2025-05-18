@@ -213,13 +213,29 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         >
           {getThemeEmoji()}
         </button>
-        <button
-          className={styles.actionButton}
-          onClick={() => setZoom(1.0)}
-          title={`Current Zoom: ${Math.round((zoomLevel || 1.0) * 100)}% - Click to reset`}
-        >
-          🔍
-        </button>
+        <span className={styles.zoomControls}>
+          <button
+            className={styles.zoomButton}
+            onClick={() => setZoom(Math.max(0.5, Math.round((zoomLevel - 0.1) * 10) / 10))}
+            title="Zoom Out"
+          >
+            −
+          </button>
+          <button
+            className={styles.zoomResetButton}
+            onClick={() => setZoom(1.0)}
+            title={`Current Zoom: ${Math.round((zoomLevel || 1.0) * 100)}% - Click to reset`}
+          >
+            🔍
+          </button>
+          <button
+            className={styles.zoomButton}
+            onClick={() => setZoom(Math.min(2.0, Math.round((zoomLevel + 0.1) * 10) / 10))}
+            title="Zoom In"
+          >
+            +
+          </button>
+        </span>
         <button
           className={styles.actionButton}
           onClick={handleSettingsClick}

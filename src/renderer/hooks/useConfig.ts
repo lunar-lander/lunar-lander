@@ -200,11 +200,17 @@ export function useConfig() {
   // Set zoom level
   const setZoom = async (newZoomLevel: number) => {
     try {
-      await electron.invoke('config:set-zoom-level', newZoomLevel);
-      setZoomLevel(newZoomLevel);
+      // Ensure zoom level is between 0.5 and 2.0
+      const clampedZoom = Math.max(0.5, Math.min(2.0, newZoomLevel));
+      
+      await electron.invoke('config:set-zoom-level', clampedZoom);
+      setZoomLevel(clampedZoom);
       
       // Apply zoom level to the document root
-      document.documentElement.style.setProperty('--zoom-level', newZoomLevel.toString());
+      document.documentElement.style.setProperty('--zoom-level', clampedZoom.toString());
+      
+      // Force layout recalculation
+      window.dispatchEvent(new Event('resize'));
       
       return true;
     } catch (error) {

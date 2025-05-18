@@ -32,6 +32,59 @@
   transition: background-color 0.2s;
 }
 
+.zoomControls {
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  margin: 0 4px;
+}
+
+:global(.dark-theme) .zoomControls {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.zoomButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.zoomButton:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark-theme) .zoomButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.zoomResetButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoomResetButton:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark-theme) .zoomResetButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .actionButton:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
