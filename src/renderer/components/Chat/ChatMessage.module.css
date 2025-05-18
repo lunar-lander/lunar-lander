@@ -39,7 +39,6 @@
 /* Markdown styling */
 .messageText {
   line-height: 1.5;
-  white-space: pre-wrap;
   word-break: break-word;
   width: 100%;
   /* Optimize the rendering of markdown content */
@@ -366,7 +365,6 @@
   padding: 8px;
   border-radius: 4px;
   overflow-x: auto;
-  white-space: pre-wrap;
 }
 
 .latexHelperContent ul {
