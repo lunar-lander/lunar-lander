@@ -58,7 +58,8 @@
   border: none;
   outline: none;
   background-color: var(--primary-color);
-  color: white;
+  border: 3px solid rgba(0,0,0,0.3);
+  color: var(--text-color);
 }
 
 .button.secondary {
@@ -107,7 +108,7 @@
   border: 3px solid var(--border-color);
   border-radius: 4px;
   font-size: 14px;
-  background-color: var(--input-b);
+  background-color: var(--input-bg);
   color: var(--text-color);
 }
 
@@ -174,27 +175,4 @@
   border-top: 1px solid var(--border-color);
 }
 
-:global(.dark-theme) .container {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-:global(.dark-theme) .modelDetails {
-  color: #9aa0a6;
-}
-
-:global(.dark-theme) .button.secondary {
-  background-color: transparent;
-  border: 1px solid #5f6368;
-}
-
-:global(.dark-theme) .testResult.success {
-  background-color: rgba(52, 168, 83, 0.15);
-}
-
-:global(.dark-theme) .testResult.error {
-  background-color: rgba(234, 67, 53, 0.15);
-}
-
-:global(.dark-theme) .form {
-  background-color: #303134;
-}
+/* Dark mode styling is handled through CSS variables, no need for overrides */
