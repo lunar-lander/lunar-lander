@@ -1,4 +1,4 @@
-# ChatAAP - Multi-LLM Conversation Platform
+# Lunar Lander - Multi-LLM Conversation Platform
 
 <div align="center">
   <h3>Experience the power of multiple AI models in a single interface</h3>
@@ -8,11 +8,11 @@
   [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey)]()
 </div>
 
-![ChatAAP Screenshot](assets/screenshot.png)
+![Lunar Lander Screenshot](assets/screenshot.png)
 
 ## 🔍 Overview
 
-ChatAAP is a desktop application that enables seamless interaction with multiple Large Language Models simultaneously. Designed for researchers, developers, and AI enthusiasts, it allows you to:
+Lunar Lander is a desktop application that enables seamless interaction with multiple Large Language Models simultaneously. Designed for researchers, developers, and AI enthusiasts, it allows you to:
 
 - **Compare responses** from different models to the same prompt
 - **Create collaborative discussions** where models build on each other's thoughts
@@ -27,9 +27,9 @@ ChatAAP is a desktop application that enables seamless interaction with multiple
 - Toggle models on/off during conversations with live updates
 
 ### Revolutionary Conversation Modes
-- **Isolated Mode**: Each LLM can only see its own chat history with the user
-- **Discussion Mode**: All LLMs see all messages and can reference each other
-- **Round Robin**: Models respond sequentially, with each seeing previous responses
+- **One-to-Many**: Send one message to multiple LLMs simultaneously
+- **Many-to-Many**: Each LLM sees all previous responses
+- **Round Robin**: Models respond in sequence, with each building on previous responses
 - **Custom Mode**: Define specialized semantic configurations
 
 ### Advanced Conversation Controls
@@ -48,7 +48,7 @@ ChatAAP is a desktop application that enables seamless interaction with multiple
 ## 🚀 Getting Started
 
 ### Download
-Pre-built binaries are available for Windows, macOS, and Linux on our [releases page](https://github.com/yourusername/chataap/releases).
+Pre-built binaries are available for Windows, macOS, and Linux on our [releases page](https://github.com/yourusername/lunar-lander/releases).
 
 ### Build From Source
 
@@ -59,8 +59,8 @@ Pre-built binaries are available for Windows, macOS, and Linux on our [releases 
 #### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/chataap.git
-cd chataap
+git clone https://github.com/yourusername/lunar-lander.git
+cd lunar-lander
 
 # Install dependencies
 make install
@@ -80,7 +80,16 @@ make package
 # Package for Linux only (on Linux systems)
 make package-linux
 
-# Package for all platforms (requires proper environment)
+# Package for all Linux formats
+make package-linux-all
+
+# Package for Windows only
+make package-win
+
+# Package for macOS only
+make package-mac
+
+# Package for all platforms
 make package-all
 ```
 
@@ -94,7 +103,7 @@ make package-all
 - **Webpack**: Module bundling
 
 ### Architecture
-ChatAAP follows a modular architecture with clear separation of concerns:
+Lunar Lander follows a modular architecture with clear separation of concerns:
 
 #### Main Process (Electron Backend)
 - Configuration management
@@ -156,12 +165,13 @@ make clean
 
 ## 🧩 Conversation Modes Explained
 
-### Isolated Mode
-- Each model only sees messages between itself and the user
+### One-to-Many Mode
+- Send a single message to multiple models simultaneously
+- Each model responds independently
 - Perfect for comparing raw model capabilities on the same inputs
 - Models cannot influence each other
 
-### Discussion Mode
+### Many-to-Many Mode
 - All participants see all messages
 - Models can reference and build upon each other's responses
 - Creates a collaborative multi-model conversation
@@ -169,7 +179,8 @@ make clean
 ### Round Robin Mode
 - Models respond in sequence to user messages
 - Each model sees the user's message and all previous model responses
-- Creates a chain of thought across multiple models
+- Creates a chain of thought with each model building on previous responses
+- Produces a cumulative, collaborative response sequence
 
 ### Custom Mode
 - Define specialized conversation rules
@@ -178,7 +189,7 @@ make clean
 
 ## 🔗 Connect Your LLMs
 
-ChatAAP works with any OpenAI API-compatible service:
+Lunar Lander works with any OpenAI API-compatible service:
 
 1. Go to Settings > Models
 2. Add your model with:
@@ -186,6 +197,22 @@ ChatAAP works with any OpenAI API-compatible service:
    - Base URL: The API endpoint
    - Model Name: The specific model identifier
    - API Key: Your authentication key
+
+## 📦 Package Formats
+
+Lunar Lander is available in multiple package formats:
+
+### Linux
+- **ZIP**: Portable format for all Linux distributions
+- **AppImage**: Self-contained executable format
+- **DEB**: For Debian-based distributions (Ubuntu, Linux Mint, etc.)
+- **Pacman**: For Arch-based distributions (Arch Linux, Manjaro, etc.)
+
+### Windows
+- **ZIP**: Portable format
+
+### macOS
+- **ZIP**: Portable format
 
 ## 🤝 Contributing
 
@@ -212,6 +239,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
-  <p>Built with ❤️ by ChatAAP Team</p>
-  <p><a href="https://chataap.blackmetal.tech">https://chataap.blackmetal.tech</a></p>
+  <p>Built with ❤️ by Lunar Lander Team</p>
+  <p><a href="https://lunar-lander.blackmetal.tech">https://lunar-lander.blackmetal.tech</a></p>
 </div>

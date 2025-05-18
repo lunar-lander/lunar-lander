@@ -9,7 +9,9 @@ const Settings: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Settings</h1>
-        <p className={styles.description}>Configure your ChatAAP preferences</p>
+        <p className={styles.description}>
+          Configure your Lunar Lander preferences
+        </p>
       </div>
 
       <div className={styles.content}>

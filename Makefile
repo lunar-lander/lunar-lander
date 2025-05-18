@@ -1,4 +1,4 @@
-# ChatAAP - Multi-LLM Chat Application Makefile
+# Lunar Lander - Multi-LLM Chat Application Makefile
 
 # Environment variables
 SHELL := /bin/bash
@@ -25,7 +25,7 @@ else
 	else ifeq ($(UNAME),Darwin)
 		PLATFORM := mac
 	endif
-	
+
 	UNAME_M := $(shell uname -m)
 	ifeq ($(UNAME_M),x86_64)
 		ARCH := x64

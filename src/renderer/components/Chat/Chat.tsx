@@ -22,7 +22,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     handleSendMessage,
     handleToggleModel,
     handleToggleMessageVisibility,
-    generateChatSummary
+    generateChatSummary,
   } = useChat(chatId);
 
   // Get models and conversation mode from context
@@ -88,7 +88,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       ) : (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>💬</div>
-          <h2 className={styles.emptyTitle}>Welcome to ChatAAP</h2>
+          <h2 className={styles.emptyTitle}>Welcome to Lunar Lander</h2>
           <p className={styles.emptyText}>
             Start a new chat by clicking the "New Chat" button in the sidebar,
             or select an existing conversation.
