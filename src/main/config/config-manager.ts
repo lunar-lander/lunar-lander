@@ -36,6 +36,7 @@ export interface AppConfig {
     showTimestamps: boolean;
     compactMode: boolean;
     sidebarWidth: number;
+    zoomLevel: number;
   };
   behavior: {
     sendOnEnter: boolean;
@@ -73,7 +74,8 @@ const defaultConfig: AppConfig = {
     messageBubbleStyle: 'rounded',
     showTimestamps: true,
     compactMode: false,
-    sidebarWidth: 280
+    sidebarWidth: 280,
+    zoomLevel: 1.0
   },
   behavior: {
     sendOnEnter: true,

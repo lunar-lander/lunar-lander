@@ -1,0 +1,104 @@
+.container {
+  padding: 16px;
+  margin-bottom: 20px;
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: var(--text-color);
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sliderContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.slider {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  background: var(--border-color);
+  outline: none;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.zoomButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.zoomButton:hover {
+  background-color: var(--primary-hover-color);
+}
+
+.zoomValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.presetButton {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.presetButton:hover {
+  background-color: var(--hover-bg-color);
+}
+
+.presetButton.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}

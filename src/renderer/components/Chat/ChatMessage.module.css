@@ -38,18 +38,25 @@
 
 /* Markdown styling */
 .messageText {
-  line-height: 1.4;
+  line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
   width: 100%;
+  /* Optimize the rendering of markdown content */
+  text-rendering: optimizeLegibility;
 }
 
 .messageText :global(p) {
-  margin: 0 0 8px;
+  margin: 0 0 0.6em;
 }
 
 .messageText :global(p:last-child) {
   margin-bottom: 0;
+}
+
+/* Improve paragraph spacing */
+.messageText :global(p + p) {
+  margin-top: 0.6em;
 }
 
 .messageText :global(pre) {

@@ -4,7 +4,14 @@
   padding: 0;
 }
 
-html, body, #root {
+html {
+  height: 100%;
+  width: 100%;
+  /* Apply zoom level to all elements through font size */
+  font-size: calc(100% * var(--zoom-level, 1.0));
+}
+
+body, #root {
   height: 100%;
   width: 100%;
   overflow: hidden; /* Prevent double scrollbars */

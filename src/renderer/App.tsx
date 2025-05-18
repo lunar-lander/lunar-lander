@@ -2,6 +2,7 @@ import React from "react";
 import Layout from "./components/Layout/Layout";
 import Chat from "./components/Chat/Chat";
 import Settings from "./components/Settings/Settings";
+import ZoomControls from "./components/ZoomControls";
 import { AppProvider, useAppContext } from "./contexts/AppContext";
 import styles from "./App.module.css";
 
@@ -24,6 +25,7 @@ const App: React.FC = () => {
     <AppProvider>
       <Layout>
         <MainContent />
+        <ZoomControls />
       </Layout>
     </AppProvider>
   );

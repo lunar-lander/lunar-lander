@@ -19,7 +19,7 @@ const Sidebar: React.FC = () => {
     deleteChat,
   } = useAppContext();
 
-  const { config, setTheme } = useConfig();
+  const { config, setTheme, zoomLevel, setZoom } = useConfig();
   const [themeIndex, setThemeIndex] = useState(0);
   const [availableThemes, setAvailableThemes] = useState<string[]>([]);
 
@@ -125,6 +125,13 @@ const Sidebar: React.FC = () => {
           } - Click to cycle themes`}
         >
           {getThemeEmoji()}
+        </button>
+        <button
+          className={styles.actionButton}
+          onClick={() => setZoom(1.0)}
+          title={`Current Zoom: ${Math.round((zoomLevel || 1.0) * 100)}% - Click to reset`}
+        >
+          🔍
         </button>
         <button
           className={styles.actionButton}

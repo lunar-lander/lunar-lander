@@ -29,6 +29,7 @@ interface AppConfig {
     showTimestamps: boolean;
     compactMode: boolean;
     sidebarWidth: number;
+    zoomLevel: number;
   };
   behavior: {
     sendOnEnter: boolean;
@@ -59,6 +60,7 @@ export function useConfig() {
   const [currentTheme, setCurrentTheme] = useState<ThemeConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [summaryModelId, setSummaryModelId] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(1.0);
 
   // Load initial config
   useEffect(() => {
@@ -73,6 +75,10 @@ export function useConfig() {
         // Get summary model ID
         const summaryModel = await electron.invoke('config:get-summary-model');
         setSummaryModelId(summaryModel);
+        
+        // Get zoom level
+        const currentZoom = await electron.invoke('config:get-zoom-level');
+        setZoomLevel(currentZoom);
       } catch (error) {
         console.error('Failed to load configuration:', error);
       } finally {
@@ -190,17 +196,42 @@ export function useConfig() {
       return false;
     }
   };
+  
+  // Set zoom level
+  const setZoom = async (newZoomLevel: number) => {
+    try {
+      await electron.invoke('config:set-zoom-level', newZoomLevel);
+      setZoomLevel(newZoomLevel);
+      
+      // Apply zoom level to the document root
+      document.documentElement.style.setProperty('--zoom-level', newZoomLevel.toString());
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to set zoom level:', error);
+      return false;
+    }
+  };
+
+  // Apply zoom level effect whenever it changes
+  useEffect(() => {
+    if (zoomLevel) {
+      document.documentElement.style.setProperty('--zoom-level', zoomLevel.toString());
+    }
+  }, [zoomLevel]);
 
   return {
     config,
     currentTheme,
     loading,
     summaryModelId,
+    zoomLevel,
     updateConfig,
     saveTheme,
     deleteTheme,
     setTheme,
     toggleSystemTheme,
-    setSummaryModel
+    setSummaryModel,
+    setZoom
   };
 }

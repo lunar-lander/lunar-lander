@@ -110,6 +110,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           <ReactMarkdown 
             remarkPlugins={[remarkGfm, remarkMath]}
             rehypePlugins={[rehypeRaw, [rehypeKatex, { throwOnError: false, strict: false }]]}
+            components={{
+              // Improve paragraph spacing
+              p: ({node, ...props}) => <p style={{marginBottom: '0.6em'}} {...props} />,
+              // Make code blocks more readable
+              code: ({node, inline, ...props}) => 
+                inline ? 
+                  <code {...props} /> : 
+                  <code style={{display: 'block', padding: '0.5em'}} {...props} />,
+              // Make lists more readable
+              li: ({node, ...props}) => <li style={{marginBottom: '0.3em'}} {...props} />
+            }}
           >
             {processContent(content)}
           </ReactMarkdown>

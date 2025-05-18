@@ -58,6 +58,24 @@ export function registerConfigIpcHandlers(): void {
     const config = configManager.getConfig();
     return config.chat.summaryModelId;
   });
+  
+  // Set zoom level
+  ipcMain.handle('config:set-zoom-level', (_, zoomLevel: number) => {
+    const config = configManager.getConfig();
+    configManager.updateConfig({
+      ui: {
+        ...config.ui,
+        zoomLevel: zoomLevel
+      }
+    });
+    return true;
+  });
+
+  // Get zoom level
+  ipcMain.handle('config:get-zoom-level', () => {
+    const config = configManager.getConfig();
+    return config.ui.zoomLevel;
+  });
 }
 
 // Function to unregister all handlers (useful for cleanup)
@@ -71,4 +89,6 @@ export function unregisterConfigIpcHandlers(): void {
   ipcMain.removeHandler('config:toggle-system-theme');
   ipcMain.removeHandler('config:set-summary-model');
   ipcMain.removeHandler('config:get-summary-model');
+  ipcMain.removeHandler('config:set-zoom-level');
+  ipcMain.removeHandler('config:get-zoom-level');
 }

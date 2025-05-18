@@ -2,6 +2,7 @@ import React from "react";
 import ModelSettings from "./ModelSettings";
 import SystemPrompt from "./SystemPrompt";
 import ConversationMode from "./ConversationMode";
+import ZoomSettings from "./ZoomSettings";
 import styles from "./Settings.module.css";
 
 const Settings: React.FC = () => {
@@ -15,6 +16,7 @@ const Settings: React.FC = () => {
       </div>
 
       <div className={styles.content}>
+        <ZoomSettings />
         <ModelSettings />
         <SystemPrompt />
         <ConversationMode />
