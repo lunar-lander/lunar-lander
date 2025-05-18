@@ -56,6 +56,7 @@ export const initializeMockData = () => {
       summary: 'Discussing AI capabilities',
       date: new Date().toLocaleDateString(),
       lastUpdated: Date.now(),
+      isStarred: true,
       messages: [
         {
           id: 'msg_1',

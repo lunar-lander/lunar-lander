@@ -34,6 +34,9 @@ interface AppContextType {
   addMessageToChat: (chatId: string, message: ChatMessage) => void;
   getChat: (chatId: string) => Chat | null;
   updateChat: (chat: Chat) => void;
+  starChat: (chatId: string) => void;
+  unstarChat: (chatId: string) => void;
+  deleteChat: (chatId: string) => void;
 
   // Models
   models: Model[];
@@ -198,6 +201,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       date: new Date().toLocaleDateString(),
       messages: [],
       lastUpdated: Date.now(),
+      isStarred: false,
     };
 
     DbService.saveChat(newChat);
@@ -446,6 +450,87 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // No longer used - function has been replaced by callLLMApi in Chat.tsx
 
+    // Star a chat
+  const starChat = (chatId: string) => {
+    try {
+      const chat = DbService.getChat(chatId);
+      if (!chat) {
+        console.error(`Chat ${chatId} not found when starring`);
+        return false;
+      }
+
+      const updatedChat = {
+        ...chat,
+        isStarred: true
+      };
+
+      const success = DbService.saveChat(updatedChat);
+      if (success) {
+        setChats(chats.map(c => c.id === chatId ? updatedChat : c));
+        return true;
+      } else {
+        console.error(`Failed to star chat ${chatId}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error starring chat ${chatId}:`, error);
+      return false;
+    }
+  };
+
+  // Unstar a chat
+  const unstarChat = (chatId: string) => {
+    try {
+      const chat = DbService.getChat(chatId);
+      if (!chat) {
+        console.error(`Chat ${chatId} not found when unstarring`);
+        return false;
+      }
+
+      const updatedChat = {
+        ...chat,
+        isStarred: false
+      };
+
+      const success = DbService.saveChat(updatedChat);
+      if (success) {
+        setChats(chats.map(c => c.id === chatId ? updatedChat : c));
+        return true;
+      } else {
+        console.error(`Failed to unstar chat ${chatId}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error unstarring chat ${chatId}:`, error);
+      return false;
+    }
+  };
+
+  // Delete a chat
+  const deleteChat = (chatId: string) => {
+    try {
+      // If this is the active chat, select another chat
+      if (activeChat === chatId) {
+        const otherChats = chats.filter(c => c.id !== chatId);
+        if (otherChats.length > 0) {
+          setActiveChat(otherChats[0].id);
+        } else {
+          setActiveChat(null);
+        }
+      }
+
+      // Remove from database
+      DbService.deleteChat(chatId);
+      
+      // Update state
+      setChats(chats.filter(c => c.id !== chatId));
+      return true;
+    } catch (error) {
+      console.error(`Error deleting chat ${chatId}:`, error);
+      return false;
+    }
+  };
+
   const value = {
     // View management
     currentView,
@@ -464,6 +549,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     addMessageToChat,
     getChat,
     updateChat,
+    starChat,
+    unstarChat,
+    deleteChat,
 
     // Models
     models,

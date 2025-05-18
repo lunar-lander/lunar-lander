@@ -7,6 +7,7 @@ export interface Chat {
   date: string;
   messages: ChatMessage[];
   lastUpdated: number;
+  isStarred?: boolean;
 }
 
 export interface ChatMessage {

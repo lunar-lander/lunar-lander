@@ -150,6 +150,7 @@
   margin-bottom: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
+  position: relative;
 }
 
 .chatItem:hover {
@@ -181,6 +182,44 @@
   font-size: 0.8em;
   color: #9aa0a6;
   margin-top: 4px;
+}
+
+.chatControls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.chatControl {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  font-size: 14px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.chatControl:hover {
+  opacity: 1;
+}
+
+.chatItem:hover .chatControls {
+  visibility: visible;
+}
+
+.chatControls {
+  visibility: hidden;
+}
+
+.starIcon {
+  color: #f8c33c;
+}
+
+.starredChat {
+  border-left: 3px solid #f8c33c;
 }
 
 .noChats {

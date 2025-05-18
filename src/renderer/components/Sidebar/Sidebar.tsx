@@ -14,6 +14,9 @@ const Sidebar: React.FC = () => {
     setCurrentView,
     models,
     updateModel,
+    starChat,
+    unstarChat,
+    deleteChat,
   } = useAppContext();
 
   const { config, setTheme } = useConfig();
@@ -166,12 +169,36 @@ const Sidebar: React.FC = () => {
               key={chat.id}
               className={`${styles.chatItem} ${
                 activeChat === chat.id ? styles.active : ""
-              }`}
+              } ${chat.isStarred ? styles.starredChat : ""}`}
               onClick={() => selectChat(chat.id)}
             >
               <div className={styles.chatTitle}>{chat.title}</div>
               <div className={styles.chatSummary}>{chat.summary}</div>
               <div className={styles.chatDate}>{chat.date}</div>
+              <div className={styles.chatControls}>
+                <button
+                  className={styles.chatControl}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    chat.isStarred ? unstarChat(chat.id) : starChat(chat.id);
+                  }}
+                  title={chat.isStarred ? "Unstar" : "Star"}
+                >
+                  {chat.isStarred ? <span className={styles.starIcon}>★</span> : "☆"}
+                </button>
+                <button
+                  className={styles.chatControl}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm("Are you sure you want to delete this conversation?")) {
+                      deleteChat(chat.id);
+                    }
+                  }}
+                  title="Delete"
+                >
+                  🗑️
+                </button>
+              </div>
             </div>
           ))
         )}
