@@ -122,14 +122,20 @@ check: lint typecheck
 # Package for distribution
 .PHONY: package
 package: $(NODE_MODULES) build
-	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for $(PLATFORM)-$(ARCH)...$(COLOR_RESET)"
-	@NODE_ENV=production $(ELECTRON_BUILDER) --$(PLATFORM) --$(ARCH)
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for current platform...$(COLOR_RESET)"
+ifeq ($(PLATFORM),linux)
+	@NODE_ENV=production yarn run dist:linux
+else ifeq ($(PLATFORM),win)
+	@NODE_ENV=production yarn run dist:win-manual
+else ifeq ($(PLATFORM),mac)
+	@NODE_ENV=production yarn run dist:mac-manual
+endif
 
 # Package for Linux only
 .PHONY: package-linux
 package-linux: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for Linux...$(COLOR_RESET)"
-	@NODE_ENV=production $(ELECTRON_BUILDER) --linux
+	@NODE_ENV=production yarn run dist:linux
 
 # Package for specific Linux formats
 .PHONY: package-appimage
@@ -151,19 +157,21 @@ package-pacman: $(NODE_MODULES) build
 .PHONY: package-win
 package-win: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for Windows...$(COLOR_RESET)"
-	@NODE_ENV=production $(ELECTRON_BUILDER) --win
+	@NODE_ENV=production yarn run dist:win-manual
+
+# Package for Mac only
+.PHONY: package-mac
+package-mac: $(NODE_MODULES) build
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for macOS...$(COLOR_RESET)"
+	@NODE_ENV=production yarn run dist:mac-manual
 
 # Package for all platforms
 .PHONY: package-all
 package-all: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for all platforms...$(COLOR_RESET)"
-ifeq ($(PLATFORM),mac)
-	@NODE_ENV=production $(ELECTRON_BUILDER) --mac --win --linux
-else
-	@echo -e "$(COLOR_BOLD)$(COLOR_YELLOW)Note: macOS packaging requires being on a Mac system.$(COLOR_RESET)"
-	@echo -e "$(COLOR_BOLD)$(COLOR_YELLOW)Packaging only for Windows and Linux...$(COLOR_RESET)"
-	@NODE_ENV=production $(ELECTRON_BUILDER) --win --linux
-endif
+	@NODE_ENV=production yarn run dist:linux
+	@NODE_ENV=production yarn run dist:win-manual
+	@NODE_ENV=production yarn run dist:mac-manual
 
 # Create release
 .PHONY: release
