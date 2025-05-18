@@ -1,6 +1,11 @@
 import React from "react";
 import { ChatMessage as ChatMessageType } from "../../../shared/types/chat";
 import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import "katex/dist/katex.min.css";
 import styles from "./ChatMessage.module.css";
 
 interface ChatMessageProps {
@@ -14,6 +19,46 @@ interface ChatMessageProps {
 const formatTime = (timestamp: number): string => {
   const date = new Date(timestamp);
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+};
+
+// Preprocessor to ensure proper LaTeX rendering
+const processContent = (content: string): string => {
+  if (!content) return '';
+  
+  // Optimization: Only process content that potentially contains LaTeX
+  if (!content.includes('$')) return content;
+  
+  try {
+    // Process the content for LaTeX rendering, handling common LLM formatting issues
+    return content
+      // Handle inline math with no space after the opening $
+      .replace(/\$([^\s$\\])/g, '$ $1')
+      
+      // Ensure block math has proper spacing around it
+      .replace(/([^\n])\$\$/g, '$1\n$$')
+      .replace(/\$\$([^\n])/g, '$$\n$1')
+      
+      // Fix the common double backslash escaping in LaTeX from LLMs
+      .replace(/\$(.*?)\$/g, function(match) {
+        return match
+          // In math contexts, replace double backslashes with single backslashes
+          .replace(/\\{2,}([a-zA-Z]+)/g, '\\$1')
+          // Also fix commands with arguments that use curly braces
+          .replace(/\\{2,}\{/g, '\\{');
+      })
+      
+      // Special case for \\begin and \\end in block math
+      .replace(/\$\$([\s\S]*?)\$\$/g, function(match) {
+        return match
+          .replace(/\\{2,}begin/g, '\\begin')
+          .replace(/\\{2,}end/g, '\\end')
+          // Fix alignment environments which often have escaped backslashes
+          .replace(/\\{2,}(align|aligned|matrix|pmatrix|bmatrix|cases)/g, '\\$1');
+      });
+  } catch (e) {
+    console.error('Error processing LaTeX content:', e);
+    return content; // Return unprocessed content if there's an error
+  }
 };
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -62,7 +107,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             isStreaming ? styles.streaming : ""
           }`}
         >
-          <ReactMarkdown>{content}</ReactMarkdown>
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeRaw, [rehypeKatex, { throwOnError: false, strict: false }]]}
+          >
+            {processContent(content)}
+          </ReactMarkdown>
         </div>
       </div>
     </div>

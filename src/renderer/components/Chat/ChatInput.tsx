@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Model } from "../../../shared/types/model";
 import styles from "./ChatInput.module.css";
 import MDEditor from "@uiw/react-md-editor";
+import LaTeXHelper from "./LaTeXHelper";
 
 // Chat mode options - aligned with settings definitions
 export enum ChatMode {
@@ -134,7 +135,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
         </button>
       </div>
 
-      <div className={styles.helpText}>Press Ctrl+Enter to send</div>
+      <div className={styles.helpText}>
+        Press Ctrl+Enter to send
+        <div className={styles.latexHelperWrapper}>
+          <LaTeXHelper />
+        </div>
+      </div>
     </div>
   );
 };

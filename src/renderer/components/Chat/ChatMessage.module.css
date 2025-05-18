@@ -102,6 +102,53 @@
 .messageText :global(h5) { font-size: 1.05em; }
 .messageText :global(h6) { font-size: 1em; }
 
+/* KaTeX math styling */
+.messageText :global(.math-inline) {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 2px;
+  margin: 0 1px;
+}
+
+.messageText :global(.math-display) {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 12px 0;
+  margin: 12px 0;
+  text-align: center;
+  border-left: 3px solid rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Fix for dark theme */
+.user .messageText :global(.katex) {
+  color: white;
+}
+
+.user .messageText :global(.math-display) {
+  border-left: 3px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* KaTeX specific fixes */
+.messageText :global(.katex-display) {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+}
+
+.messageText :global(.katex) {
+  font-size: 1.1em;
+}
+
+.messageText :global(.katex-error) {
+  color: #f44336;
+  background-color: rgba(244, 67, 54, 0.1);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
 /* User message markdown (light on dark) */
 .user .messageText :global(pre) {
   background-color: rgba(0, 0, 0, 0.2);
@@ -177,5 +224,68 @@
   50% {
     opacity: 0;
   }
+}
+
+/* LaTeX Helper */
+.latexHelper {
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.latexHelperToggle {
+  background-color: var(--primary-color, #1a73e8);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.latexHelperToggle:hover {
+  background-color: var(--secondary-color, #0d47a1);
+}
+
+.latexHelperContent {
+  background-color: var(--hover-bg-color, #f5f5f5);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+  font-size: 0.9em;
+}
+
+.latexHelperContent h4 {
+  margin-top: 0;
+  color: var(--primary-color, #1a73e8);
+}
+
+.latexHelperContent h5 {
+  margin: 16px 0 8px;
+  color: var(--text-secondary, #5f6368);
+}
+
+.latexHelperContent pre {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.latexHelperContent ul {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.latexHelperContent a {
+  color: var(--primary-color, #1a73e8);
+  text-decoration: none;
+}
+
+.latexHelperContent a:hover {
+  text-decoration: underline;
 }
 
