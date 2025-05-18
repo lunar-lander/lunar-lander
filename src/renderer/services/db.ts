@@ -104,7 +104,7 @@ export class DbService {
       if (!messageExists) {
         console.error(`DB: Failed to save message ${message.id} to chat ${chatId}`);
       } else {
-        console.log(`DB: Successfully saved message ${message.id} to chat ${chatId}`);
+        // console.log(`DB: Successfully saved message ${message.id} to chat ${chatId}`);
       }
 
       return updatedChat;

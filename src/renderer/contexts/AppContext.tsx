@@ -125,6 +125,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.getItem("conversationMode") || ConversationModeType.ISOLATED;
     setConversationMode(savedConversationMode as ConversationModeType);
 
+    let effectiveMode = Object.values(ConversationModeType).includes(
+      savedConversationMode as ConversationModeType
+    )
+      ? (savedConversationMode as ConversationModeType)
+      : ConversationModeType.ISOLATED;
+
+    console.log(
+      `Setting conversation mode: ${effectiveMode} (was: ${
+        savedConversationMode || "not set"
+      })`
+    );
+
+    setConversationMode(effectiveMode);
+
     // Load custom configs
     const savedCustomConfigs = JSON.parse(
       localStorage.getItem("customConfigs") || "[]"

@@ -146,12 +146,12 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
 
               if (!messageExists) {
                 console.error(
-                  `Message ${assistantMessageId} was not properly added to chat ${chatId}`
+                  `Message ${assistantMessageId} was not added to chat ${chatId}`
                 );
               } else {
-                console.log(
-                  `Successfully added message ${assistantMessageId} to chat ${chatId}`
-                );
+                // console.log(
+                //   `Successfully added message ${assistantMessageId} to chat ${chatId}`
+                // );
               }
 
               // In Round Robin mode, only start the first model talking right away
@@ -267,9 +267,9 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
                   `Message ${assistantMessageId} was not properly added to chat ${chatId}`
                 );
               } else {
-                console.log(
-                  `Successfully added message ${assistantMessageId} to chat ${chatId}`
-                );
+                // console.log(
+                //   `Successfully added message ${assistantMessageId} to chat ${chatId}`
+                // );
               }
 
               // Mark message as streaming and make API call inside a try-catch
@@ -515,6 +515,19 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
         (msg) => msg.id !== messageId
       );
 
+      // Ensure the last user message is included by finding it
+      const lastUserMessage = [...currentChat.messages]
+        .reverse()
+        .find((msg) => msg.sender === "user");
+
+      if (!lastUserMessage) {
+        console.error(`No user message found in chat ${chatId}!`);
+      } else {
+        console.log(
+          `Last user message: "${lastUserMessage.content.substring(0, 30)}..."`
+        );
+      }
+
       // Filter messages based on conversation mode
       let filteredMessages: ChatMessageType[] = [];
 
@@ -526,20 +539,93 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       if (conversationMode === ConversationModeType.ISOLATED) {
         // In isolated mode, models only see user messages and their own previous responses
         // Each model has its own private conversation with the user
-        filteredMessages = sortedChatMessages.filter(
-          (msg) =>
-            msg.sender === "user" ||
-            (msg.sender === "assistant" && msg.modelId === modelId)
+
+        // Get the most recent user message (required for API calls)
+        const lastUserMessage = [...sortedChatMessages]
+          .reverse()
+          .find((msg) => msg.sender === "user");
+
+        // Make sure to include ALL user messages and only this model's responses
+        const userMessages = sortedChatMessages.filter(
+          (msg) => msg.sender === "user"
         );
+        const thisModelMessages = sortedChatMessages.filter(
+          (msg) => msg.sender === "assistant" && msg.modelId === modelId
+        );
+
+        // Log details of available messages
         console.log(
-          `ISOLATED mode: Model ${modelId} only sees user messages and its own responses`
+          `ISOLATED mode - Chat has ${sortedChatMessages.length} total messages:`
+        );
+        console.log(`- User messages: ${userMessages.length}`);
+        console.log(`- This model's messages: ${thisModelMessages.length}`);
+
+        // Debug: print user messages if available
+        if (userMessages.length > 0) {
+          console.log(
+            `First user message: "${userMessages[0].content.substring(
+              0,
+              30
+            )}..."`
+          );
+          if (lastUserMessage) {
+            console.log(
+              `Last user message: "${lastUserMessage.content.substring(
+                0,
+                30
+              )}..."`
+            );
+          }
+        } else {
+          console.error(
+            `ISOLATED mode: No user messages found for model ${modelId}`
+          );
+          // CRITICAL FIX: If we don't have user messages in the filtered set but have a lastUserMessage,
+          // make sure to include it so the API call doesn't fail
+          if (lastUserMessage) {
+            console.log(`RECOVERY: Adding last user message manually`);
+            userMessages.push(lastUserMessage);
+          }
+        }
+
+        // Combine and ensure proper ordering
+        filteredMessages = [...userMessages, ...thisModelMessages].sort(
+          (a, b) => a.timestamp - b.timestamp
+        );
+
+        console.log(
+          `ISOLATED mode: Model ${modelId} will see ${filteredMessages.length} messages total`
         );
       } else if (conversationMode === ConversationModeType.DISCUSS) {
         // In discuss mode, all models see all messages (from users and all other models) in parallel
         // This creates a collaborative environment where models can reference each other
         filteredMessages = sortedChatMessages;
+
+        // Log details of available messages
+        const userMessages = sortedChatMessages.filter(
+          (msg) => msg.sender === "user"
+        );
+        const allModelMessages = sortedChatMessages.filter(
+          (msg) => msg.sender === "assistant"
+        );
+
         console.log(
-          `DISCUSS mode: Model ${modelId} sees all messages from all participants`
+          `DISCUSS mode - Chat has ${sortedChatMessages.length} total messages:`
+        );
+        console.log(`- User messages: ${userMessages.length}`);
+        console.log(`- All model messages: ${allModelMessages.length}`);
+
+        // Debug: print user messages if available
+        if (userMessages.length > 0) {
+          console.log(
+            `Last user message: "${userMessages[
+              userMessages.length - 1
+            ].content.substring(0, 30)}..."`
+          );
+        }
+
+        console.log(
+          `DISCUSS mode: Model ${modelId} will see all ${filteredMessages.length} messages`
         );
       } else if (conversationMode === ConversationModeType.ROUND_ROBIN) {
         // In round-robin mode, we need to determine if it's this model's turn to respond
@@ -564,6 +650,20 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
             assistantResponses.map((msg) => msg.modelId)
           );
           const isThisModelsTurn = !respondedModels.has(modelId);
+
+          // Log detailed information about Round Robin state
+          console.log(`ROUND_ROBIN mode - Analysis for model ${modelId}:`);
+          console.log(`- Last user message index: ${lastUserMessageIndex}`);
+          console.log(
+            `- Already responded models: ${
+              Array.from(respondedModels).join(", ") || "none"
+            }`
+          );
+          console.log(
+            `- Message stream for this model: ${
+              isThisModelsTurn ? "ACTIVE" : "ON HOLD"
+            }`
+          );
 
           console.log(
             `ROUND_ROBIN mode: It ${
@@ -600,19 +700,50 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       );
 
       // Convert filtered messages to API format
+      let userMessagesAdded = 0;
+      let assistantMessagesAdded = 0;
+
       filteredMessages.forEach((msg) => {
         if (msg.sender === "user") {
           apiMessages.push({
             role: "user",
             content: msg.content,
           });
+          userMessagesAdded++;
         } else if (msg.sender === "assistant" && msg.modelId) {
           apiMessages.push({
             role: "assistant",
             content: msg.content,
           });
+          assistantMessagesAdded++;
         }
       });
+
+      // CRITICAL SAFEGUARD: If no user messages were added, add the request content
+      // as a user message to ensure the API call doesn't fail
+      if (userMessagesAdded === 0) {
+        console.warn(
+          `CRITICAL: No user messages in API call. Adding current message as fallback.`
+        );
+        apiMessages.push({
+          role: "user",
+          content: request.content,
+        });
+        userMessagesAdded++;
+      }
+
+      // Log the number of messages added to the API by role
+      console.log(`API message construction for ${model.name}:`);
+      console.log(`- System messages: ${request.systemPrompt ? 1 : 0}`);
+      console.log(`- User messages: ${userMessagesAdded}`);
+      console.log(`- Assistant messages: ${assistantMessagesAdded}`);
+
+      // Still warn if we had to use the fallback mechanism
+      if (userMessagesAdded === 1 && filteredMessages.length === 0) {
+        console.warn(
+          `WARNING: Using fallback user message for API call to ${model.name}`
+        );
+      }
 
       console.log(
         `Making API call to ${model.baseUrl} for model ${model.modelName}`
@@ -726,9 +857,9 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
 
                     // Update message content in the chat
                     try {
-                      console.log(
-                        `Processing stream chunk for message ${messageId}, content length: ${content.length}`
-                      );
+                      // console.log(
+                      //   `Processing stream chunk for message ${messageId}, content length: ${content.length}`
+                      // );
                       const chatData = getChat(chatId);
                       if (!chatData) {
                         console.error(`Chat data not found for ID: ${chatId}`);
