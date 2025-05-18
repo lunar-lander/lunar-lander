@@ -9,7 +9,7 @@
 
 </div>
 
-![Lunar Lander Screenshot](assets/screenshot.png)
+![Lunar Lander Screenshot](assets/ll-intro.gif)
 
 ## 🔍 Overview
 
