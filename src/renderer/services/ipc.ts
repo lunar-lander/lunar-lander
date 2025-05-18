@@ -20,6 +20,8 @@ export const electron = {
       'config:toggle-system-theme',
       'config:set-summary-model',
       'config:get-summary-model',
+      'config:set-zoom-level',
+      'config:get-zoom-level',
       'models:get-all',
       'models:get-active',
       'models:add',

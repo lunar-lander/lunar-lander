@@ -138,6 +138,20 @@
   color: #9aa0a6;
 }
 
+:global(.dark-theme) .searchInput {
+  background-color: #303134;
+  border-color: #5f6368;
+}
+
+:global(.dark-theme) .searchInput:focus {
+  border-color: #8ab4f8;
+}
+
+:global(.dark-theme) .editTitleInput {
+  background-color: #303134;
+  border-color: #8ab4f8;
+}
+
 .chatList {
   flex: 1;
   overflow-y: auto;
@@ -167,7 +181,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: none;
+  cursor: text;
 }
 
 .chatSummary {
@@ -220,6 +234,68 @@
 
 .starredChat {
   border-left: 3px solid #f8c33c;
+}
+
+.chatListHeader {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.searchContainer {
+  position: relative;
+  margin: 8px 0;
+  padding: 0 4px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 28px 8px 8px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  border-color: var(--primary);
+}
+
+.clearSearch {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.editTitleForm {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.editTitleInput {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--primary);
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  font-size: 14px;
+  outline: none;
 }
 
 .noChats {

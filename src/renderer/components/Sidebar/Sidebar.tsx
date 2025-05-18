@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./Sidebar.module.css";
 import { useAppContext } from "../../contexts/AppContext";
 import { useConfig } from "../../hooks/useConfig";
+import { Chat } from "../../../shared/types/chat";
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  collapsed?: boolean;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const {
     chats,
     activeChat,
@@ -17,11 +22,25 @@ const Sidebar: React.FC = () => {
     starChat,
     unstarChat,
     deleteChat,
+    updateChatTitle,
   } = useAppContext();
 
   const { config, setTheme, zoomLevel, setZoom } = useConfig();
   const [themeIndex, setThemeIndex] = useState(0);
   const [availableThemes, setAvailableThemes] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingChatId, setEditingChatId] = useState<string | null>(null);
+  const [editedTitle, setEditedTitle] = useState("");
+  const editInputRef = useRef<HTMLInputElement>(null);
+  
+  // Filter chats based on search term
+  const filteredChats = chats.filter(chat => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      chat.title.toLowerCase().includes(searchLower) || 
+      chat.summary.toLowerCase().includes(searchLower)
+    );
+  });
 
   // Load available themes
   useEffect(() => {
@@ -107,6 +126,34 @@ const Sidebar: React.FC = () => {
         return "🎨";
     }
   };
+  
+  // Focus on edit input when editing a chat title
+  useEffect(() => {
+    if (editingChatId && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [editingChatId]);
+  
+  // Handle starting to edit a chat title
+  const startEditingChat = (chat: Chat, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingChatId(chat.id);
+    setEditedTitle(chat.title);
+  };
+  
+  // Handle saving an edited chat title
+  const saveEditedTitle = (chatId: string, e: React.FormEvent) => {
+    e.preventDefault();
+    if (editedTitle.trim()) {
+      updateChatTitle(chatId, editedTitle.trim());
+    }
+    setEditingChatId(null);
+  };
+  
+  // Handle cancel editing
+  const cancelEditing = () => {
+    setEditingChatId(null);
+  };
 
   return (
     <div className={styles.sidebar}>
@@ -167,11 +214,34 @@ const Sidebar: React.FC = () => {
       </div>
 
       <div className={styles.chatList}>
-        <h3 className={styles.sectionTitle}>Conversations</h3>
-        {chats.length === 0 ? (
-          <div className={styles.noChats}>No chat history yet</div>
+        <div className={styles.chatListHeader}>
+          <h3 className={styles.sectionTitle}>Conversations</h3>
+          <div className={styles.searchContainer}>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+            {searchTerm && (
+              <button 
+                className={styles.clearSearch}
+                onClick={() => setSearchTerm("")}
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {filteredChats.length === 0 ? (
+          <div className={styles.noChats}>
+            {chats.length === 0 ? "No chat history yet" : "No matches found"}
+          </div>
         ) : (
-          chats.map((chat) => (
+          filteredChats.map((chat) => (
             <div
               key={chat.id}
               className={`${styles.chatItem} ${
@@ -179,33 +249,65 @@ const Sidebar: React.FC = () => {
               } ${chat.isStarred ? styles.starredChat : ""}`}
               onClick={() => selectChat(chat.id)}
             >
-              <div className={styles.chatTitle}>{chat.title}</div>
-              <div className={styles.chatSummary}>{chat.summary}</div>
-              <div className={styles.chatDate}>{chat.date}</div>
-              <div className={styles.chatControls}>
-                <button
-                  className={styles.chatControl}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    chat.isStarred ? unstarChat(chat.id) : starChat(chat.id);
-                  }}
-                  title={chat.isStarred ? "Unstar" : "Star"}
-                >
-                  {chat.isStarred ? <span className={styles.starIcon}>★</span> : "☆"}
-                </button>
-                <button
-                  className={styles.chatControl}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (window.confirm("Are you sure you want to delete this conversation?")) {
-                      deleteChat(chat.id);
-                    }
-                  }}
-                  title="Delete"
-                >
-                  🗑️
-                </button>
-              </div>
+              {editingChatId === chat.id ? (
+                <form onSubmit={(e) => saveEditedTitle(chat.id, e)} className={styles.editTitleForm}>
+                  <input
+                    ref={editInputRef}
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className={styles.editTitleInput}
+                    onBlur={() => cancelEditing()}
+                    onKeyDown={(e) => e.key === 'Escape' && cancelEditing()}
+                  />
+                </form>
+              ) : (
+                <>
+                  <div 
+                    className={styles.chatTitle}
+                    onClick={(e) => startEditingChat(chat, e)}
+                    title="Double-click to edit title"
+                  >
+                    {chat.title}
+                  </div>
+                  <div className={styles.chatSummary}>{chat.summary}</div>
+                  <div className={styles.chatDate}>{chat.date}</div>
+                  <div className={styles.chatControls}>
+                    <button
+                      className={styles.chatControl}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startEditingChat(chat, e);
+                      }}
+                      title="Edit title"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className={styles.chatControl}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        chat.isStarred ? unstarChat(chat.id) : starChat(chat.id);
+                      }}
+                      title={chat.isStarred ? "Unstar" : "Star"}
+                    >
+                      {chat.isStarred ? <span className={styles.starIcon}>★</span> : "☆"}
+                    </button>
+                    <button
+                      className={styles.chatControl}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm("Are you sure you want to delete this conversation?")) {
+                          deleteChat(chat.id);
+                        }
+                      }}
+                      title="Delete"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))
         )}

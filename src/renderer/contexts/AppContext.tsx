@@ -34,6 +34,7 @@ interface AppContextType {
   addMessageToChat: (chatId: string, message: ChatMessage) => void;
   getChat: (chatId: string) => Chat | null;
   updateChat: (chat: Chat) => void;
+  updateChatTitle: (chatId: string, title: string) => boolean;
   starChat: (chatId: string) => void;
   unstarChat: (chatId: string) => void;
   deleteChat: (chatId: string) => void;
@@ -351,6 +352,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       return false;
     }
   };
+  
+  // Update chat title
+  const updateChatTitle = (chatId: string, title: string): boolean => {
+    try {
+      // Get the chat from database
+      const chat = DbService.getChat(chatId);
+      if (!chat) {
+        console.error(`Chat ${chatId} not found when updating title`);
+        return false;
+      }
+      
+      // Update the title
+      const updatedChat = { ...chat, title };
+      
+      // Save to database and update state
+      return updateChat(updatedChat);
+    } catch (error) {
+      console.error(`Error updating chat title:`, error);
+      return false;
+    }
+  };
 
   // Get a specific model
   const getModel = (modelId: string): Model | null => {
@@ -549,6 +571,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     addMessageToChat,
     getChat,
     updateChat,
+    updateChatTitle,
     starChat,
     unstarChat,
     deleteChat,

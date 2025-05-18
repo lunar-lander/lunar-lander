@@ -26,10 +26,36 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
   } = useChat(chatId);
 
   // Get models and conversation mode from context
-  const { models, conversationMode, summaryModelId } = useAppContext();
+  const { models, conversationMode, summaryModelId, updateConversationMode } = useAppContext();
 
   // Convert from settings conversation mode to chat mode
   const chatMode = getModeFromConversationMode(conversationMode);
+  
+  // Handle mode change
+  const handleModeChange = (newMode: string) => {
+    // Map from ChatMode to ConversationModeType
+    let newConversationMode: ConversationModeType;
+    
+    switch (newMode) {
+      case 'isolated':
+        newConversationMode = ConversationModeType.ISOLATED;
+        break;
+      case 'discuss':
+        newConversationMode = ConversationModeType.DISCUSS;
+        break;
+      case 'round-robin':
+        newConversationMode = ConversationModeType.ROUND_ROBIN;
+        break;
+      case 'custom':
+        newConversationMode = ConversationModeType.CUSTOM;
+        break;
+      default:
+        newConversationMode = ConversationModeType.ISOLATED;
+    }
+    
+    // Update conversation mode in context
+    updateConversationMode(newConversationMode);
+  };
 
   return (
     <div className={styles.container}>
@@ -80,7 +106,7 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
             activeModelIds={activeModelIds}
             onSendMessage={handleSendMessage}
             onToggleModel={handleToggleModel}
-            onModeChange={() => {}} // Mode change is now handled in settings
+            onModeChange={handleModeChange}
             disabled={isLoading || streamingMessageIds.length > 0}
             currentMode={chatMode}
           />
