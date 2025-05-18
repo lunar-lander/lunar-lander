@@ -121,15 +121,49 @@ check: lint typecheck
 
 # Package for distribution
 .PHONY: package
-package: $(NODE_MODULES)
+package: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for $(PLATFORM)-$(ARCH)...$(COLOR_RESET)"
 	@NODE_ENV=production $(ELECTRON_BUILDER) --$(PLATFORM) --$(ARCH)
 
+# Package for Linux only
+.PHONY: package-linux
+package-linux: $(NODE_MODULES) build
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for Linux...$(COLOR_RESET)"
+	@NODE_ENV=production $(ELECTRON_BUILDER) --linux
+
+# Package for specific Linux formats
+.PHONY: package-appimage
+package-appimage: $(NODE_MODULES) build
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application as AppImage...$(COLOR_RESET)"
+	@NODE_ENV=production $(ELECTRON_BUILDER) --linux AppImage
+
+.PHONY: package-deb
+package-deb: $(NODE_MODULES) build
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application as .deb...$(COLOR_RESET)"
+	@NODE_ENV=production $(ELECTRON_BUILDER) --linux deb
+
+.PHONY: package-pacman
+package-pacman: $(NODE_MODULES) build
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application as Arch package...$(COLOR_RESET)"
+	@NODE_ENV=production $(ELECTRON_BUILDER) --linux pacman
+
+# Package for Windows only
+.PHONY: package-win
+package-win: $(NODE_MODULES) build
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for Windows...$(COLOR_RESET)"
+	@NODE_ENV=production $(ELECTRON_BUILDER) --win
+
 # Package for all platforms
 .PHONY: package-all
-package-all: $(NODE_MODULES)
+package-all: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for all platforms...$(COLOR_RESET)"
+ifeq ($(PLATFORM),mac)
 	@NODE_ENV=production $(ELECTRON_BUILDER) --mac --win --linux
+else
+	@echo -e "$(COLOR_BOLD)$(COLOR_YELLOW)Note: macOS packaging requires being on a Mac system.$(COLOR_RESET)"
+	@echo -e "$(COLOR_BOLD)$(COLOR_YELLOW)Packaging only for Windows and Linux...$(COLOR_RESET)"
+	@NODE_ENV=production $(ELECTRON_BUILDER) --win --linux
+endif
 
 # Create release
 .PHONY: release
@@ -157,6 +191,11 @@ help:
 	@echo -e "  $(COLOR_GREEN)typecheck$(COLOR_RESET)   Typecheck TypeScript code"
 	@echo -e "  $(COLOR_GREEN)check$(COLOR_RESET)       Run all code quality checks"
 	@echo -e "  $(COLOR_GREEN)package$(COLOR_RESET)     Package application for current platform"
+	@echo -e "  $(COLOR_GREEN)package-linux$(COLOR_RESET) Package application for Linux only"
+	@echo -e "  $(COLOR_GREEN)package-appimage$(COLOR_RESET) Package application as AppImage"
+	@echo -e "  $(COLOR_GREEN)package-deb$(COLOR_RESET) Package application as Debian/Ubuntu package"
+	@echo -e "  $(COLOR_GREEN)package-pacman$(COLOR_RESET) Package application as Arch Linux package"
+	@echo -e "  $(COLOR_GREEN)package-win$(COLOR_RESET) Package application for Windows"
 	@echo -e "  $(COLOR_GREEN)package-all$(COLOR_RESET) Package application for all platforms"
 	@echo -e "  $(COLOR_GREEN)release$(COLOR_RESET)     Create a release"
 	@echo -e "  $(COLOR_GREEN)clean$(COLOR_RESET)       Clean build files"
