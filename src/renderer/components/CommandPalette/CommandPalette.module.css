@@ -4,8 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(4px);
+  background-color: #000000;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -110,12 +109,10 @@
 .itemDescription {
   font-size: 12px;
   color: var(--text-secondary);
-  opacity: 0.8;
 }
 
 .selected .itemDescription {
   font-weight: 600;
-  opacity: 1;
 }
 
 .shortcutKeys {
