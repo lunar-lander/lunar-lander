@@ -13,6 +13,14 @@ export function getModeFromConversationMode(conversationMode: ConversationModeTy
       return ChatMode.DISCUSS;
     case ConversationModeType.ROUND_ROBIN:
       return ChatMode.ROUND_ROBIN;
+    case ConversationModeType.COLLABORATIVE_REFINEMENT:
+      return ChatMode.COLLABORATIVE_REFINEMENT;
+    case ConversationModeType.EXPERT_PANEL:
+      return ChatMode.EXPERT_PANEL;
+    case ConversationModeType.DEBATE:
+      return ChatMode.DEBATE;
+    case ConversationModeType.CONSENSUS_BUILDING:
+      return ChatMode.CONSENSUS_BUILDING;
     case ConversationModeType.CUSTOM:
       return ChatMode.CUSTOM;
     default:

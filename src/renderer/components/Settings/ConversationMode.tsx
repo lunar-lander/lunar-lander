@@ -7,6 +7,10 @@ export enum ConversationModeType {
   ISOLATED = "isolated",
   DISCUSS = "discuss",
   ROUND_ROBIN = "round-robin",
+  COLLABORATIVE_REFINEMENT = "collaborative-refinement",
+  EXPERT_PANEL = "expert-panel",
+  DEBATE = "debate",
+  CONSENSUS_BUILDING = "consensus-building",
   CUSTOM = "custom",
 }
 
@@ -40,6 +44,30 @@ const CONVERSATION_MODES: ConversationModeOption[] = [
     name: "Round Robin",
     description:
       "LLMs respond in sequence, one after another. Each model can see all previous responses from all models. This creates a structured conversation flow where each model can build on what came before it.",
+  },
+  {
+    id: ConversationModeType.COLLABORATIVE_REFINEMENT,
+    name: "Collaborative Refinement",
+    description:
+      "**Multi-stage collaboration**: User asks → All LLMs answer → All LLMs see each other's responses and refine their answers → One selected LLM summarizes all responses into a final comprehensive answer. Perfect for complex problems requiring multiple perspectives and iterative improvement.",
+  },
+  {
+    id: ConversationModeType.EXPERT_PANEL,
+    name: "Expert Panel",
+    description:
+      "Each LLM assumes a different expert role (e.g., scientist, engineer, philosopher) and responds from that specialized perspective. Creates diverse viewpoints and comprehensive analysis by having models approach problems from different professional angles.",
+  },
+  {
+    id: ConversationModeType.DEBATE,
+    name: "Debate Mode",
+    description:
+      "LLMs are assigned opposing positions and engage in structured debate. They present arguments, counter-arguments, and rebuttals. Excellent for exploring controversial topics, examining pros and cons, and understanding multiple sides of complex issues.",
+  },
+  {
+    id: ConversationModeType.CONSENSUS_BUILDING,
+    name: "Consensus Building",
+    description:
+      "LLMs work through multiple rounds of discussion to reach agreement. They start with different perspectives, identify areas of disagreement, and gradually work toward a shared understanding or compromise solution.",
   },
   {
     id: ConversationModeType.CUSTOM,

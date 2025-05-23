@@ -2,12 +2,20 @@ export * from './baseHandler';
 export * from './isolatedHandler';
 export * from './discussHandler';
 export * from './roundRobinHandler';
+export * from './collaborativeRefinementHandler';
+export * from './expertPanelHandler';
+export * from './debateHandler';
+export * from './consensusBuildingHandler';
 export * from './customHandler';
 
 import { BaseChatHandler } from './baseHandler';
 import { IsolatedChatHandler } from './isolatedHandler';
 import { DiscussChatHandler } from './discussHandler';
 import { RoundRobinChatHandler } from './roundRobinHandler';
+import { CollaborativeRefinementHandler } from './collaborativeRefinementHandler';
+import { ExpertPanelHandler } from './expertPanelHandler';
+import { DebateHandler } from './debateHandler';
+import { ConsensusBuildingHandler } from './consensusBuildingHandler';
 import { CustomChatHandler } from './customHandler';
 
 import { ConversationModeType } from '../../../components/Settings/ConversationMode';
@@ -29,6 +37,14 @@ export function createChatHandler(
       return new DiscussChatHandler(deps, streamHandlers, systemPrompt);
     case ConversationModeType.ROUND_ROBIN:
       return new RoundRobinChatHandler(deps, streamHandlers, systemPrompt);
+    case ConversationModeType.COLLABORATIVE_REFINEMENT:
+      return new CollaborativeRefinementHandler(deps, streamHandlers, systemPrompt);
+    case ConversationModeType.EXPERT_PANEL:
+      return new ExpertPanelHandler(deps, streamHandlers, systemPrompt);
+    case ConversationModeType.DEBATE:
+      return new DebateHandler(deps, streamHandlers, systemPrompt);
+    case ConversationModeType.CONSENSUS_BUILDING:
+      return new ConsensusBuildingHandler(deps, streamHandlers, systemPrompt);
     case ConversationModeType.CUSTOM:
       return new CustomChatHandler(deps, streamHandlers, systemPrompt, customConfig);
     default:

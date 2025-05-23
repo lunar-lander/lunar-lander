@@ -47,6 +47,18 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
       case 'round-robin':
         newConversationMode = ConversationModeType.ROUND_ROBIN;
         break;
+      case 'collaborative-refinement':
+        newConversationMode = ConversationModeType.COLLABORATIVE_REFINEMENT;
+        break;
+      case 'expert-panel':
+        newConversationMode = ConversationModeType.EXPERT_PANEL;
+        break;
+      case 'debate':
+        newConversationMode = ConversationModeType.DEBATE;
+        break;
+      case 'consensus-building':
+        newConversationMode = ConversationModeType.CONSENSUS_BUILDING;
+        break;
       case 'custom':
         newConversationMode = ConversationModeType.CUSTOM;
         break;
