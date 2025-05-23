@@ -303,6 +303,23 @@
   opacity: 1;
 }
 
+.copyButton {
+  position: absolute;
+  left: -10px;
+  top: 36px;
+  border: none;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  z-index: 10; /* Ensure button is clickable */
+}
+
+.copyButton:hover {
+  opacity: 1;
+}
+
 .hidden .messageContent {
   opacity: 0.4;
 }

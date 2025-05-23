@@ -84,6 +84,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     }
   };
 
+  const handleCopyMessage = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
   return (
     <div
       className={`${styles.messageContainer} ${styles[sender]} ${
@@ -91,14 +99,24 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       }`}
     >
       {!isUser && (
-        <button
-          className={styles.toggleVisibility}
-          onClick={handleToggleVisibility}
-          aria-label={isVisible ? "Hide message" : "Show message"}
-          title={isVisible ? "Hide message" : "Show message"}
-        >
-          {isVisible ? "👁️" : "👁️‍🗨️"}
-        </button>
+        <>
+          <button
+            className={styles.toggleVisibility}
+            onClick={handleToggleVisibility}
+            aria-label={isVisible ? "Hide message" : "Show message"}
+            title={isVisible ? "Hide message" : "Show message"}
+          >
+            {isVisible ? "👁️" : "👁️‍🗨️"}
+          </button>
+          <button
+            className={styles.copyButton}
+            onClick={handleCopyMessage}
+            aria-label="Copy message"
+            title="Copy message"
+          >
+            📋
+          </button>
+        </>
       )}
 
       <div className={styles.messageContent}>
