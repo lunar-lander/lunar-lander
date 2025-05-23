@@ -7,15 +7,15 @@
 html {
   height: 100%;
   width: 100%;
-  /* Apply zoom level to all elements through scale transform */
-  font-size: calc(100% * var(--zoom-level, 1.0));
 }
 
 body {
   transform-origin: top left;
   transform: scale(var(--zoom-level, 1.0));
-  width: calc(100% / var(--zoom-level, 1.0));
-  height: calc(100% / var(--zoom-level, 1.0));
+  width: calc(100vw / var(--zoom-level, 1.0));
+  height: calc(100vh / var(--zoom-level, 1.0));
+  min-width: calc(100vw / var(--zoom-level, 1.0));
+  min-height: calc(100vh / var(--zoom-level, 1.0));
 }
 
 body, #root {
