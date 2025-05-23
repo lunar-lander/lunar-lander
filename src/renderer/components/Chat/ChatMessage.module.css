@@ -311,19 +311,31 @@
 
 .copyButton {
   position: absolute;
-  left: -10px;
-  top: 36px;
+  right: 8px;
+  top: 8px;
   border: none;
   background: none;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0.4;
   transition: opacity 0.2s;
   z-index: 10; /* Ensure button is clickable */
+  border-radius: 4px;
+  padding: 4px;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .copyButton:hover {
   opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+:global(.dark-theme) .copyButton {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+:global(.dark-theme) .copyButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .hidden .messageContent {

@@ -99,15 +99,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       }`}
     >
       {!isUser && (
-        <>
-          <button
-            className={styles.toggleVisibility}
-            onClick={handleToggleVisibility}
-            aria-label={isVisible ? "Hide message" : "Show message"}
-            title={isVisible ? "Hide message" : "Show message"}
-          >
-            {isVisible ? "👁️" : "👁️‍🗨️"}
-          </button>
+        <button
+          className={styles.toggleVisibility}
+          onClick={handleToggleVisibility}
+          aria-label={isVisible ? "Hide message" : "Show message"}
+          title={isVisible ? "Hide message" : "Show message"}
+        >
+          {isVisible ? "👁️" : "👁️‍🗨️"}
+        </button>
+      )}
+
+      <div className={styles.messageContent}>
+        {!isUser && (
           <button
             className={styles.copyButton}
             onClick={handleCopyMessage}
@@ -116,10 +119,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           >
             📋
           </button>
-        </>
-      )}
-
-      <div className={styles.messageContent}>
+        )}
         {!isUser && message.modelId && (
           <span className={styles.modelTag}>
             {modelName || `Model ID: ${message.modelId}`}
