@@ -18,15 +18,35 @@ export class SummaryGenerator {
       return 'New conversation';
     }
 
-    // Truncate and return as summary
-    const maxLength = 60;
     let summary = firstUserMessage.content;
-
+    
+    // Clean up the message content
+    summary = summary
+      .replace(/\n+/g, ' ')  // Replace newlines with spaces
+      .replace(/\s+/g, ' ')  // Collapse multiple spaces
+      .trim();
+    
+    // Try to extract the main topic from the first sentence
+    const sentences = summary.split(/[.!?]+/);
+    if (sentences.length > 0 && sentences[0].trim()) {
+      summary = sentences[0].trim();
+    }
+    
+    // Truncate intelligently - prefer to break at word boundaries
+    const maxLength = 50;
     if (summary.length > maxLength) {
-      summary = summary.substring(0, maxLength) + '...';
+      const words = summary.split(' ');
+      let truncated = '';
+      for (const word of words) {
+        if ((truncated + ' ' + word).length > maxLength) {
+          break;
+        }
+        truncated = truncated ? truncated + ' ' + word : word;
+      }
+      summary = truncated + (truncated !== summary ? '...' : '');
     }
 
-    return summary;
+    return summary || 'New conversation';
   }
 
   /**
@@ -64,7 +84,7 @@ export class SummaryGenerator {
     const apiMessages = [
       {
         role: 'system',
-        content: 'You are a helpful assistant. Your task is to create a short, concise title for this conversation. The title should be 5-8 words maximum and capture the main topic being discussed. Return ONLY the title with no quotes, explanations, or additional text.'
+        content: 'Create a concise, descriptive title for this conversation. Requirements:\n- Maximum 6 words\n- Focus on the main topic or question\n- Use present tense when possible\n- Avoid generic words like "help", "question", "discussion"\n- Return ONLY the title with no quotes, punctuation, or extra text\n\nExamples:\n"Fix React component bug" → "React Component Rendering Issue"\n"How to learn Python" → "Python Learning Resources"\n"Database design advice" → "Database Schema Design"'
       }
     ];
 
@@ -100,8 +120,8 @@ export class SummaryGenerator {
         body: JSON.stringify({
           model: model.modelName,
           messages: apiMessages,
-          max_tokens: 60,
-          temperature: 0.7
+          max_tokens: 30,
+          temperature: 0.3
         }),
         signal: controller.signal
       });

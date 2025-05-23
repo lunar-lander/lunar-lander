@@ -177,11 +177,18 @@ export class ChatHandler {
   public async generateChatSummary(chatId: string, setSummarizing: (value: boolean) => void) {
     console.log(`Attempting to generate summary for chat ${chatId}`);
     // Use config summary model ID if available, otherwise use the one from context
-    const effectiveSummaryModelId = this.configSummaryModelId || this.summaryModelId;
+    let effectiveSummaryModelId = this.configSummaryModelId || this.summaryModelId;
 
+    // If no summary model is configured, try to use the first active model
     if (!effectiveSummaryModelId) {
-      console.log(`No summary model ID available, skipping summary generation`);
-      return;
+      const activeModels = this.deps.models.filter(m => m.isActive);
+      if (activeModels.length > 0) {
+        effectiveSummaryModelId = activeModels[0].id;
+        console.log(`No summary model configured, using first active model: ${effectiveSummaryModelId}`);
+      } else {
+        console.log(`No summary model ID available and no active models, skipping summary generation`);
+        return;
+      }
     }
 
     const currentChat = this.deps.getChat(chatId);
