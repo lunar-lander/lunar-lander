@@ -2,9 +2,12 @@ import { ChatMessage } from "../../../../shared/types/chat";
 import { BaseChatHandler } from "./baseHandler";
 import { ChatHandlerDeps, StreamingStateHandlers } from "../chatHandler";
 import { CustomConfig } from "../../../contexts/AppContext";
+import { DSLExecutor } from "../../dsl/dslExecutor";
+import { DSLParser } from "../../dsl/dslParser";
 
 export class CustomChatHandler extends BaseChatHandler {
   private customConfig: CustomConfig | null;
+  private dslExecutor: DSLExecutor | null = null;
   
   constructor(
     deps: ChatHandlerDeps,
@@ -14,56 +17,66 @@ export class CustomChatHandler extends BaseChatHandler {
   ) {
     super(deps, streamHandlers, systemPrompt);
     this.customConfig = customConfig;
+    
+    // Try to parse custom config as DSL
+    if (customConfig?.rules) {
+      try {
+        const dsl = DSLParser.parse(customConfig.rules);
+        this.dslExecutor = new DSLExecutor(deps, streamHandlers, systemPrompt, dsl);
+        console.log(`DSL parsed successfully for custom config: ${customConfig.name}`);
+      } catch (error) {
+        console.warn(`Failed to parse custom config as DSL: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.warn('Falling back to basic custom mode behavior');
+      }
+    }
   }
   
-  // Filter messages based on custom rules
-  // For now, we'll use the same approach as discuss mode
-  // In the future, this could be more sophisticated based on custom rules
-  public filterMessages(chatId: string, messageId: string, _modelId: string): ChatMessage[] {
-    // Get the current chat
+  public filterMessages(chatId: string, messageId: string, modelId: string): ChatMessage[] {
+    // If we have a DSL executor, use it
+    if (this.dslExecutor) {
+      return this.dslExecutor.filterMessages(chatId, messageId, modelId);
+    }
+    
+    // Fallback to basic behavior
     const currentChat = this.deps.getChat(chatId);
     if (!currentChat) return [];
     
-    // Filter out the message being processed
     const chatMessages = currentChat.messages.filter(
       (msg) => msg.id !== messageId
     );
     
-    // Sort messages by timestamp to maintain correct ordering
     const sortedChatMessages = [...chatMessages].sort(
       (a, b) => a.timestamp - b.timestamp
     );
     
-    // If we have custom rules, log that they will be applied in the future
     if (this.customConfig) {
       console.log(
-        `CUSTOM mode with config "${this.customConfig.name}": Using default behavior for now`
+        `CUSTOM mode with config "${this.customConfig.name}": Using basic behavior (custom rules not DSL-compatible)`
       );
-      console.log(`Custom rules: ${this.customConfig.rules}`);
     } else {
-      console.log(`CUSTOM mode: Using default behavior (all messages visible)`);
+      console.log(`CUSTOM mode: Using basic behavior (no config provided)`);
     }
     
-    // For now, custom mode behaves like discuss mode
     return sortedChatMessages;
   }
   
-  // Handle sending a message with custom rules
-  // For now, we'll use the same approach as discuss mode
   public async handleSendMessage(
     chatId: string,
     content: string,
-    modelIds: string[],
-    temperature: number
+    temperature: number,
+    modelIds: string[]
   ): Promise<string[]> {
-    // Create a model message for each model and start API calls in parallel
+    // If we have a DSL executor, use it
+    if (this.dslExecutor) {
+      return this.dslExecutor.handleSendMessage(chatId, content, temperature, modelIds);
+    }
+    
+    // Fallback to basic behavior (like discuss mode)
     const messagePromises = modelIds.map((modelId, index) => {
       return this.createModelMessage(chatId, modelId, index)
         .then(assistantMessageId => {
-          // Mark message as streaming
           this.streamHandlers.setStreamingMessageIds((prev) => [...prev, assistantMessageId]);
           
-          // Start API call with a slight delay to ensure state is updated
           setTimeout(() => {
             this.callLLMApi(chatId, assistantMessageId, modelId, {
               content,
@@ -71,13 +84,11 @@ export class CustomChatHandler extends BaseChatHandler {
               systemPrompt: this.systemPrompt,
             }).catch((error) => {
               console.error(`Error in API call for ${modelId}:`, error);
-              
-              // Cleanup streaming state on error
               this.streamHandlers.setStreamingMessageIds((prev) =>
                 prev.filter((id) => id !== assistantMessageId)
               );
             });
-          }, 100); // Short delay
+          }, 100);
           
           return assistantMessageId;
         });

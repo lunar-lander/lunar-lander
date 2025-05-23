@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { useAppContext } from "../../contexts/AppContext";
+import DSLReference from "./DSLReference";
+import { DSLParser } from "../../services/dsl/dslParser";
+import { DSLFileManager } from "../../services/dsl/dslFileManager";
+import { DSLConversation } from "../../../shared/types/dsl";
 import styles from "./ConversationMode.module.css";
 
 export enum ConversationModeType {
@@ -59,11 +63,15 @@ const ConversationMode: React.FC = () => {
     deleteCustomConfig,
   } = useAppContext();
 
-  const [selectedMode, setSelectedMode] =
-    useState<ConversationModeType>(conversationMode);
+  const [selectedMode, setSelectedMode] = useState<ConversationModeType>(conversationMode);
   const [hasChanges, setHasChanges] = useState(false);
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [showReference, setShowReference] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const [dslFiles, setDslFiles] = useState<string[]>([]);
+  const [selectedDslFile, setSelectedDslFile] = useState<string>("");
+  
   const [customForm, setCustomForm] = useState<CustomConversationConfig>({
     name: "",
     description: "",
@@ -73,14 +81,37 @@ const ConversationMode: React.FC = () => {
   useEffect(() => {
     setSelectedMode(conversationMode);
     setHasChanges(false);
+    loadDslFiles();
   }, [conversationMode]);
+
+  useEffect(() => {
+    // Initialize DSL directory when component mounts
+    DSLFileManager.ensureDirectory();
+  }, []);
+
+  const loadDslFiles = async () => {
+    try {
+      const files = await DSLFileManager.listFiles();
+      setDslFiles(files);
+    } catch (error) {
+      console.error('Failed to load DSL files:', error);
+    }
+  };
 
   const handleModeSelect = (mode: ConversationModeType) => {
     setSelectedMode(mode);
     setHasChanges(true);
+    setError("");
 
     if (mode === ConversationModeType.CUSTOM && customConfigs.length === 0) {
       setShowCustomForm(true);
+      // Load example DSL
+      const example = DSLParser.getExampleDSL();
+      setCustomForm({
+        name: example.name,
+        description: example.description,
+        rules: DSLParser.stringify(example)
+      });
     } else {
       setShowCustomForm(false);
     }
@@ -90,8 +121,8 @@ const ConversationMode: React.FC = () => {
     updateConversationMode(selectedMode);
     setHasChanges(false);
     setSaveSuccess(true);
+    setError("");
 
-    // Clear the success message after 3 seconds
     setTimeout(() => {
       setSaveSuccess(false);
     }, 3000);
@@ -101,6 +132,7 @@ const ConversationMode: React.FC = () => {
     setSelectedMode(conversationMode);
     setHasChanges(false);
     setShowCustomForm(false);
+    setError("");
   };
 
   const handleCustomFormChange = (
@@ -111,22 +143,128 @@ const ConversationMode: React.FC = () => {
       ...prev,
       [name]: value,
     }));
+    setError("");
+  };
+
+  const validateDSL = (rules: string): string | null => {
+    try {
+      const dsl = DSLParser.parse(rules);
+      const errors = DSLParser.validate(dsl);
+      if (errors.length > 0) {
+        return errors.map(e => 
+          e.phase !== undefined 
+            ? `Phase ${e.phase + 1} ${e.field}: ${e.message}`
+            : `${e.field}: ${e.message}`
+        ).join('\n');
+      }
+      return null;
+    } catch (error) {
+      return error instanceof Error ? error.message : 'Invalid YAML syntax';
+    }
   };
 
   const handleAddCustomConfig = () => {
-    if (customForm.name && customForm.rules) {
-      addCustomConfig({
-        ...customForm,
-        id: `custom_${Date.now()}`,
-      });
+    if (!customForm.name || !customForm.rules) {
+      setError("Name and DSL configuration are required");
+      return;
+    }
 
+    const validationError = validateDSL(customForm.rules);
+    if (validationError) {
+      setError(`DSL Validation Error:\n${validationError}`);
+      return;
+    }
+
+    addCustomConfig({
+      ...customForm,
+      id: `custom_${Date.now()}`,
+    });
+
+    setCustomForm({
+      name: "",
+      description: "",
+      rules: "",
+    });
+
+    setShowCustomForm(false);
+    setError("");
+  };
+
+  const handleLoadDslFile = async () => {
+    if (!selectedDslFile) return;
+
+    try {
+      const dsl = await DSLFileManager.loadFile(selectedDslFile);
       setCustomForm({
-        name: "",
-        description: "",
-        rules: "",
+        name: dsl.name,
+        description: dsl.description,
+        rules: DSLParser.stringify(dsl)
       });
+      setError("");
+    } catch (error) {
+      setError(`Failed to load DSL file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
-      setShowCustomForm(false);
+  const handleSaveDslFile = async () => {
+    if (!customForm.name || !customForm.rules) {
+      setError("Name and DSL configuration are required");
+      return;
+    }
+
+    const validationError = validateDSL(customForm.rules);
+    if (validationError) {
+      setError(`DSL Validation Error:\n${validationError}`);
+      return;
+    }
+
+    try {
+      const dsl = DSLParser.parse(customForm.rules);
+      const filename = `${customForm.name.replace(/[^a-zA-Z0-9]/g, '_')}.yaml`;
+      await DSLFileManager.saveFile(filename, dsl);
+      await loadDslFiles();
+      setError("");
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error) {
+      setError(`Failed to save DSL file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleExportDsl = async () => {
+    if (!customForm.rules) {
+      setError("No DSL configuration to export");
+      return;
+    }
+
+    const validationError = validateDSL(customForm.rules);
+    if (validationError) {
+      setError(`DSL Validation Error:\n${validationError}`);
+      return;
+    }
+
+    try {
+      const dsl = DSLParser.parse(customForm.rules);
+      await DSLFileManager.exportFile(dsl);
+      setError("");
+    } catch (error) {
+      setError(`Failed to export DSL file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleImportDsl = async () => {
+    try {
+      const dsl = await DSLFileManager.importFile();
+      if (dsl) {
+        setCustomForm({
+          name: dsl.name,
+          description: dsl.description,
+          rules: DSLParser.stringify(dsl)
+        });
+        setError("");
+      }
+    } catch (error) {
+      setError(`Failed to import DSL file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -138,6 +276,16 @@ const ConversationMode: React.FC = () => {
     ) {
       deleteCustomConfig(configId);
     }
+  };
+
+  const loadExampleDsl = () => {
+    const example = DSLParser.getExampleDSL();
+    setCustomForm({
+      name: example.name,
+      description: example.description,
+      rules: DSLParser.stringify(example)
+    });
+    setError("");
   };
 
   return (
@@ -168,10 +316,16 @@ const ConversationMode: React.FC = () => {
         ))}
       </div>
 
+      {error && (
+        <div className={styles.errorMessage}>
+          <pre>{error}</pre>
+        </div>
+      )}
+
       <div className={styles.actions}>
         {saveSuccess && (
           <div className={styles.successMessage}>
-            Conversation mode saved successfully!
+            Saved successfully!
           </div>
         )}
         <button
@@ -192,9 +346,17 @@ const ConversationMode: React.FC = () => {
 
       {(selectedMode === ConversationModeType.CUSTOM || showCustomForm) && (
         <div className={styles.customConfig}>
-          <h3 className={styles.customTitle}>
-            Custom Conversation Configurations
-          </h3>
+          <div className={styles.customHeader}>
+            <h3 className={styles.customTitle}>
+              Custom DSL Configuration
+            </h3>
+            <button
+              className={`${styles.button} ${styles.secondary}`}
+              onClick={() => setShowReference(true)}
+            >
+              📖 Reference Guide
+            </button>
+          </div>
 
           {customConfigs.length > 0 && !showCustomForm && (
             <div className={styles.customConfigList}>
@@ -211,7 +373,7 @@ const ConversationMode: React.FC = () => {
                   </div>
                   <p className={styles.modeDescription}>{config.description}</p>
                   <div className={styles.modeDescription}>
-                    <ReactMarkdown>{config.rules}</ReactMarkdown>
+                    <ReactMarkdown>{"```yaml\n" + config.rules + "\n```"}</ReactMarkdown>
                   </div>
                 </div>
               ))}
@@ -226,6 +388,60 @@ const ConversationMode: React.FC = () => {
 
           {showCustomForm && (
             <div className={styles.customForm}>
+              {/* File Management Section */}
+              <div className={styles.fileSection}>
+                <h4>📁 File Management</h4>
+                <div className={styles.fileActions}>
+                  <div className={styles.fileLoad}>
+                    <select 
+                      value={selectedDslFile} 
+                      onChange={(e) => setSelectedDslFile(e.target.value)}
+                      className={styles.select}
+                    >
+                      <option value="">Select a saved DSL file...</option>
+                      {dslFiles.map(file => (
+                        <option key={file} value={file}>{file}</option>
+                      ))}
+                    </select>
+                    <button
+                      className={`${styles.button} ${styles.secondary}`}
+                      onClick={handleLoadDslFile}
+                      disabled={!selectedDslFile}
+                    >
+                      Load
+                    </button>
+                  </div>
+                  <div className={styles.fileButtons}>
+                    <button
+                      className={`${styles.button} ${styles.secondary}`}
+                      onClick={handleImportDsl}
+                    >
+                      Import
+                    </button>
+                    <button
+                      className={`${styles.button} ${styles.secondary}`}
+                      onClick={handleExportDsl}
+                      disabled={!customForm.rules}
+                    >
+                      Export
+                    </button>
+                    <button
+                      className={`${styles.button} ${styles.secondary}`}
+                      onClick={handleSaveDslFile}
+                      disabled={!customForm.name || !customForm.rules}
+                    >
+                      Save to File
+                    </button>
+                    <button
+                      className={`${styles.button} ${styles.secondary}`}
+                      onClick={loadExampleDsl}
+                    >
+                      Load Example
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div className={styles.formGroup}>
                 <label className={styles.label} htmlFor="name">
                   Configuration Name
@@ -236,7 +452,7 @@ const ConversationMode: React.FC = () => {
                   className={styles.input}
                   value={customForm.name}
                   onChange={handleCustomFormChange}
-                  placeholder="e.g., Expert Debate, Sequential Analysis"
+                  placeholder="e.g., Collaborative Refinement, Expert Panel"
                   required
                 />
               </div>
@@ -257,7 +473,7 @@ const ConversationMode: React.FC = () => {
 
               <div className={styles.formGroup}>
                 <label className={styles.label} htmlFor="rules">
-                  Configuration Rules (Markdown supported)
+                  DSL Configuration (YAML)
                 </label>
                 <textarea
                   id="rules"
@@ -265,7 +481,9 @@ const ConversationMode: React.FC = () => {
                   className={styles.textarea}
                   value={customForm.rules}
                   onChange={handleCustomFormChange}
-                  placeholder="Define the rules for this conversation mode..."
+                  placeholder="Enter your DSL configuration in YAML format..."
+                  rows={15}
+                  style={{ fontFamily: 'monospace', fontSize: '0.9em' }}
                   required
                 />
               </div>
@@ -288,6 +506,11 @@ const ConversationMode: React.FC = () => {
           )}
         </div>
       )}
+
+      <DSLReference 
+        isOpen={showReference} 
+        onClose={() => setShowReference(false)} 
+      />
     </div>
   );
 };

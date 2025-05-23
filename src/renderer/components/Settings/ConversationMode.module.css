@@ -150,4 +150,179 @@
   outline: none;
 }
 
+/* DSL-specific styles */
+.customHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.fileSection {
+  background-color: rgba(var(--primary-color-rgb), 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.fileSection h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.fileActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fileLoad {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fileButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
+}
+
+.select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.errorMessage {
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 4px;
+  padding: 12px;
+  margin: 16px 0;
+  color: #dc3545;
+  font-family: monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+/* Modal styles for DSL Reference */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.closeButton:hover {
+  background-color: var(--hover-bg-color);
+  color: var(--text-color);
+}
+
+.modalBody {
+  padding: 20px 24px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.modalBody h1,
+.modalBody h2,
+.modalBody h3,
+.modalBody h4 {
+  color: var(--text-color);
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.modalBody h1:first-child,
+.modalBody h2:first-child {
+  margin-top: 0;
+}
+
+.modalBody code {
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.modalBody pre {
+  background-color: rgba(var(--primary-color-rgb), 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.modalBody ul,
+.modalBody ol {
+  padding-left: 20px;
+}
+
+.modalBody li {
+  margin-bottom: 4px;
+}
+
 /* Dark mode styling is handled through CSS variables, no need for overrides */
