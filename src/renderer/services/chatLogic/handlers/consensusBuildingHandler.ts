@@ -29,11 +29,28 @@ export class ConsensusBuildingHandler extends BaseChatHandler {
       (a, b) => a.timestamp - b.timestamp
     );
     
+    // Add model attribution to assistant messages for consensus building context
+    const enhancedMessages = sortedChatMessages.map(msg => {
+      if (msg.sender === "assistant" && msg.modelId) {
+        const model = this.deps.models.find(m => m.id === msg.modelId);
+        const modelName = model ? model.name : `Model ${msg.modelId}`;
+        
+        // Only add attribution if it's not already there
+        if (!msg.content.startsWith(`[${modelName}`)) {
+          return {
+            ...msg,
+            content: `[${modelName}]: ${msg.content}`
+          };
+        }
+      }
+      return msg;
+    });
+    
     console.log(
-      `CONSENSUS_BUILDING mode: Model ${modelId} will see ${sortedChatMessages.length} messages`
+      `CONSENSUS_BUILDING mode: Model ${modelId} will see ${enhancedMessages.length} messages with model attribution`
     );
     
-    return sortedChatMessages;
+    return enhancedMessages;
   }
   
   // Determine which round of consensus building this is

@@ -80,7 +80,7 @@ export abstract class BaseChatHandler {
         } else if (msg.sender === "assistant" && msg.modelId) {
           apiMessages.push({
             role: "assistant",
-            content: msg.content,
+            content: msg.content, // Content may already be attributed by specific handlers
           });
           assistantMessagesAdded++;
         }

@@ -61,11 +61,32 @@ export class ExpertPanelHandler extends BaseChatHandler {
       (a, b) => a.timestamp - b.timestamp
     );
     
+    // Add expert role information to assistant messages for better context
+    const enhancedMessages = sortedChatMessages.map(msg => {
+      if (msg.sender === "assistant" && msg.modelId) {
+        // Find which model and what expert role it had
+        const modelIndex = this.deps.models.findIndex(m => m.id === msg.modelId);
+        if (modelIndex >= 0) {
+          const role = this.expertRoles[modelIndex % this.expertRoles.length];
+          const model = this.deps.models[modelIndex];
+          
+          // Only add attribution if it's not already there
+          if (!msg.content.startsWith(`[${model.name}`)) {
+            return {
+              ...msg,
+              content: `[${model.name} as ${role.role}]: ${msg.content}`
+            };
+          }
+        }
+      }
+      return msg;
+    });
+    
     console.log(
-      `EXPERT_PANEL mode: Model ${modelId} will see ${sortedChatMessages.length} messages`
+      `EXPERT_PANEL mode: Model ${modelId} will see ${enhancedMessages.length} messages with expert role context`
     );
     
-    return sortedChatMessages;
+    return enhancedMessages;
   }
   
   // Get expert role and system prompt for a specific model

@@ -35,11 +35,32 @@ export class DebateHandler extends BaseChatHandler {
       (a, b) => a.timestamp - b.timestamp
     );
     
+    // Add debate position information to assistant messages for better context
+    const enhancedMessages = sortedChatMessages.map(msg => {
+      if (msg.sender === "assistant" && msg.modelId) {
+        // Find which model and what debate position it had
+        const modelIndex = this.deps.models.findIndex(m => m.id === msg.modelId);
+        if (modelIndex >= 0) {
+          const position = this.debatePositions[modelIndex % this.debatePositions.length];
+          const model = this.deps.models[modelIndex];
+          
+          // Only add attribution if it's not already there
+          if (!msg.content.startsWith(`[${model.name}`)) {
+            return {
+              ...msg,
+              content: `[${model.name} as ${position}]: ${msg.content}`
+            };
+          }
+        }
+      }
+      return msg;
+    });
+    
     console.log(
-      `DEBATE mode: Model ${modelId} will see ${sortedChatMessages.length} messages for debate context`
+      `DEBATE mode: Model ${modelId} will see ${enhancedMessages.length} messages with debate position context`
     );
     
-    return sortedChatMessages;
+    return enhancedMessages;
   }
   
   // Get debate position and system prompt for a specific model
