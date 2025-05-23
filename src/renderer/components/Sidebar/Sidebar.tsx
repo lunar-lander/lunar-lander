@@ -36,10 +36,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const editInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Filter and sort chats based on search term and star status
   const filteredChats = chats
-    .filter(chat => {
+    .filter((chat) => {
       const searchLower = searchTerm.toLowerCase();
       return chat.summary.toLowerCase().includes(searchLower);
     })
@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
       // First sort by starred status (starred chats come first)
       if (a.isStarred && !b.isStarred) return -1;
       if (!a.isStarred && b.isStarred) return 1;
-      
+
       // Then sort by last updated time (most recent first)
       return b.lastUpdated - a.lastUpdated;
     });
@@ -136,22 +136,24 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         return "🎨";
     }
   };
-  
+
   // Focus on edit input when editing a chat title
   useEffect(() => {
     if (editingChatId && editInputRef.current) {
       editInputRef.current.focus();
     }
   }, [editingChatId]);
-  
+
   // Handle starting to edit a chat summary
   const startEditingChat = (chat: Chat, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingChatId(chat.id);
     // Set the current summary as the initial value to edit
-    setEditedTitle(chat.summary !== "Start a new conversation" ? chat.summary : "");
+    setEditedTitle(
+      chat.summary !== "Start a new conversation" ? chat.summary : ""
+    );
   };
-  
+
   // Handle saving an edited chat summary
   const saveEditedSummary = (chatId: string, e: React.FormEvent) => {
     e.preventDefault();
@@ -160,12 +162,12 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     }
     setEditingChatId(null);
   };
-  
+
   // Handle cancel editing
   const cancelEditing = () => {
     setEditingChatId(null);
   };
-  
+
   // Generate subtle background color for model using theme colors
   const getModelColor = (modelId: string): string => {
     // Create a consistent hash from model ID
@@ -173,29 +175,29 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     for (let i = 0; i < modelId.length; i++) {
       hash = ((hash << 5) - hash + modelId.charCodeAt(i)) & 0xffffffff;
     }
-    
+
     // Check if dark theme is active
-    const isDark = document.body.classList.contains('dark-theme');
-    
+    const isDark = document.body.classList.contains("dark-theme");
+
     // Use predefined RGB values for theme colors with very low opacity
     const lightColorVariants = [
-      'rgba(26, 115, 232, 0.06)',   // primary-color with 6% opacity
-      'rgba(66, 133, 244, 0.06)',   // secondary-color with 6% opacity  
-      'rgba(251, 188, 4, 0.06)',    // accent-color with 6% opacity
-      'rgba(52, 168, 83, 0.06)',    // success-color with 6% opacity
-      'rgba(234, 67, 53, 0.06)',    // error-color with 6% opacity
-      'rgba(156, 39, 176, 0.06)'    // purple variant with 6% opacity
+      "rgba(26, 115, 232, 0.06)", // primary-color with 6% opacity
+      "rgba(66, 133, 244, 0.06)", // secondary-color with 6% opacity
+      "rgba(251, 188, 4, 0.06)", // accent-color with 6% opacity
+      "rgba(52, 168, 83, 0.06)", // success-color with 6% opacity
+      "rgba(234, 67, 53, 0.06)", // error-color with 6% opacity
+      "rgba(156, 39, 176, 0.06)", // purple variant with 6% opacity
     ];
-    
+
     const darkColorVariants = [
-      'rgba(138, 180, 248, 0.08)',  // primary-color dark with 8% opacity
-      'rgba(66, 133, 244, 0.08)',   // secondary-color with 8% opacity  
-      'rgba(251, 188, 4, 0.08)',    // accent-color with 8% opacity
-      'rgba(52, 168, 83, 0.08)',    // success-color with 8% opacity
-      'rgba(234, 67, 53, 0.08)',    // error-color with 8% opacity
-      'rgba(171, 71, 188, 0.08)'    // purple variant with 8% opacity
+      "rgba(138, 180, 248, 0.08)", // primary-color dark with 8% opacity
+      "rgba(66, 133, 244, 0.08)", // secondary-color with 8% opacity
+      "rgba(251, 188, 4, 0.08)", // accent-color with 8% opacity
+      "rgba(52, 168, 83, 0.08)", // success-color with 8% opacity
+      "rgba(234, 67, 53, 0.08)", // error-color with 8% opacity
+      "rgba(171, 71, 188, 0.08)", // purple variant with 8% opacity
     ];
-    
+
     const colorVariants = isDark ? darkColorVariants : lightColorVariants;
     const colorIndex = Math.abs(hash) % colorVariants.length;
     return colorVariants[colorIndex];
@@ -205,30 +207,30 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const formatRelativeTime = (timestamp: number): string => {
     const now = Date.now();
     const diff = now - timestamp;
-    
+
     // Less than a minute
     if (diff < 60 * 1000) {
-      return 'Just now';
+      return "Just now";
     }
-    
+
     // Less than an hour
     if (diff < 60 * 60 * 1000) {
       const minutes = Math.floor(diff / (60 * 1000));
-      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+      return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
     }
-    
+
     // Less than a day
     if (diff < 24 * 60 * 60 * 1000) {
       const hours = Math.floor(diff / (60 * 60 * 1000));
-      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+      return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
     }
-    
+
     // Less than a week
     if (diff < 7 * 24 * 60 * 60 * 1000) {
       const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+      return `${days} ${days === 1 ? "day" : "days"} ago`;
     }
-    
+
     // Default to date format
     return new Date(timestamp).toLocaleDateString();
   };
@@ -236,8 +238,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   return (
     <div className={styles.sidebar}>
       <div className={styles.header}>
-        <button 
-          className={styles.newChatButton} 
+        <button
+          className={styles.newChatButton}
           onClick={handleNewChat}
           title="New Chat (Ctrl+N)"
         >
@@ -258,7 +260,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         <span className={styles.zoomControls}>
           <button
             className={styles.zoomButton}
-            onClick={() => setZoom(Math.max(0.5, Math.round((zoomLevel - 0.1) * 10) / 10))}
+            onClick={() =>
+              setZoom(Math.max(0.5, Math.round((zoomLevel - 0.1) * 10) / 10))
+            }
             title="Zoom Out"
           >
             −
@@ -266,13 +270,17 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
           <button
             className={styles.zoomResetButton}
             onClick={() => setZoom(1.0)}
-            title={`Current Zoom: ${Math.round((zoomLevel || 1.0) * 100)}% - Click to reset`}
+            title={`Current Zoom: ${Math.round(
+              (zoomLevel || 1.0) * 100
+            )}% - Click to reset`}
           >
             🔍
           </button>
           <button
             className={styles.zoomButton}
-            onClick={() => setZoom(Math.min(2.0, Math.round((zoomLevel + 0.1) * 10) / 10))}
+            onClick={() =>
+              setZoom(Math.min(2.0, Math.round((zoomLevel + 0.1) * 10) / 10))
+            }
             title="Zoom In"
           >
             +
@@ -285,13 +293,14 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         >
           ⚙️
         </button>
-        <button
+        {/* TODO: remove this ugly button */}
+        {/* <button
           className={styles.actionButton}
           onClick={openCommandPalette}
           title="Command Palette (Ctrl+K)"
         >
           ⌘
-        </button>
+        </button> */}
       </div>
 
       <div className={styles.modelToggles}>
@@ -299,7 +308,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
           <h3 className={styles.sectionTitle}>Models</h3>
           {models.length > 0 && (
             <span className={styles.modelCount}>
-              {models.filter(m => m.isActive).length} active
+              {models.filter((m) => m.isActive).length} active
             </span>
           )}
         </div>
@@ -315,7 +324,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 }`}
                 style={{ backgroundColor: getModelColor(model.id) }}
                 onClick={() => handleToggleModel(model.id, model.isActive)}
-                title={`${model.name} - Click to toggle${index < 9 ? ` (Alt+${index + 1})` : ''}`}
+                title={`${model.name} - Click to toggle${
+                  index < 9 ? ` (Alt+${index + 1})` : ""
+                }`}
               >
                 <span className={styles.modelName}>{model.name}</span>
                 <span className={styles.toggleIndicator}>
@@ -332,10 +343,14 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
           <div className={styles.chatListHeaderTop}>
             <h3 className={styles.sectionTitle}>Conversations</h3>
             {chats.length > 0 && (
-              <button 
+              <button
                 className={styles.clearAllButton}
                 onClick={() => {
-                  if (window.confirm("Are you sure you want to delete ALL conversations? This cannot be undone.")) {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to delete ALL conversations? This cannot be undone."
+                    )
+                  ) {
                     deleteAllChats();
                   }
                 }}
@@ -354,7 +369,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               className={styles.searchInput}
             />
             {searchTerm && (
-              <button 
+              <button
                 className={styles.clearSearch}
                 onClick={() => setSearchTerm("")}
                 title="Clear search"
@@ -364,7 +379,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
             )}
           </div>
         </div>
-        
+
         {filteredChats.length === 0 ? (
           <div className={styles.noChats}>
             {chats.length === 0 ? "No chat history yet" : "No matches found"}
@@ -372,11 +387,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         ) : (
           <>
             {/* Render starred chats with heading if there are any */}
-            {filteredChats.some(chat => chat.isStarred) && (
+            {filteredChats.some((chat) => chat.isStarred) && (
               <>
                 <div className={styles.sectionTitle}>Starred</div>
                 {filteredChats
-                  .filter(chat => chat.isStarred)
+                  .filter((chat) => chat.isStarred)
                   .map((chat) => (
                     <div
                       key={chat.id}
@@ -386,7 +401,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                       onClick={() => selectChat(chat.id)}
                     >
                       {editingChatId === chat.id ? (
-                        <form onSubmit={(e) => saveEditedSummary(chat.id, e)} className={styles.editTitleForm}>
+                        <form
+                          onSubmit={(e) => saveEditedSummary(chat.id, e)}
+                          className={styles.editTitleForm}
+                        >
                           <input
                             ref={editInputRef}
                             type="text"
@@ -394,19 +412,26 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                             onChange={(e) => setEditedTitle(e.target.value)}
                             className={styles.editTitleInput}
                             onBlur={() => cancelEditing()}
-                            onKeyDown={(e) => e.key === 'Escape' && cancelEditing()}
+                            onKeyDown={(e) =>
+                              e.key === "Escape" && cancelEditing()
+                            }
                           />
                         </form>
                       ) : (
                         <>
-                          <div 
+                          <div
                             className={styles.chatSummary}
                             onClick={(e) => startEditingChat(chat, e)}
                             title="Click to edit summary"
                           >
-                            {chat.summary !== "Start a new conversation" ? chat.summary : "New conversation"}
+                            {chat.summary !== "Start a new conversation"
+                              ? chat.summary
+                              : "New conversation"}
                           </div>
-                          <div className={styles.chatDate} title={new Date(chat.lastUpdated).toLocaleString()}>
+                          <div
+                            className={styles.chatDate}
+                            title={new Date(chat.lastUpdated).toLocaleString()}
+                          >
                             {formatRelativeTime(chat.lastUpdated)}
                           </div>
                           <div className={styles.chatControls}>
@@ -434,7 +459,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                               className={styles.chatControl}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (window.confirm("Are you sure you want to delete this conversation?")) {
+                                if (
+                                  window.confirm(
+                                    "Are you sure you want to delete this conversation?"
+                                  )
+                                ) {
                                   deleteChat(chat.id);
                                 }
                               }}
@@ -449,15 +478,16 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                   ))}
               </>
             )}
-            
+
             {/* Render non-starred chats with heading if there are both starred and non-starred chats */}
-            {filteredChats.some(chat => chat.isStarred) && filteredChats.some(chat => !chat.isStarred) && (
-              <div className={styles.sectionTitle}>Recent</div>
-            )}
-            
+            {filteredChats.some((chat) => chat.isStarred) &&
+              filteredChats.some((chat) => !chat.isStarred) && (
+                <div className={styles.sectionTitle}>Recent</div>
+              )}
+
             {/* Render non-starred chats */}
             {filteredChats
-              .filter(chat => !chat.isStarred)
+              .filter((chat) => !chat.isStarred)
               .map((chat) => (
                 <div
                   key={chat.id}
@@ -467,7 +497,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                   onClick={() => selectChat(chat.id)}
                 >
                   {editingChatId === chat.id ? (
-                    <form onSubmit={(e) => saveEditedSummary(chat.id, e)} className={styles.editTitleForm}>
+                    <form
+                      onSubmit={(e) => saveEditedSummary(chat.id, e)}
+                      className={styles.editTitleForm}
+                    >
                       <input
                         ref={editInputRef}
                         type="text"
@@ -475,19 +508,24 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                         onChange={(e) => setEditedTitle(e.target.value)}
                         className={styles.editTitleInput}
                         onBlur={() => cancelEditing()}
-                        onKeyDown={(e) => e.key === 'Escape' && cancelEditing()}
+                        onKeyDown={(e) => e.key === "Escape" && cancelEditing()}
                       />
                     </form>
                   ) : (
                     <>
-                      <div 
+                      <div
                         className={styles.chatSummary}
                         onClick={(e) => startEditingChat(chat, e)}
                         title="Click to edit summary"
                       >
-                        {chat.summary !== "Start a new conversation" ? chat.summary : "New conversation"}
+                        {chat.summary !== "Start a new conversation"
+                          ? chat.summary
+                          : "New conversation"}
                       </div>
-                      <div className={styles.chatDate} title={new Date(chat.lastUpdated).toLocaleString()}>
+                      <div
+                        className={styles.chatDate}
+                        title={new Date(chat.lastUpdated).toLocaleString()}
+                      >
                         {formatRelativeTime(chat.lastUpdated)}
                       </div>
                       <div className={styles.chatControls}>
@@ -515,7 +553,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                           className={styles.chatControl}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (window.confirm("Are you sure you want to delete this conversation?")) {
+                            if (
+                              window.confirm(
+                                "Are you sure you want to delete this conversation?"
+                              )
+                            ) {
                               deleteChat(chat.id);
                             }
                           }}
