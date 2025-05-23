@@ -157,7 +157,7 @@ export class ChatHandler {
               chatToSummarize.messages &&
               chatToSummarize.messages.length > 0
             ) {
-              this.generateChatSummary(chatId, setSummarizing);
+              this.generateChatSummary(chatId, setSummarizing, false);
             } else {
               console.error(
                 `Chat ${chatId} no longer valid before summary generation`
@@ -174,7 +174,7 @@ export class ChatHandler {
   }
 
   // Generate chat summary using the designated summary model
-  public async generateChatSummary(chatId: string, setSummarizing: (value: boolean) => void) {
+  public async generateChatSummary(chatId: string, setSummarizing: (value: boolean) => void, isRegeneration: boolean = false) {
     console.log(`Attempting to generate summary for chat ${chatId}`);
     // Use config summary model ID if available, otherwise use the one from context
     let effectiveSummaryModelId = this.configSummaryModelId || this.summaryModelId;
@@ -229,7 +229,8 @@ export class ChatHandler {
         );
         const llmSummary = await SummaryGenerator.generateLLMSummary(
           chatCopy,
-          effectiveSummaryModelId
+          effectiveSummaryModelId,
+          isRegeneration
         );
         console.log(`Generated LLM summary: "${llmSummary}"`);
 

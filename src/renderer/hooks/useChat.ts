@@ -122,8 +122,8 @@ export const useChat = (chatId?: string) => {
     );
   };
 
-  const generateChatSummary = async (chatId: string) => {
-    await chatHandler.generateChatSummary(chatId, setSummarizing);
+  const generateChatSummary = async (chatId: string, isRegeneration: boolean = true) => {
+    await chatHandler.generateChatSummary(chatId, setSummarizing, isRegeneration);
   };
 
   return {

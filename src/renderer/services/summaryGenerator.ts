@@ -52,14 +52,21 @@ export class SummaryGenerator {
   /**
    * Generate a summary using an LLM
    */
-  static async generateLLMSummary(chat: Chat, modelId: string): Promise<string> {
+  static async generateLLMSummary(chat: Chat, modelId: string, isRegeneration: boolean = false): Promise<string> {
     if (!chat.messages.length) {
       return 'New conversation';
     }
 
     try {
-      // Get up to the first 5 message exchanges
-      const messagesToInclude = chat.messages.slice(0, 10);
+      let messagesToInclude: ChatMessage[];
+      
+      if (isRegeneration) {
+        // For regeneration, consider the entire conversation but intelligently sample
+        messagesToInclude = this.selectMessagesForFullSummary(chat.messages);
+      } else {
+        // For initial summary, just use first few exchanges
+        messagesToInclude = chat.messages.slice(0, 10);
+      }
 
       // Get the model configuration
       const model = DbService.getModel(modelId);
@@ -69,7 +76,7 @@ export class SummaryGenerator {
       }
 
       // Call the LLM API
-      return await this.callSummaryLLM(messagesToInclude, model);
+      return await this.callSummaryLLM(messagesToInclude, model, isRegeneration);
     } catch (error) {
       console.error("Error generating summary:", error);
       return this.generateBasicSummary(chat);
@@ -77,14 +84,50 @@ export class SummaryGenerator {
   }
 
   /**
+   * Intelligently select messages for full conversation summary
+   */
+  private static selectMessagesForFullSummary(messages: ChatMessage[]): ChatMessage[] {
+    if (messages.length <= 15) {
+      // If conversation is short, include all messages
+      return messages;
+    }
+
+    // For longer conversations, include:
+    // - First 3 exchanges (6 messages)
+    // - Last 3 exchanges (6 messages) 
+    // - A few key messages from the middle
+    const result: ChatMessage[] = [];
+    
+    // Add first 6 messages
+    result.push(...messages.slice(0, 6));
+    
+    // Add some middle messages if conversation is long enough
+    if (messages.length > 20) {
+      const middleStart = Math.floor(messages.length / 2) - 2;
+      result.push(...messages.slice(middleStart, middleStart + 4));
+    }
+    
+    // Add last 6 messages (avoid duplicates)
+    const lastMessages = messages.slice(-6);
+    const lastStartIndex = Math.max(result.length, messages.length - 6);
+    result.push(...messages.slice(lastStartIndex));
+    
+    return result;
+  }
+
+  /**
    * Call the LLM API to generate a summary
    */
-  private static async callSummaryLLM(messages: ChatMessage[], model: Model): Promise<string> {
+  private static async callSummaryLLM(messages: ChatMessage[], model: Model, isRegeneration: boolean = false): Promise<string> {
     // Prepare the messages for the API
+    const systemPrompt = isRegeneration 
+      ? 'Create a concise, descriptive title that captures the overall conversation topic and evolution. Requirements:\n- Maximum 6 words\n- Reflect the main themes discussed throughout the conversation\n- Consider how the topic developed or evolved\n- Use present tense when possible\n- Avoid generic words like "help", "question", "discussion"\n- Return ONLY the title with no quotes, punctuation, or extra text\n\nExamples:\n"Python basics to advanced deployment" → "Python Learning Journey"\n"Database design then optimization" → "Database Architecture Optimization"\n"React bug to performance tuning" → "React Performance Enhancement"'
+      : 'Create a concise, descriptive title for this conversation. Requirements:\n- Maximum 6 words\n- Focus on the main topic or question\n- Use present tense when possible\n- Avoid generic words like "help", "question", "discussion"\n- Return ONLY the title with no quotes, punctuation, or extra text\n\nExamples:\n"Fix React component bug" → "React Component Rendering Issue"\n"How to learn Python" → "Python Learning Resources"\n"Database design advice" → "Database Schema Design"';
+
     const apiMessages = [
       {
         role: 'system',
-        content: 'Create a concise, descriptive title for this conversation. Requirements:\n- Maximum 6 words\n- Focus on the main topic or question\n- Use present tense when possible\n- Avoid generic words like "help", "question", "discussion"\n- Return ONLY the title with no quotes, punctuation, or extra text\n\nExamples:\n"Fix React component bug" → "React Component Rendering Issue"\n"How to learn Python" → "Python Learning Resources"\n"Database design advice" → "Database Schema Design"'
+        content: systemPrompt
       }
     ];
 
