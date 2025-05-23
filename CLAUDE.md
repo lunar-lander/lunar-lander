@@ -10,10 +10,10 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
 
 1. **Multiple LLM Support**: Connect to any OpenAI API-compatible LLM providers
 2. **Flexible Conversation Modes**:
-   - One-to-many: Send one message to multiple LLMs
-   - Many-to-many: Each LLM sees all previous responses
-   - Round-robin: Each LLM builds on responses from previous LLMs in sequence
-   - Custom semantic discussion configurations
+   - **Isolated**: Each LLM sees only its own conversation (independent responses)
+   - **Discuss**: All LLMs see all messages (collaborative discussion)
+   - **Round Robin**: Sequential responses where each LLM builds on previous ones
+   - **Custom DSL Mode**: User-defined conversation orchestration using YAML-based Domain-Specific Language
 3. **Conversation Control**:
    - Select which LLMs participate in conversations
    - Toggle message visibility for specific responses
@@ -23,8 +23,10 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
    - Intuitive interface for managing complex multi-LLM interactions
    - Copy button for easy message copying from LLM responses
    - Compact sidebar design for better space utilization
+   - Resizable sidebar and input textarea with persistent settings
    - Proper zoom functionality with consistent scaling
    - Enhanced dark theme support with proper code block visibility
+   - Transparent theme-based model toggle colors for better integration
 5. **Cross-Platform**: Available for Linux, Windows, and macOS
 
 ## Technical Implementation
@@ -42,12 +44,13 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
 - **Location**: `src/main/config/`
 - **Features**:
   - Theme configuration (light/dark/custom themes)
-  - UI preferences (fontSize, fontFamily, messageBubbleStyle)
+  - UI preferences (fontSize, fontFamily, messageBubbleStyle, sidebarWidth, inputHeight)
   - Behavior settings (sendOnEnter, autoSave, notifications)
   - Privacy settings (saveHistory, anonymizeData)
   - Advanced settings (logLevel, useGPU, proxy)
   - IPC handlers for main/renderer process communication
   - Persistent storage in app user directory
+  - DSL file management with import/export capabilities
 
 ### Build System
 - Replaced Vite with Webpack
@@ -79,27 +82,31 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
 ### UI Components
 - **Layout**: `src/renderer/components/Layout/`
   - Main application layout with sidebar and content area
+  - Resizable sidebar with drag handle and persistent width settings
 - **Sidebar**: `src/renderer/components/Sidebar/`
   - New chat button
   - Theme toggle (light/dark mode)
   - Settings navigation
   - Chat history list with summaries
+  - Model toggles with transparent theme-based colors
 - **Chat Interface**: `src/renderer/components/Chat/`
   - **Chat.tsx**: Main chat container for UI rendering (logic moved to useChat hook)
   - **ChatMessages.tsx**: Scrollable message list with visibility controls
-  - **ChatMessage.tsx**: Individual message bubbles with streaming support
-  - **ChatInput.tsx**: Input area with LLM toggles, temperature control, and mode selection
+  - **ChatMessage.tsx**: Individual message bubbles with streaming support and copy functionality
+  - **ChatInput.tsx**: Input area with resizable textarea, LLM toggles, temperature control, and mode selection
 - **Settings**: `src/renderer/components/Settings/`
-  - Basic settings page structure
+  - **ConversationMode.tsx**: DSL editor with validation, file management, and reference guide
+  - **DSLReference.tsx**: Comprehensive interactive reference for DSL syntax
 
 ### Chat Logic & State Management
 - **Chat Logic**: `src/renderer/services/chatLogic/`
   - **chatHandler.ts**: Core class handling chat operations
   - **handlers/**: Strategy pattern implementations for different conversation modes
     - **baseHandler.ts**: Abstract base handler with common functionality
-    - **oneToManyHandler.ts**: Handler for one-to-many conversation mode
-    - **manyToManyHandler.ts**: Handler for many-to-many conversation mode
+    - **isolatedHandler.ts**: Handler for isolated conversation mode
+    - **discussHandler.ts**: Handler for discuss conversation mode
     - **roundRobinHandler.ts**: Handler for round-robin conversation mode
+    - **customHandler.ts**: Handler for custom DSL-based conversation modes
   - Improved separation of concerns with UI components
   - Factory pattern for creating appropriate handlers
 - **Hooks**: `src/renderer/hooks/`
@@ -112,6 +119,38 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
   - Model configuration and selection
   - Persistence integration
   - Multi-LLM chat orchestration
+
+### DSL System (Domain-Specific Language)
+- **Location**: `src/renderer/services/dsl/`
+- **Features**:
+  - **YAML-based configuration** for intuitive conversation orchestration
+  - **Multi-phase execution** with flexible flow control
+  - **Smart model selection**: `all`, `first`, `last`, `random`, or specific indices
+  - **Context control**: Fine-grained control over message visibility (`user_only`, `all_previous`, `phase_previous`)
+  - **Role assignments** for specialized model personas
+  - **Custom prompts** per phase with global and phase-specific options
+  - **File management** with save/load/import/export capabilities
+- **Components**:
+  - **dslParser.ts**: YAML parsing, validation, and serialization
+  - **dslExecutor.ts**: Multi-phase conversation execution engine
+  - **dslFileManager.ts**: File operations with cross-platform IPC
+- **Example DSL**:
+  ```yaml
+  name: "Collaborative Refinement"
+  description: "Multi-stage collaboration with refinement and summary"
+  phases:
+    - name: "Initial Response"
+      models: "all"
+      context: "user_only"
+    - name: "Refinement"
+      models: "all"
+      context: "all_previous"
+      prompt: "Refine your answer based on other responses"
+    - name: "Final Summary"
+      models: "first"
+      context: "all_previous"
+      prompt: "Synthesize all responses into a final answer"
+  ```
 
 ### Data Storage and Services
 - **Database Service**: `src/renderer/services/db.ts`
@@ -149,6 +188,10 @@ src/
   │   │   ├── chatLogic/ # Chat logic implementation
   │   │   │   ├── chatHandler.ts # Core chat logic
   │   │   │   └── handlers/  # Conversation mode handlers
+  │   │   ├── dsl/    # DSL system for custom conversation orchestration
+  │   │   │   ├── dslParser.ts # YAML parsing and validation
+  │   │   │   ├── dslExecutor.ts # Multi-phase execution engine
+  │   │   │   └── dslFileManager.ts # File operations
   │   │   ├── db.ts   # Database service
   │   │   └── summaryGenerator.ts # Chat summary generation
   │   ├── styles/     # Global styles
@@ -156,7 +199,8 @@ src/
   └── shared/         # Shared code between processes
       ├── types/      # TypeScript type definitions
       │   ├── chat.ts # Chat-related type definitions
-      │   └── model.ts # Model-related type definitions
+      │   ├── model.ts # Model-related type definitions
+      │   └── dsl.ts  # DSL-related type definitions
       └── utils/      # Utility functions
 ```
 
@@ -194,24 +238,48 @@ src/
   - Supports Linux, macOS, and Windows
 
 ### Recent UI Enhancements
-- **Copy Functionality**: Added copy button for LLM replies in chat messages
+
+#### Message Management & Copy Functionality
+- **Copy Button**: Added one-click copy functionality for LLM responses
   - Located in `src/renderer/components/Chat/ChatMessage.tsx`
-  - Positioned below visibility toggle for assistant messages
-  - Uses native clipboard API for reliable copying
-- **Compact Sidebar Design**: Improved space utilization for chat history
+  - Positioned right side of message content for easy access
+  - Uses native clipboard API for reliable copying across platforms
+
+#### Layout & Responsiveness
+- **Resizable Sidebar**: Interactive sidebar width adjustment
+  - Drag handle on right edge of sidebar in `src/renderer/components/Layout/Layout.tsx`
+  - Real-time visual feedback during resizing
+  - Persistent width settings stored in user configuration
+- **Resizable Input Area**: Adjustable chat input textarea height
+  - Drag handle at bottom of input in `src/renderer/components/Chat/ChatInput.tsx`
+  - Smooth resize animation with delta-based calculation
+  - Height preferences saved to configuration and restored on app restart
+- **Compact Sidebar Design**: Optimized space utilization for chat history
   - Reduced padding, margins, and font sizes in `src/renderer/components/Sidebar/Sidebar.module.css`
-  - Smaller control buttons and tighter spacing
-  - More conversations visible in limited space
-- **Model Selection Consistency**: Fixed inconsistent behavior between sidebar and chat box
-  - Enhanced `src/renderer/hooks/useChat.ts` to sync global and local model states
-  - Both sidebar and chat input maintain consistent model selections
+  - Single-line chat items with ultra-compact layout
+  - Significantly more conversations visible in limited space
+
+#### Visual & Theme Improvements
+- **Model Toggle Colors**: Enhanced visual integration with theme system
+  - Transparent theme-based colors (6-8% opacity) instead of bright pastels
+  - Consistent with overall application design language
+  - Better text visibility and subtle visual feedback
 - **Improved Zoom Implementation**: Fixed zoom behavior for proper scaling
   - Updated `src/renderer/styles/global.css` to use transform-only scaling
   - Eliminated double scaling (font-size + transform) issues
   - Proper viewport compensation for accurate zoom levels
-- **Dark Theme Code Visibility**: Enhanced readability of code blocks in dark themes
+- **Dark Theme Code Visibility**: Enhanced readability of code blocks
   - Added proper text color styling in `src/renderer/components/Chat/ChatMessage.module.css`
-  - Both inline and block code elements now visible in dark mode
+  - Both inline and block code elements fully visible in dark mode
+
+#### State Management & Consistency  
+- **Model Selection Sync**: Fixed inconsistent behavior between sidebar and chat box
+  - Enhanced `src/renderer/hooks/useChat.ts` to maintain unified model state
+  - Both sidebar toggles and chat input maintain consistent selections
+  - Eliminated confusion from divergent model states
+- **Configuration Persistence**: All UI customizations saved automatically
+  - Sidebar width, input height, and other preferences stored via IPC
+  - Settings restored on application restart for consistent experience
 
 ### Documentation
 - README.md with comprehensive documentation:
