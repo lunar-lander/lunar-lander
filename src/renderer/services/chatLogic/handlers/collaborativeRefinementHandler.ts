@@ -159,7 +159,7 @@ You are the designated summarizer for this collaborative refinement discussion.
           setTimeout(() => {
             this.callLLMApi(chatId, assistantMessageId, modelId, {
               content: "Please refine your previous response based on the other perspectives you can see.",
-              temperature: temperature * 0.8, // Slightly lower temperature for refinement
+              temperature: temperature,
               systemPrompt: this.getPhaseSystemPrompt('refinement', index),
             }).catch((error) => {
               console.error(`Error in refinement API call for ${modelId}:`, error);

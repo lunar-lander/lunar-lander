@@ -146,7 +146,7 @@ Remember: The goal is not to "win" but to find the best collective solution thro
           setTimeout(() => {
             this.callLLMApi(chatId, assistantMessageId, modelId, {
               content,
-              temperature: temperature * 0.9, // Slightly lower temperature for more measured responses
+              temperature: temperature,
               systemPrompt: this.getConsensusBuildingSystemPrompt(round, index),
             }).catch((error) => {
               console.error(`Error in consensus building API call for ${modelId}:`, error);

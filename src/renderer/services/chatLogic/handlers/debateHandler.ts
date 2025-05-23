@@ -147,7 +147,7 @@ Maintain this perspective consistently while engaging constructively with other 
           setTimeout(() => {
             this.callLLMApi(chatId, assistantMessageId, modelId, {
               content,
-              temperature: temperature * 1.1, // Slightly higher temperature for more dynamic debate
+              temperature: temperature,
               systemPrompt: this.getDebateSystemPrompt(index, modelIds.length),
             }).catch((error) => {
               console.error(`Error in debate API call for ${modelId} (${position}):`, error);
