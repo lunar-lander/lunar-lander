@@ -163,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     setEditingChatId(null);
   };
   
-  // Generate pastel color for model
+  // Generate subtle background color for model using theme colors
   const getModelColor = (modelId: string): string => {
     // Create a consistent hash from model ID
     let hash = 0;
@@ -171,12 +171,31 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
       hash = ((hash << 5) - hash + modelId.charCodeAt(i)) & 0xffffffff;
     }
     
-    // Generate pastel colors using the hash
-    const hue = Math.abs(hash) % 360;
-    const saturation = 45 + (Math.abs(hash) % 20); // 45-65%
-    const lightness = 85 + (Math.abs(hash) % 10); // 85-95%
+    // Check if dark theme is active
+    const isDark = document.body.classList.contains('dark-theme');
     
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    // Use predefined RGB values for theme colors with very low opacity
+    const lightColorVariants = [
+      'rgba(26, 115, 232, 0.06)',   // primary-color with 6% opacity
+      'rgba(66, 133, 244, 0.06)',   // secondary-color with 6% opacity  
+      'rgba(251, 188, 4, 0.06)',    // accent-color with 6% opacity
+      'rgba(52, 168, 83, 0.06)',    // success-color with 6% opacity
+      'rgba(234, 67, 53, 0.06)',    // error-color with 6% opacity
+      'rgba(156, 39, 176, 0.06)'    // purple variant with 6% opacity
+    ];
+    
+    const darkColorVariants = [
+      'rgba(138, 180, 248, 0.08)',  // primary-color dark with 8% opacity
+      'rgba(66, 133, 244, 0.08)',   // secondary-color with 8% opacity  
+      'rgba(251, 188, 4, 0.08)',    // accent-color with 8% opacity
+      'rgba(52, 168, 83, 0.08)',    // success-color with 8% opacity
+      'rgba(234, 67, 53, 0.08)',    // error-color with 8% opacity
+      'rgba(171, 71, 188, 0.08)'    // purple variant with 8% opacity
+    ];
+    
+    const colorVariants = isDark ? darkColorVariants : lightColorVariants;
+    const colorIndex = Math.abs(hash) % colorVariants.length;
+    return colorVariants[colorIndex];
   };
 
   // Format relative time for chats
