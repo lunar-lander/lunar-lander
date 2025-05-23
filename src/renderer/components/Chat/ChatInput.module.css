@@ -1,8 +1,8 @@
 .container {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-color);
   padding: 16px;
-  background-color: #f9f9f9;
-  color: #202124;
+  background-color: var(--sidebar-color);
+  color: var(--text-color);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -25,7 +25,7 @@
 
 .resizeHandle::after {
   content: "⋯";
-  color: rgba(0, 0, 0, 0.3);
+  color: var(--text-secondary);
   font-size: 16px;
   letter-spacing: 2px;
 }
@@ -49,9 +49,9 @@
   padding: 6px 10px;
   border-radius: 16px;
   font-size: 13px;
-  background-color: #f1f3f4;
-  border: 1px solid #dadce0;
-  color: #202124;
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
   cursor: pointer;
   transition: all 0.2s;
   user-select: none;
@@ -59,9 +59,9 @@
 }
 
 .modelToggle.active {
-  background-color: #e8f0fe;
-  border-color: #1a73e8;
-  color: #1a73e8;
+  background-color: var(--hover-bg-color);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
 .chatControls {
@@ -73,9 +73,9 @@
 .modeSelect {
   padding: 6px 10px;
   border-radius: 4px;
-  border: 1px solid #dadce0;
-  background-color: white;
-  color: #202124;
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-color);
   cursor: pointer;
   font-size: 13px;
 }
@@ -85,7 +85,7 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #202124;
+  color: var(--text-color);
 }
 
 .temperatureSlider {
@@ -95,7 +95,7 @@
 .editorWrapper {
   position: relative;
   border-radius: 8px;
-  background-color: white;
+  background-color: var(--input-bg);
   transition: border-color 0.2s;
   flex: 1;
   min-height: 100px;
@@ -115,8 +115,8 @@
 
 /* Override markdown editor styles */
 .mdEditor :global(.w-md-editor) {
-  background-color: white;
-  border: 1px solid #dadce0;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px !important;
   height: 100% !important;
   display: flex;
@@ -132,17 +132,17 @@
 }
 
 .mdEditor :global(.w-md-editor-toolbar) {
-  background-color: white;
-  border-bottom: 1px solid #dadce0;
+  background-color: var(--input-bg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .mdEditor :global(.w-md-editor-text) {
-  color: #202124;
+  color: var(--text-color);
 }
 
 .mdEditor :global(.w-md-editor-preview) {
-  background-color: rgba(247, 247, 247, 0.3);
-  color: #202124;
+  background-color: var(--sidebar-color);
+  color: var(--text-color);
 }
 
 .sendButton {
@@ -155,7 +155,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1a73e8;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   cursor: pointer;
@@ -163,18 +163,18 @@
 }
 
 .sendButton:hover {
-  background-color: #1765cc;
+  background-color: var(--primary-hover-color);
 }
 
 .sendButton:disabled {
-  background-color: #dadce0;
+  background-color: var(--border-color);
   cursor: not-allowed;
 }
 
 .helpText {
   margin-top: 4px;
   font-size: 12px;
-  color: #5f6368;
+  color: var(--text-secondary);
   text-align: right;
   display: flex;
   justify-content: space-between;
@@ -185,66 +185,4 @@
   text-align: left;
 }
 
-/* Dark theme overrides */
-:global(.dark-theme) .container {
-  background-color: #202124;
-  border-top-color: #5f6368;
-  color: #e8eaed;
-}
-
-:global(.dark-theme) .modelToggle {
-  background-color: #303134;
-  border-color: #5f6368;
-  color: #e8eaed;
-}
-
-:global(.dark-theme) .modelToggle.active {
-  background-color: #394457;
-  border-color: #8ab4f8;
-  color: #8ab4f8;
-}
-
-:global(.dark-theme) .modeSelect {
-  background-color: #303134;
-  border-color: #5f6368;
-  color: #e8eaed;
-}
-
-:global(.dark-theme) .temperatureControl {
-  color: #e8eaed;
-}
-
-:global(.dark-theme) .mdEditor :global(.w-md-editor) {
-  background-color: #303134;
-  border-color: #5f6368;
-}
-
-:global(.dark-theme) .mdEditor :global(.w-md-editor-toolbar) {
-  background-color: #303134;
-  border-color: #5f6368;
-}
-
-:global(.dark-theme) .mdEditor :global(.w-md-editor-text) {
-  color: #e8eaed;
-}
-
-:global(.dark-theme) .mdEditor :global(.w-md-editor-preview) {
-  background-color: rgba(30, 30, 30, 0.3);
-  color: #e8eaed;
-}
-
-:global(.dark-theme) .sendButton {
-  background-color: #8ab4f8;
-}
-
-:global(.dark-theme) .sendButton:hover {
-  background-color: #a1c3fa;
-}
-
-:global(.dark-theme) .helpText {
-  color: #9aa0a6;
-}
-
-:global(.dark-theme) .container::after {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6"><circle cx="3" cy="3" r="1" fill="rgba(255,255,255,0.3)"/></svg>');
-}
+/* Dark theme overrides are no longer needed since we use CSS variables */
