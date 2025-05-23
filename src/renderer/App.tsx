@@ -4,6 +4,7 @@ import Chat from "./components/Chat/Chat";
 import Settings from "./components/Settings/Settings";
 import ZoomControls from "./components/ZoomControls";
 import { AppProvider, useAppContext } from "./contexts/AppContext";
+import { ShortcutsProvider } from "./contexts/ShortcutsContext";
 import styles from "./App.module.css";
 
 const MainContent: React.FC = () => {
@@ -23,10 +24,12 @@ const MainContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AppProvider>
-      <Layout>
-        <MainContent />
-        <ZoomControls />
-      </Layout>
+      <ShortcutsProvider>
+        <Layout>
+          <MainContent />
+          <ZoomControls />
+        </Layout>
+      </ShortcutsProvider>
     </AppProvider>
   );
 };

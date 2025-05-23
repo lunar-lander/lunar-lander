@@ -187,7 +187,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       </div>
 
       <div className={styles.helpText}>
-        Press Ctrl+Enter to send
+        Press Ctrl+Enter to send • Ctrl+K for commands • Ctrl+N for new chat
       </div>
       <div className={styles.resizeHandle} onMouseDown={handleResizeMouseDown} />
     </div>

@@ -27,7 +27,14 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
    - Proper zoom functionality with consistent scaling
    - Enhanced dark theme support with proper code block visibility
    - Transparent theme-based model toggle colors for better integration
-5. **Cross-Platform**: Available for Linux, Windows, and macOS
+5. **Comprehensive Keyboard Shortcuts**:
+   - **Command Palette (Ctrl+K)**: Quick access to all commands with fuzzy search
+   - **Chat Operations**: Ctrl+N (new chat), Ctrl+Shift+↑/↓ (navigate chats)
+   - **Navigation**: Ctrl+, (settings), Ctrl+1/2 (switch views)
+   - **Model Control**: Alt+1-9 (toggle first 9 models)
+   - **System**: Ctrl+Shift+T (toggle theme), Escape (close dialogs)
+   - **Visual Indicators**: Tooltips showing keyboard shortcuts throughout UI
+6. **Cross-Platform**: Available for Linux, Windows, and macOS
 
 ## Technical Implementation
 
@@ -97,6 +104,27 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
 - **Settings**: `src/renderer/components/Settings/`
   - **ConversationMode.tsx**: DSL editor with validation, file management, and reference guide
   - **DSLReference.tsx**: Comprehensive interactive reference for DSL syntax
+- **Command Palette**: `src/renderer/components/CommandPalette/`
+  - **CommandPalette.tsx**: Modal interface for quick command access with fuzzy search
+  - **CommandPalette.module.css**: Styled with smooth animations and keyboard navigation
+  - Categorized commands with visual shortcuts indicators
+
+### Keyboard Shortcuts System
+- **Location**: `src/renderer/hooks/useKeyboardShortcuts.ts` and `src/renderer/contexts/ShortcutsContext.tsx`
+- **Features**:
+  - **Global Event Handling**: Captures keyboard events across the entire application
+  - **Context-Aware**: Respects input focus states to avoid conflicts with typing
+  - **Command Palette Integration**: Ctrl+K opens searchable command interface
+  - **Dynamic Registration**: Shortcuts update based on available models and chats
+  - **Visual Feedback**: Tooltips and help text show available shortcuts
+- **Type System**: `src/shared/types/shortcuts.ts`
+  - Type-safe shortcut definitions with categories and actions
+  - Command palette items with search keywords and descriptions
+- **Shortcut Categories**:
+  - **Chat**: New chat (Ctrl+N), navigate chats (Ctrl+Shift+↑/↓)
+  - **Navigation**: Settings toggle (Ctrl+,), view switching (Ctrl+1/2)
+  - **Models**: Toggle first 9 models (Alt+1-9), bulk operations via palette
+  - **System**: Theme toggle (Ctrl+Shift+T), close dialogs (Escape)
 
 ### Chat Logic & State Management
 - **Chat Logic**: `src/renderer/services/chatLogic/`
@@ -178,12 +206,16 @@ src/
   ├── renderer/       # Electron renderer process (UI)
   │   ├── components/ # React components
   │   │   ├── Chat/   # Chat interface components
+  │   │   ├── CommandPalette/ # Command palette for keyboard shortcuts
   │   │   ├── Layout/ # Application layout components
   │   │   ├── Settings/ # Settings page components
   │   │   └── Sidebar/ # Sidebar components
   │   ├── contexts/   # React contexts for state management
+  │   │   ├── AppContext.tsx # Main application state
+  │   │   └── ShortcutsContext.tsx # Keyboard shortcuts management
   │   ├── hooks/      # React hooks
-  │   │   └── useChat.ts # Chat-specific hooks
+  │   │   ├── useChat.ts # Chat-specific hooks
+  │   │   └── useKeyboardShortcuts.ts # Keyboard shortcuts logic
   │   ├── services/   # Frontend services
   │   │   ├── chatLogic/ # Chat logic implementation
   │   │   │   ├── chatHandler.ts # Core chat logic
@@ -200,7 +232,8 @@ src/
       ├── types/      # TypeScript type definitions
       │   ├── chat.ts # Chat-related type definitions
       │   ├── model.ts # Model-related type definitions
-      │   └── dsl.ts  # DSL-related type definitions
+      │   ├── dsl.ts  # DSL-related type definitions
+      │   └── shortcuts.ts # Keyboard shortcuts type definitions
       └── utils/      # Utility functions
 ```
 
@@ -280,6 +313,21 @@ src/
 - **Configuration Persistence**: All UI customizations saved automatically
   - Sidebar width, input height, and other preferences stored via IPC
   - Settings restored on application restart for consistent experience
+
+#### Keyboard Shortcuts & Command Palette
+- **Command Palette (Ctrl+K)**: Universal command interface with fuzzy search
+  - Located in `src/renderer/components/CommandPalette/`
+  - Categorized commands with keyboard navigation (↑/↓ to navigate, Enter to execute)
+  - Dynamic content based on current app state (available models, chats, etc.)
+  - Visual shortcut indicators and searchable descriptions
+- **Global Keyboard Shortcuts**: Comprehensive shortcut system
+  - **Implementation**: `src/renderer/hooks/useKeyboardShortcuts.ts` and `src/renderer/contexts/ShortcutsContext.tsx`
+  - **Context-aware**: Respects input focus to avoid conflicts with typing
+  - **Visual Integration**: Tooltips on buttons show corresponding keyboard shortcuts
+  - **Type-safe**: Full TypeScript support with `src/shared/types/shortcuts.ts`
+- **Enhanced Help Text**: Chat input area shows key shortcuts (Ctrl+Enter, Ctrl+K, Ctrl+N)
+- **Model Toggle Shortcuts**: Alt+1-9 for quick model activation/deactivation
+- **Navigation Shortcuts**: Ctrl+, for settings, Ctrl+1/2 for view switching
 
 ### Documentation
 - README.md with comprehensive documentation:

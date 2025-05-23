@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./Sidebar.module.css";
 import { useAppContext } from "../../contexts/AppContext";
+import { useShortcuts } from "../../contexts/ShortcutsContext";
 import { useConfig } from "../../hooks/useConfig";
 import { Chat } from "../../../shared/types/chat";
 
@@ -25,6 +26,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     deleteAllChats,
     updateChatSummaryManual,
   } = useAppContext();
+
+  const { openCommandPalette } = useShortcuts();
 
   const { config, setTheme, zoomLevel, setZoom } = useConfig();
   const [themeIndex, setThemeIndex] = useState(0);
@@ -233,7 +236,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   return (
     <div className={styles.sidebar}>
       <div className={styles.header}>
-        <button className={styles.newChatButton} onClick={handleNewChat}>
+        <button 
+          className={styles.newChatButton} 
+          onClick={handleNewChat}
+          title="New Chat (Ctrl+N)"
+        >
           <span>+</span> New Chat
         </button>
       </div>
@@ -244,7 +251,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
           onClick={cycleTheme}
           title={`Current Theme: ${
             availableThemes[themeIndex] || "Default"
-          } - Click to cycle themes`}
+          } - Click to cycle themes (Ctrl+Shift+T)`}
         >
           {getThemeEmoji()}
         </button>
@@ -274,9 +281,16 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         <button
           className={styles.actionButton}
           onClick={handleSettingsClick}
-          title="Settings"
+          title="Settings (Ctrl+,)"
         >
           ⚙️
+        </button>
+        <button
+          className={styles.actionButton}
+          onClick={openCommandPalette}
+          title="Command Palette (Ctrl+K)"
+        >
+          ⌘
         </button>
       </div>
 
@@ -293,7 +307,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
           <div className={styles.noModels}>No models configured yet</div>
         ) : (
           <div className={styles.modelList}>
-            {models.map((model) => (
+            {models.map((model, index) => (
               <div
                 key={model.id}
                 className={`${styles.modelToggle} ${
@@ -301,6 +315,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 }`}
                 style={{ backgroundColor: getModelColor(model.id) }}
                 onClick={() => handleToggleModel(model.id, model.isActive)}
+                title={`${model.name} - Click to toggle${index < 9 ? ` (Alt+${index + 1})` : ''}`}
               >
                 <span className={styles.modelName}>{model.name}</span>
                 <span className={styles.toggleIndicator}>
