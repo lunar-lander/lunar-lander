@@ -9,88 +9,122 @@ on:
     branches: [ main, master ]
 
 jobs:
-  setup:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
 
-  build:
-    needs: setup
-    runs-on: ${{ matrix.os }}
-    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master'
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+      - name: Lint
+        run: yarn lint
 
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install
+      - name: Type check
+        run: yarn typecheck
 
       - name: Build
         run: yarn build
 
-      - name: Package
+  build:
+    needs: test
+    runs-on: ${{ matrix.os }}
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master'
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
+          - os: macos-latest
+            platform: mac
+            arch: x64
+          - os: macos-latest
+            platform: mac
+            arch: arm64
+          - os: windows-latest
+            platform: win
+            arch: x64
+          - os: windows-latest
+            platform: win
+            arch: ia32
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            yarn dist:linux
-          elif [ "$RUNNER_OS" == "macOS" ]; then
-            yarn dist:mac-manual
-          else
-            yarn dist:win-manual
-          fi
-        shell: bash
+          sudo apt-get update
+          sudo apt-get install -y rpm
+
+      - name: Build and Package
+        run: |
+          yarn build
+          yarn electron-builder --${{ matrix.platform }} --${{ matrix.arch }} --publish=never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-package
+          name: ${{ matrix.platform }}-${{ matrix.arch }}-package
           path: build/
+          retention-days: 5
 
   release:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: find artifacts -type f -name "*" | head -20
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/**/*.AppImage
-            artifacts/**/*.dmg
-            artifacts/**/*.exe
-            artifacts/**/*.zip
-            artifacts/**/*.deb
-            artifacts/**/*.rpm
-            artifacts/**/*.snap
-            artifacts/**/*.pacman
-            artifacts/**/*.pkg.tar.zst
+            artifacts/*.AppImage
+            artifacts/*.dmg
+            artifacts/*.exe
+            artifacts/*.zip
+            artifacts/*.deb
+            artifacts/*.rpm
+            artifacts/*.tar.gz
+            artifacts/*installer*
           draft: ${{ startsWith(github.ref, 'refs/tags/v') }}
           generate_release_notes: true
           prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
           tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('auto-release-{0}', github.sha) }}
           name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('Auto Release {0}', github.sha) }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

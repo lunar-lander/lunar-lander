@@ -124,47 +124,48 @@ check: lint typecheck
 package: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for current platform...$(COLOR_RESET)"
 ifeq ($(PLATFORM),linux)
-	@NODE_ENV=production yarn run dist:linux
+	@NODE_ENV=production yarn dist:linux
 else ifeq ($(PLATFORM),win)
-	@NODE_ENV=production yarn run dist:win-manual
+	@NODE_ENV=production yarn dist:win
 else ifeq ($(PLATFORM),mac)
-	@NODE_ENV=production yarn run dist:mac-manual
+	@NODE_ENV=production yarn dist:mac
 endif
 
 # Package for Linux only
-.PHONY: package-linux
-package-linux: $(NODE_MODULES) build
+.PHONY: package_linux
+package_linux: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for Linux...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:linux-manual
-
-# Package for specific Linux formats
-.PHONY: package-linux-all
-package-linux-all: $(NODE_MODULES) build
-	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for all Linux formats...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:linux-all
+	@NODE_ENV=production yarn dist:linux
 
 # Package for Windows only
-.PHONY: package-win
-package-win: $(NODE_MODULES) build
+.PHONY: package_win
+package_win: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for Windows...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:win-manual
+	@NODE_ENV=production yarn dist:win
 
 # Package for Mac only
-.PHONY: package-mac
-package-mac: $(NODE_MODULES) build
+.PHONY: package_mac
+package_mac: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for macOS...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:mac-manual
+	@NODE_ENV=production yarn dist:mac
 
-# Package for all platforms
-.PHONY: package-all
-package-all: $(NODE_MODULES) build
+# Package for all platforms (requires all platforms available)
+.PHONY: package_all
+package_all: $(NODE_MODULES) build
 	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packaging application for all platforms...$(COLOR_RESET)"
-	@echo -e "$(COLOR_BOLD)$(COLOR_BLUE)Building Linux packages...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:linux-all
-	@echo -e "$(COLOR_BOLD)$(COLOR_BLUE)Building Windows package...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:win-manual
-	@echo -e "$(COLOR_BOLD)$(COLOR_BLUE)Building macOS package...$(COLOR_RESET)"
-	@NODE_ENV=production yarn run dist:mac-manual
+	@NODE_ENV=production yarn dist:all
+
+# Pack without creating installers (useful for testing)
+.PHONY: pack
+pack: $(NODE_MODULES) build
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Packing application for current platform...$(COLOR_RESET)"
+ifeq ($(PLATFORM),linux)
+	@NODE_ENV=production yarn pack:linux
+else ifeq ($(PLATFORM),win)
+	@NODE_ENV=production yarn pack:win
+else ifeq ($(PLATFORM),mac)
+	@NODE_ENV=production yarn pack:mac
+endif
 
 # Create release
 .PHONY: release
@@ -192,12 +193,11 @@ help:
 	@echo -e "  $(COLOR_GREEN)typecheck$(COLOR_RESET)   Typecheck TypeScript code"
 	@echo -e "  $(COLOR_GREEN)check$(COLOR_RESET)       Run all code quality checks"
 	@echo -e "  $(COLOR_GREEN)package$(COLOR_RESET)     Package application for current platform"
-	@echo -e "  $(COLOR_GREEN)package-linux$(COLOR_RESET) Package application for Linux only"
-	@echo -e "  $(COLOR_GREEN)package-appimage$(COLOR_RESET) Package application as AppImage"
-	@echo -e "  $(COLOR_GREEN)package-deb$(COLOR_RESET) Package application as Debian/Ubuntu package"
-	@echo -e "  $(COLOR_GREEN)package-pacman$(COLOR_RESET) Package application as Arch Linux package"
-	@echo -e "  $(COLOR_GREEN)package-win$(COLOR_RESET) Package application for Windows"
-	@echo -e "  $(COLOR_GREEN)package-all$(COLOR_RESET) Package application for all platforms"
+	@echo -e "  $(COLOR_GREEN)package_linux$(COLOR_RESET) Package application for Linux only"
+	@echo -e "  $(COLOR_GREEN)package_win$(COLOR_RESET) Package application for Windows"
+	@echo -e "  $(COLOR_GREEN)package_mac$(COLOR_RESET) Package application for macOS"
+	@echo -e "  $(COLOR_GREEN)package_all$(COLOR_RESET) Package application for all platforms"
+	@echo -e "  $(COLOR_GREEN)pack$(COLOR_RESET)        Pack application without creating installers"
 	@echo -e "  $(COLOR_GREEN)release$(COLOR_RESET)     Create a release"
 	@echo -e "  $(COLOR_GREEN)clean$(COLOR_RESET)       Clean build files"
 	@echo -e "  $(COLOR_GREEN)help$(COLOR_RESET)        Show this help message"

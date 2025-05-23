@@ -10,14 +10,15 @@
     "lint": "eslint --ext .ts,.tsx src",
     "typecheck": "tsc --noEmit",
     "prepare": "mkdir -p dist/main dist/renderer",
-    "dist": "electron-builder",
-    "dist:linux": "electron-builder --linux",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac",
-    "dist:win-manual": "node scripts/package-win.js",
-    "dist:mac-manual": "node scripts/package-mac.js",
-    "dist:linux-manual": "node scripts/package-linux.js",
-    "dist:linux-all": "node scripts/package-linux.js"
+    "dist": "yarn build && electron-builder",
+    "dist:linux": "yarn build && electron-builder --linux",
+    "dist:win": "yarn build && electron-builder --win",
+    "dist:mac": "yarn build && electron-builder --mac",
+    "dist:all": "yarn build && electron-builder --mac --win --linux",
+    "pack": "yarn build && electron-builder --dir",
+    "pack:linux": "yarn build && electron-builder --linux dir",
+    "pack:win": "yarn build && electron-builder --win dir",
+    "pack:mac": "yarn build && electron-builder --mac dir"
   },
   "dependencies": {
     "@uiw/react-md-editor": "^4.0.6",
@@ -69,46 +70,86 @@
   "build": {
     "appId": "tech.blackmetal.lunar-lander",
     "productName": "Lunar Lander",
+    "compression": "maximum",
     "files": [
       "dist/**/*",
-      "package.json"
+      "package.json",
+      "node_modules/**/*"
     ],
     "directories": {
       "buildResources": "assets",
       "output": "build"
     },
+    "afterPack": "scripts/afterPack.js",
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
       ],
       "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
       "darkModeSupport": true,
-      "hardenedRuntime": true
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "icon": "assets/icon.png"
     },
     "win": {
       "target": [
-        "zip"
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "ia32"]
+        }
       ],
-      "artifactName": "${productName}-${version}-win-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-win-${arch}.${ext}",
+      "icon": "assets/icon.png"
     },
     "linux": {
       "target": [
-        "zip",
-        "AppImage",
-        "deb",
-        "pacman"
+        {
+          "target": "AppImage",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "rpm",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "tar.gz",
+          "arch": ["x64", "arm64"]
+        }
       ],
       "maintainer": "Lunar Lander Support <support@lunar-lander.blackmetal.tech>",
       "category": "Utility",
-      "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
+      "icon": "assets/icon.png",
+      "desktop": {
+        "Name": "Lunar Lander",
+        "Comment": "Multi-LLM Chat Application",
+        "Categories": "Utility;Office;",
+        "StartupNotify": "true"
+      }
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "runAfterFinish": true
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "artifactName": "${productName}-${version}-win-${arch}-installer.${ext}"
     },
     "publish": null,
     "extraMetadata": {
