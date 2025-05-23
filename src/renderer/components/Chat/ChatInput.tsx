@@ -3,6 +3,7 @@ import { Model } from "../../../shared/types/model";
 import styles from "./ChatInput.module.css";
 import MDEditor from "@uiw/react-md-editor";
 import { ConversationModeType } from "../Settings/ConversationMode";
+import { useConfig } from "../../hooks/useConfig";
 
 // Chat mode options - aligned with settings definitions
 export enum ChatMode {
@@ -36,10 +37,20 @@ const ChatInput: React.FC<ChatInputProps> = ({
   disabled = false,
   currentMode,
 }) => {
+  const { inputHeight: configInputHeight, setInputHeightPersistent } = useConfig();
   const [message, setMessage] = useState("");
   const [temperature, setTemperature] = useState(1.0);
   const [editorHeight, setEditorHeight] = useState(150);
   const [isResizing, setIsResizing] = useState(false);
+  const [startY, setStartY] = useState(0);
+  const [startHeight, setStartHeight] = useState(0);
+
+  // Sync with config
+  useEffect(() => {
+    if (configInputHeight) {
+      setEditorHeight(configInputHeight);
+    }
+  }, [configInputHeight]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Send message on Ctrl+Enter or Cmd+Enter
@@ -71,22 +82,25 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
-  }, []);
+    setStartY(e.clientY);
+    setStartHeight(editorHeight);
+  }, [editorHeight]);
 
   const handleResizeMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing) return;
     
-    const container = document.querySelector(`.${styles.container}`) as HTMLElement;
-    if (!container) return;
-    
-    const containerRect = container.getBoundingClientRect();
-    const newHeight = Math.max(100, Math.min(400, containerRect.bottom - e.clientY + 40));
+    const deltaY = e.clientY - startY;
+    const newHeight = Math.max(100, Math.min(400, startHeight + deltaY));
     setEditorHeight(newHeight);
-  }, [isResizing]);
+  }, [isResizing, startY, startHeight]);
 
   const handleResizeMouseUp = useCallback(() => {
     setIsResizing(false);
-  }, []);
+    // Save the final height to config
+    if (setInputHeightPersistent) {
+      setInputHeightPersistent(editorHeight);
+    }
+  }, [editorHeight, setInputHeightPersistent]);
 
   useEffect(() => {
     if (isResizing) {
@@ -150,7 +164,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       </div>
 
-      <div className={styles.resizeHandle} onMouseDown={handleResizeMouseDown} />
       <div className={styles.editorWrapper} onKeyDown={handleKeyDown}>
         <MDEditor
           value={message}
@@ -176,6 +189,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       <div className={styles.helpText}>
         Press Ctrl+Enter to send
       </div>
+      <div className={styles.resizeHandle} onMouseDown={handleResizeMouseDown} />
     </div>
   );
 };

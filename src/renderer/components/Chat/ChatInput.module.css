@@ -9,19 +9,25 @@
 }
 
 .resizeHandle {
-  position: absolute;
-  top: -2px;
-  left: 0;
-  right: 0;
-  height: 4px;
+  height: 8px;
   cursor: row-resize;
   background-color: transparent;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .resizeHandle:hover {
   background-color: var(--primary-color);
   opacity: 0.3;
+}
+
+.resizeHandle::after {
+  content: "⋯";
+  color: rgba(0, 0, 0, 0.3);
+  font-size: 16px;
+  letter-spacing: 2px;
 }
 
 .controlsBar {

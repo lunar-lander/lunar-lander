@@ -163,6 +163,22 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     setEditingChatId(null);
   };
   
+  // Generate pastel color for model
+  const getModelColor = (modelId: string): string => {
+    // Create a consistent hash from model ID
+    let hash = 0;
+    for (let i = 0; i < modelId.length; i++) {
+      hash = ((hash << 5) - hash + modelId.charCodeAt(i)) & 0xffffffff;
+    }
+    
+    // Generate pastel colors using the hash
+    const hue = Math.abs(hash) % 360;
+    const saturation = 45 + (Math.abs(hash) % 20); // 45-65%
+    const lightness = 85 + (Math.abs(hash) % 10); // 85-95%
+    
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  };
+
   // Format relative time for chats
   const formatRelativeTime = (timestamp: number): string => {
     const now = Date.now();
@@ -264,6 +280,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                 className={`${styles.modelToggle} ${
                   model.isActive ? styles.active : ""
                 }`}
+                style={{ backgroundColor: getModelColor(model.id) }}
                 onClick={() => handleToggleModel(model.id, model.isActive)}
               >
                 <span className={styles.modelName}>{model.name}</span>

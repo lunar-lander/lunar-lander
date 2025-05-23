@@ -1,16 +1,25 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Sidebar from "../Sidebar/Sidebar";
 import styles from "./Layout.module.css";
+import { useConfig } from "../../hooks/useConfig";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { sidebarWidth: configSidebarWidth, setSidebarWidthPersistent } = useConfig();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(280);
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // Sync with config
+  useEffect(() => {
+    if (configSidebarWidth) {
+      setSidebarWidth(configSidebarWidth);
+    }
+  }, [configSidebarWidth]);
 
   const toggleSidebar = () => {
     setSidebarCollapsed(prev => !prev);
@@ -30,7 +39,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleMouseUp = useCallback(() => {
     setIsResizing(false);
-  }, []);
+    // Save the final width to config
+    if (setSidebarWidthPersistent) {
+      setSidebarWidthPersistent(sidebarWidth);
+    }
+  }, [sidebarWidth, setSidebarWidthPersistent]);
 
   React.useEffect(() => {
     if (isResizing) {

@@ -29,6 +29,7 @@ interface AppConfig {
     showTimestamps: boolean;
     compactMode: boolean;
     sidebarWidth: number;
+    inputHeight: number;
     zoomLevel: number;
   };
   behavior: {
@@ -61,6 +62,8 @@ export function useConfig() {
   const [loading, setLoading] = useState(true);
   const [summaryModelId, setSummaryModelId] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1.0);
+  const [sidebarWidth, setSidebarWidth] = useState<number>(280);
+  const [inputHeight, setInputHeight] = useState<number>(150);
 
   // Load initial config
   useEffect(() => {
@@ -79,6 +82,12 @@ export function useConfig() {
         // Get zoom level
         const currentZoom = await electron.invoke('config:get-zoom-level');
         setZoomLevel(currentZoom);
+        
+        // Load UI settings
+        if (appConfig?.ui) {
+          setSidebarWidth(appConfig.ui.sidebarWidth || 280);
+          setInputHeight(appConfig.ui.inputHeight || 150);
+        }
       } catch (error) {
         console.error('Failed to load configuration:', error);
       } finally {
@@ -226,18 +235,56 @@ export function useConfig() {
     }
   }, [zoomLevel]);
 
+  // Save sidebar width to config
+  const setSidebarWidthPersistent = async (width: number) => {
+    try {
+      await updateConfig({
+        ui: {
+          ...config?.ui,
+          sidebarWidth: width
+        }
+      });
+      setSidebarWidth(width);
+      return true;
+    } catch (error) {
+      console.error('Failed to save sidebar width:', error);
+      return false;
+    }
+  };
+
+  // Save input height to config
+  const setInputHeightPersistent = async (height: number) => {
+    try {
+      await updateConfig({
+        ui: {
+          ...config?.ui,
+          inputHeight: height
+        }
+      });
+      setInputHeight(height);
+      return true;
+    } catch (error) {
+      console.error('Failed to save input height:', error);
+      return false;
+    }
+  };
+
   return {
     config,
     currentTheme,
     loading,
     summaryModelId,
     zoomLevel,
+    sidebarWidth,
+    inputHeight,
     updateConfig,
     saveTheme,
     deleteTheme,
     setTheme,
     toggleSystemTheme,
     setSummaryModel,
-    setZoom
+    setZoom,
+    setSidebarWidthPersistent,
+    setInputHeightPersistent
   };
 }
