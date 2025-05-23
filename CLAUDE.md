@@ -19,7 +19,12 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
    - Toggle message visibility for specific responses
    - Control temperature and other LLM parameters
    - Real-time streaming responses from multiple models simultaneously
-4. **Streamlined UI**: Intuitive interface for managing complex multi-LLM interactions
+4. **Streamlined UI**: 
+   - Intuitive interface for managing complex multi-LLM interactions
+   - Copy button for easy message copying from LLM responses
+   - Compact sidebar design for better space utilization
+   - Proper zoom functionality with consistent scaling
+   - Enhanced dark theme support with proper code block visibility
 5. **Cross-Platform**: Available for Linux, Windows, and macOS
 
 ## Technical Implementation
@@ -187,6 +192,26 @@ src/
   - Builds and packages for all platforms on tagged releases or master pushes
   - Publishes releases to GitHub Releases
   - Supports Linux, macOS, and Windows
+
+### Recent UI Enhancements
+- **Copy Functionality**: Added copy button for LLM replies in chat messages
+  - Located in `src/renderer/components/Chat/ChatMessage.tsx`
+  - Positioned below visibility toggle for assistant messages
+  - Uses native clipboard API for reliable copying
+- **Compact Sidebar Design**: Improved space utilization for chat history
+  - Reduced padding, margins, and font sizes in `src/renderer/components/Sidebar/Sidebar.module.css`
+  - Smaller control buttons and tighter spacing
+  - More conversations visible in limited space
+- **Model Selection Consistency**: Fixed inconsistent behavior between sidebar and chat box
+  - Enhanced `src/renderer/hooks/useChat.ts` to sync global and local model states
+  - Both sidebar and chat input maintain consistent model selections
+- **Improved Zoom Implementation**: Fixed zoom behavior for proper scaling
+  - Updated `src/renderer/styles/global.css` to use transform-only scaling
+  - Eliminated double scaling (font-size + transform) issues
+  - Proper viewport compensation for accurate zoom levels
+- **Dark Theme Code Visibility**: Enhanced readability of code blocks in dark themes
+  - Added proper text color styling in `src/renderer/components/Chat/ChatMessage.module.css`
+  - Both inline and block code elements now visible in dark mode
 
 ### Documentation
 - README.md with comprehensive documentation:
