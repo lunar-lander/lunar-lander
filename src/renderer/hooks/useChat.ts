@@ -24,7 +24,8 @@ export const useChat = (chatId?: string) => {
     conversationMode,
     systemPrompt,
     summaryModelId,
-    customConfigs
+    customConfigs,
+    updateModel
   } = useAppContext();
 
   const { summaryModelId: configSummaryModelId } = useConfig();
@@ -68,7 +69,7 @@ export const useChat = (chatId?: string) => {
     }
   }, [chatId, getChat]);
 
-  // Set initially active models
+  // Set initially active models and sync with global model state
   useEffect(() => {
     // Set all active models as initially active
     setActiveModelIds(models.filter((m) => m.isActive).map((m) => m.id));
@@ -96,11 +97,21 @@ export const useChat = (chatId?: string) => {
   };
 
   const handleToggleModel = (modelId: string) => {
+    // Check current state
+    const isCurrentlyActive = activeModelIds.includes(modelId);
+    
+    // Update local state
     setActiveModelIds((prev) =>
-      prev.includes(modelId)
+      isCurrentlyActive
         ? prev.filter((id) => id !== modelId)
         : [...prev, modelId]
     );
+    
+    // Also update the global model state to keep sidebar in sync
+    updateModel({
+      id: modelId,
+      isActive: !isCurrentlyActive
+    });
   };
 
   const handleToggleMessageVisibility = (messageId: string) => {
