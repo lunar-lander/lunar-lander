@@ -3,27 +3,25 @@
   padding: 16px;
   background-color: #f9f9f9;
   color: #202124;
-  resize: vertical;
-  overflow: auto;
-  min-height: 160px;
-  max-height: 500px;
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
-/* Add a visible resize handle to make it obvious that it's resizable */
-.container::after {
-  content: '';
+.resizeHandle {
   position: absolute;
+  top: -2px;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 6px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6"><circle cx="3" cy="3" r="1" fill="rgba(0,0,0,0.2)"/></svg>');
-  background-repeat: repeat-x;
-  background-position: center;
-  cursor: ns-resize;
+  height: 4px;
+  cursor: row-resize;
+  background-color: transparent;
+  z-index: 10;
+}
+
+.resizeHandle:hover {
+  background-color: var(--primary-color);
+  opacity: 0.3;
 }
 
 .controlsBar {

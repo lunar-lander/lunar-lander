@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Model } from "../../../shared/types/model";
 import styles from "./ChatInput.module.css";
 import MDEditor from "@uiw/react-md-editor";
@@ -39,6 +39,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const [message, setMessage] = useState("");
   const [temperature, setTemperature] = useState(1.0);
   const [editorHeight, setEditorHeight] = useState(150);
+  const [isResizing, setIsResizing] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Send message on Ctrl+Enter or Cmd+Enter
@@ -66,6 +67,42 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleTemperatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTemperature(parseFloat(e.target.value));
   };
+
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const handleResizeMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing) return;
+    
+    const container = document.querySelector(`.${styles.container}`) as HTMLElement;
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const newHeight = Math.max(100, Math.min(400, containerRect.bottom - e.clientY + 40));
+    setEditorHeight(newHeight);
+  }, [isResizing]);
+
+  const handleResizeMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleResizeMouseMove);
+      document.addEventListener('mouseup', handleResizeMouseUp);
+      document.body.style.cursor = 'row-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleResizeMouseMove);
+      document.removeEventListener('mouseup', handleResizeMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing, handleResizeMouseMove, handleResizeMouseUp]);
 
   return (
     <div className={styles.container}>
@@ -113,12 +150,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       </div>
 
+      <div className={styles.resizeHandle} onMouseDown={handleResizeMouseDown} />
       <div className={styles.editorWrapper} onKeyDown={handleKeyDown}>
         <MDEditor
           value={message}
           onChange={(value) => setMessage(value || "")}
           preview="edit"
-          height={150}
+          height={editorHeight}
           className={styles.mdEditor}
           textareaProps={{
             placeholder: "Type a message using Markdown...",
