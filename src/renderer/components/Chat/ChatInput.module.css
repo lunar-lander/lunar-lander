@@ -58,10 +58,17 @@
   white-space: nowrap;
 }
 
-.modelToggle.active {
+.modelToggle:hover:not(.active) {
   background-color: var(--hover-bg-color);
   border-color: var(--primary-color);
-  color: var(--primary-color);
+}
+
+.modelToggle.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(var(--primary-color-rgb), 0.3);
 }
 
 .chatControls {
