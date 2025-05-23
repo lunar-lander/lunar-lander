@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #000000;
+  background-color: rgba(0, 0, 0, 0.95);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -37,7 +37,6 @@
   border: 1px solid var(--border-color);
   border-radius: 6px;
   background-color: var(--input-bg);
-  color: var(--text-color);
   font-size: 16px;
   outline: none;
   transition: border-color 0.2s ease;
@@ -48,7 +47,7 @@
 }
 
 .searchInput::placeholder {
-  color: var(--text-secondary);
+
 }
 
 .resultsContainer {
@@ -65,7 +64,7 @@
   padding: 8px 16px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background-color: var(--sidebar-color);
@@ -83,11 +82,12 @@
   width: 100%;
   text-align: left;
   transition: background-color 0.15s ease;
+  color: var(--text-color);
 }
 
 .resultItem:hover,
 .resultItem.selected {
-  background-color: var(--hover-bg-color);
+  background-color: var(--primary-hover-color);
 }
 
 .itemContent {
@@ -98,17 +98,17 @@
 .itemLabel {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-color);
   margin-bottom: 2px;
 }
 
 .selected .itemLabel {
   font-weight: 700;
+  text-decoration: underline;
 }
 
 .itemDescription {
   font-size: 12px;
-  color: var(--text-secondary);
+
 }
 
 .selected .itemDescription {
@@ -129,20 +129,18 @@
   border-radius: 3px;
   font-size: 11px;
   font-family: monospace;
-  color: var(--text-secondary);
   min-width: 20px;
   text-align: center;
 }
 
 .selected .shortcutKey {
   font-weight: 600;
-  border-color: var(--text-color);
 }
 
 .noResults {
   padding: 40px 16px;
   text-align: center;
-  color: var(--text-secondary);
+
   font-size: 14px;
 }
 
@@ -155,7 +153,7 @@
 
 .footerHint {
   font-size: 11px;
-  color: var(--text-secondary);
+
   display: flex;
   justify-content: space-between;
   align-items: center;
