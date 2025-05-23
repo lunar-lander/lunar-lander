@@ -10,10 +10,6 @@ export enum ChatMode {
   ISOLATED = "isolated",
   DISCUSS = "discuss",
   ROUND_ROBIN = "round-robin",
-  COLLABORATIVE_REFINEMENT = "collaborative-refinement",
-  EXPERT_PANEL = "expert-panel",
-  DEBATE = "debate",
-  CONSENSUS_BUILDING = "consensus-building",
   CUSTOM = "custom",
 }
 
@@ -163,10 +159,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
             <option value={ChatMode.ISOLATED}>Isolated</option>
             <option value={ChatMode.DISCUSS}>Discuss</option>
             <option value={ChatMode.ROUND_ROBIN}>Round Robin</option>
-            <option value={ChatMode.COLLABORATIVE_REFINEMENT}>Collaborative Refinement</option>
-            <option value={ChatMode.EXPERT_PANEL}>Expert Panel</option>
-            <option value={ChatMode.DEBATE}>Debate</option>
-            <option value={ChatMode.CONSENSUS_BUILDING}>Consensus Building</option>
             <option value={ChatMode.CUSTOM}>Custom</option>
           </select>
         </div>
