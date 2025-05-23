@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-start;
@@ -91,11 +91,6 @@
   background-color: var(--hover-bg-color);
 }
 
-.resultItem.selected {
-  background-color: var(--primary-color);
-  color: white;
-}
-
 .itemContent {
   flex: 1;
   min-width: 0;
@@ -109,7 +104,7 @@
 }
 
 .selected .itemLabel {
-  color: white;
+  font-weight: 700;
 }
 
 .itemDescription {
@@ -119,7 +114,8 @@
 }
 
 .selected .itemDescription {
-  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  opacity: 1;
 }
 
 .shortcutKeys {
@@ -142,9 +138,8 @@
 }
 
 .selected .shortcutKey {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  border-color: var(--text-color);
 }
 
 .noResults {
