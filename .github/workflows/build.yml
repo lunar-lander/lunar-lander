@@ -39,12 +39,12 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             arch: arm64
-          - os: windows-latest
-            platform: win
-            arch: x64
-          - os: windows-latest
-            platform: win
-            arch: ia32
+          # - os: windows-latest
+          #   platform: win
+          #   arch: x64
+          # - os: windows-latest
+          #   platform: win
+          #   arch: ia32
 
     steps:
       - uses: actions/checkout@v4
