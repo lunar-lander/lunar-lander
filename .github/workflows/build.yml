@@ -66,8 +66,7 @@ jobs:
 
       - name: Build and Package
         run: |
-          yarn build
-          yarn electron-builder --${{ matrix.platform }} --${{ matrix.arch }} --publish=never
+          make package_all || true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
