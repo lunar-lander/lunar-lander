@@ -16,6 +16,8 @@ body {
   height: calc(100vh / var(--zoom-level, 1.0));
   min-width: calc(100vw / var(--zoom-level, 1.0));
   min-height: calc(100vh / var(--zoom-level, 1.0));
+  max-width: calc(100vw / var(--zoom-level, 1.0));
+  max-height: calc(100vh / var(--zoom-level, 1.0));
 }
 
 body, #root {

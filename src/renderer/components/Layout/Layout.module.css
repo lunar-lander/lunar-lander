@@ -3,6 +3,7 @@
   height: 100%;
   width: 100%;
   overflow: hidden; /* Critical to prevent layout overflow */
+  position: relative; /* Ensure proper positioning context for zoom */
 }
 
 .sidebar {
@@ -14,6 +15,7 @@
   position: relative;
   min-width: 200px;
   max-width: 500px;
+  flex-shrink: 0; /* Prevent sidebar from shrinking and disappearing */
 }
 
 .sidebar.collapsed {
