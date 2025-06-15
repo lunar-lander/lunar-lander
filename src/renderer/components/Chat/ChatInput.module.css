@@ -8,6 +8,24 @@
   flex-direction: column;
 }
 
+/* Mobile-responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .resizeHandle {
+    display: none; /* Hide resize handle on mobile */
+  }
+}
+
 .resizeHandle {
   height: 8px;
   cursor: row-resize;
@@ -36,11 +54,26 @@
   margin-bottom: 8px;
 }
 
+@media (max-width: 768px) {
+  .controlsBar {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
 .modelToggles {
   display: flex;
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 4px;
+}
+
+@media (max-width: 768px) {
+  .modelToggles {
+    gap: 6px;
+    padding: 0 4px;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
 }
 
 .modelToggle {
@@ -192,4 +225,53 @@
   text-align: left;
 }
 
-/* Dark theme overrides are no longer needed since we use CSS variables */
+/* Touch device adjustments */
+@media (pointer: coarse) {
+  .modelToggle {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .modeSelector,
+  .temperatureSlider {
+    min-height: 44px;
+  }
+  
+  .sendButton {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 768px) {
+  .editorWrapper {
+    min-height: 120px; /* Larger minimum on mobile */
+  }
+  
+  .mdEditor {
+    min-height: 120px;
+  }
+  
+  .temperatureControl {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .temperatureSlider {
+    width: 150px;
+  }
+  
+  .bottomBar {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  
+  .helpText {
+    font-size: 12px;
+    text-align: center;
+  }
+}

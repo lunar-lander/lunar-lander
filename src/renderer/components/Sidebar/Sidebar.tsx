@@ -7,9 +7,10 @@ import { Chat } from "../../../shared/types/chat";
 
 interface SidebarProps {
   collapsed?: boolean;
+  onMobileClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
+const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onMobileClose }) => {
   const {
     chats,
     activeChat,
@@ -398,7 +399,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                       className={`${styles.chatItem} ${
                         activeChat === chat.id ? styles.active : ""
                       } ${styles.starredChat}`}
-                      onClick={() => selectChat(chat.id)}
+                      onClick={() => {
+                        selectChat(chat.id);
+                        onMobileClose?.();
+                      }}
                     >
                       {editingChatId === chat.id ? (
                         <form
@@ -494,7 +498,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                   className={`${styles.chatItem} ${
                     activeChat === chat.id ? styles.active : ""
                   }`}
-                  onClick={() => selectChat(chat.id)}
+                  onClick={() => {
+                    selectChat(chat.id);
+                    onMobileClose?.();
+                  }}
                 >
                   {editingChatId === chat.id ? (
                     <form

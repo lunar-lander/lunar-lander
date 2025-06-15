@@ -4,6 +4,13 @@
   flex-direction: column;
 }
 
+/* Mobile adjustments for fixed input */
+@media (max-width: 768px) {
+  .container {
+    padding-bottom: 200px; /* Account for fixed input area */
+  }
+}
+
 .header {
   padding: 16px;
   border-bottom: 1px solid #e0e0e0;

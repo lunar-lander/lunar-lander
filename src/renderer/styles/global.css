@@ -31,6 +31,37 @@ body, #root {
   flex-direction: column;
 }
 
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  body {
+    /* Disable zoom behavior on mobile as it can interfere with viewport */
+    transform: none !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    min-width: 100vw !important;
+    min-height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+  }
+  
+  /* Adjust font size for mobile readability */
+  body {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* Touch-friendly adjustments */
+@media (pointer: coarse) {
+  /* Increase touch target sizes */
+  button, 
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px; /* iOS recommended minimum */
+    min-width: 44px;
+  }
+}
+
 body {
   font-family: var(--font-family, 'Inter, system-ui, sans-serif');
   font-size: var(--font-size-md, 14px);
