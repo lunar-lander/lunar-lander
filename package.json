@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development concurrently \"webpack --config webpack.main.config.js --watch\" \"webpack --config webpack.renderer.config.js --watch\" \"electron dist/main/index.js\"",
     "build": "cross-env NODE_ENV=production webpack --config webpack.main.config.js && webpack --config webpack.renderer.config.js",
+    "build:mobile": "cross-env NODE_ENV=production webpack --config webpack.renderer.config.js",
     "start": "electron dist/main/index.js",
     "lint": "eslint --ext .ts,.tsx src",
     "typecheck": "tsc --noEmit",
@@ -18,9 +19,24 @@
     "pack": "yarn build && electron-builder --dir",
     "pack:linux": "yarn build && electron-builder --linux dir",
     "pack:win": "yarn build && electron-builder --win dir",
-    "pack:mac": "yarn build && electron-builder --mac dir"
+    "pack:mac": "yarn build && electron-builder --mac dir",
+    "mobile:add": "npm run build:mobile && npx cap add",
+    "mobile:copy": "npm run build:mobile && npx cap copy",
+    "mobile:sync": "npm run build:mobile && npx cap sync",
+    "mobile:run:android": "npm run mobile:sync && npx cap run android",
+    "mobile:run:ios": "npm run mobile:sync && npx cap run ios",
+    "mobile:build:android": "npm run mobile:sync && npx cap build android",
+    "mobile:build:ios": "npm run mobile:sync && npx cap build ios"
   },
   "dependencies": {
+    "@capacitor/android": "^7.3.0",
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/cli": "^7.3.0",
+    "@capacitor/core": "^7.3.0",
+    "@capacitor/device": "^7.0.1",
+    "@capacitor/filesystem": "^7.1.1",
+    "@capacitor/ios": "^7.3.0",
+    "@capacitor/preferences": "^7.0.1",
     "@uiw/react-md-editor": "^4.0.6",
     "axios": "^1.6.2",
     "electron-store": "^8.1.0",

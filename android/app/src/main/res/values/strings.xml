@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Lunar Lander</string>
+    <string name="title_activity_main">Lunar Lander</string>
+    <string name="package_name">tech.blackmetal.lunarlander</string>
+    <string name="custom_url_scheme">tech.blackmetal.lunarlander</string>
+</resources>
