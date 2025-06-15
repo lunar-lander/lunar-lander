@@ -110,16 +110,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Initialize app data on first load
   useEffect(() => {
-    // Load mock data for development
-    initializeMockData();
+    const loadData = async () => {
+      // Load mock data for development
+      initializeMockData();
 
-    // Load chats from database
-    const savedChats = DbService.getChats();
-    setChats(savedChats);
+      // Load chats from database
+      const savedChats = await DbService.getChats();
+      setChats(savedChats);
 
-    // Load models from database
-    const savedModels = DbService.getModels();
-    setModels(savedModels);
+      // Load models from database
+      const savedModels = await DbService.getModels();
+      setModels(savedModels);
+    };
+    
+    loadData();
 
     // Load system prompt
     const savedSystemPrompt = localStorage.getItem("systemPrompt") || "";
@@ -205,7 +209,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       isStarred: false,
     };
 
-    DbService.saveChat(newChat);
+    // Save to database asynchronously
+    DbService.saveChat(newChat).catch(error => 
+      console.error('Failed to save new chat:', error)
+    );
     setChats([newChat, ...chats]);
     setActiveChat(newChatId);
     return newChatId;
@@ -220,8 +227,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       console.log(`Updating summary for chat ${chatId} to "${summary}"`);
 
-      // First get chat from DB to ensure we have the latest version
-      const latestChat = DbService.getChat(chatId);
+      // First get chat from state (since DB is async)
+      const latestChat = chats.find(chat => chat.id === chatId);
       if (!latestChat) {
         console.error(`Chat ${chatId} not found when updating summary`);
         return false;
@@ -236,34 +243,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           );
           // Use the state chat instead as it has messages
           const updatedChat = { ...stateChat, summary };
-          const success = DbService.saveChat(updatedChat);
-
-          if (success) {
-            setChats(chats.map((c) => (c.id === chatId ? updatedChat : c)));
-            return true;
-          } else {
-            console.error(`Failed to save chat with updated summary`);
-            return false;
-          }
+          setChats(chats.map((c) => (c.id === chatId ? updatedChat : c)));
+          DbService.saveChat(updatedChat).catch(error => 
+            console.error('Failed to save chat with updated summary:', error)
+          );
+          return true;
         }
       }
 
       // Normal case - we have a valid chat with messages
       const updatedChat = { ...latestChat, summary };
 
-      // Save to DB first
-      const success = DbService.saveChat(updatedChat);
-
-      if (success) {
-        // Then update state
-        setChats((prevChats) =>
-          prevChats.map((c) => (c.id === chatId ? updatedChat : c))
-        );
-        return true;
-      } else {
-        console.error(`Failed to save chat with updated summary`);
-        return false;
-      }
+      // Update state first, then save to DB
+      setChats((prevChats) =>
+        prevChats.map((c) => (c.id === chatId ? updatedChat : c))
+      );
+      
+      DbService.saveChat(updatedChat).catch(error => 
+        console.error(`Failed to save chat with updated summary:`, error)
+      );
+      return true;
     } catch (error) {
       console.error(`Error updating chat summary:`, error);
       return false;
@@ -273,8 +272,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   // Add a message to chat
   const addMessageToChat = (chatId: string, message: ChatMessage) => {
     try {
-      // First try to get existing chat
-      const existingChat = DbService.getChat(chatId);
+      // First try to get existing chat from state
+      const existingChat = chats.find(chat => chat.id === chatId);
       if (!existingChat) {
         console.error(
           `Chat ${chatId} not found when adding message ${message.id}`
@@ -295,21 +294,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       // Then save to database
-      const result = DbService.addMessageToChat(chatId, message);
+      DbService.addMessageToChat(chatId, message).catch(error => 
+        console.error('Failed to save message to database:', error)
+      );
 
       // Return the updated chat
-      return result;
+      return updatedChat;
     } catch (error) {
       console.error(`Error adding message to chat ${chatId}:`, error);
       // Refresh from database in case of error
-      setChats(DbService.getChats());
+      DbService.getChats().then(setChats).catch(console.error);
       return null;
     }
   };
 
   // Get a specific chat
   const getChat = (chatId: string): Chat | null => {
-    return DbService.getChat(chatId);
+    // Return from memory first for synchronous access
+    return chats.find(chat => chat.id === chatId) || null;
   };
 
   // Update an entire chat
@@ -335,20 +337,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       // Then save to database
-      const saveResult = DbService.saveChat(chat);
-
-      if (!saveResult) {
-        console.error(`Failed to save chat ${chat.id} to database`);
+      DbService.saveChat(chat).catch(error => {
+        console.error(`Failed to save chat ${chat.id} to database:`, error);
         // In case of error, refresh from DB to ensure consistency
-        setChats(DbService.getChats());
-        return false;
-      }
+        DbService.getChats().then(setChats).catch(console.error);
+      });
 
       return true;
     } catch (error) {
       console.error("Error updating chat:", error);
       // In case of error, refresh from DB to ensure consistency
-      setChats(DbService.getChats());
+      DbService.getChats().then(setChats).catch(console.error);
       return false;
     }
   };
@@ -356,8 +355,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   // Update chat summary
   const updateChatSummaryManual = (chatId: string, summary: string): boolean => {
     try {
-      // Get the chat from database
-      const chat = DbService.getChat(chatId);
+      // Get the chat from state (since DB is async)
+      const chat = chats.find(c => c.id === chatId);
       if (!chat) {
         console.error(`Chat ${chatId} not found when updating summary manually`);
         return false;
@@ -376,29 +375,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Get a specific model
   const getModel = (modelId: string): Model | null => {
-    return DbService.getModel(modelId);
+    return models.find(model => model.id === modelId) || null;
   };
 
   // Add a new model
   const addModel = (model: Omit<Model, "id">) => {
-    const newModel = DbService.addModel(model);
+    const newModel = {
+      id: `model_${Date.now()}`,
+      ...model
+    };
     setModels([...models, newModel]);
+    DbService.addModel(model).catch(error => 
+      console.error('Failed to save new model:', error)
+    );
     return newModel;
   };
 
   // Update an existing model
   const updateModel = (model: Partial<Model> & { id: string }) => {
-    const updatedModel = DbService.updateModel(model);
-    if (updatedModel) {
-      setModels(models.map((m) => (m.id === model.id ? updatedModel : m)));
-    }
+    const existingModel = models.find(m => m.id === model.id);
+    if (!existingModel) return null;
+    
+    const updatedModel = { ...existingModel, ...model };
+    setModels(models.map((m) => (m.id === model.id ? updatedModel : m)));
+    
+    DbService.updateModel(model).catch(error => 
+      console.error('Failed to update model:', error)
+    );
     return updatedModel;
   };
 
   // Delete a model
   const deleteModel = (modelId: string) => {
-    DbService.deleteModel(modelId);
     setModels(models.filter((model) => model.id !== modelId));
+    DbService.deleteModel(modelId).catch(error => 
+      console.error('Failed to delete model:', error)
+    );
 
     // If this was the summary model, clear the summary model ID
     if (summaryModelId === modelId) {
@@ -475,7 +487,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     // Star a chat
   const starChat = (chatId: string) => {
     try {
-      const chat = DbService.getChat(chatId);
+      const chat = chats.find(c => c.id === chatId);
       if (!chat) {
         console.error(`Chat ${chatId} not found when starring`);
         return false;
@@ -486,14 +498,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         isStarred: true
       };
 
-      const success = DbService.saveChat(updatedChat);
-      if (success) {
-        setChats(chats.map(c => c.id === chatId ? updatedChat : c));
-        return true;
-      } else {
-        console.error(`Failed to star chat ${chatId}`);
-        return false;
-      }
+      setChats(chats.map(c => c.id === chatId ? updatedChat : c));
+      DbService.saveChat(updatedChat).catch(error => 
+        console.error(`Failed to star chat ${chatId}:`, error)
+      );
+      return true;
     } catch (error) {
       console.error(`Error starring chat ${chatId}:`, error);
       return false;
@@ -503,7 +512,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   // Unstar a chat
   const unstarChat = (chatId: string) => {
     try {
-      const chat = DbService.getChat(chatId);
+      const chat = chats.find(c => c.id === chatId);
       if (!chat) {
         console.error(`Chat ${chatId} not found when unstarring`);
         return false;
@@ -514,14 +523,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         isStarred: false
       };
 
-      const success = DbService.saveChat(updatedChat);
-      if (success) {
-        setChats(chats.map(c => c.id === chatId ? updatedChat : c));
-        return true;
-      } else {
-        console.error(`Failed to unstar chat ${chatId}`);
-        return false;
-      }
+      setChats(chats.map(c => c.id === chatId ? updatedChat : c));
+      DbService.saveChat(updatedChat).catch(error => 
+        console.error(`Failed to unstar chat ${chatId}:`, error)
+      );
+      return true;
     } catch (error) {
       console.error(`Error unstarring chat ${chatId}:`, error);
       return false;
@@ -541,11 +547,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
-      // Remove from database
-      DbService.deleteChat(chatId);
-      
-      // Update state
+      // Update state first
       setChats(chats.filter(c => c.id !== chatId));
+      
+      // Remove from database
+      DbService.deleteChat(chatId).catch(error => 
+        console.error(`Failed to delete chat ${chatId}:`, error)
+      );
       return true;
     } catch (error) {
       console.error(`Error deleting chat ${chatId}:`, error);
@@ -559,13 +567,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       // Clear active chat
       setActiveChat(null);
       
+      // Update state first
+      setChats([]);
+      
       // Remove all chats from database
       chats.forEach(chat => {
-        DbService.deleteChat(chat.id);
+        DbService.deleteChat(chat.id).catch(error => 
+          console.error(`Failed to delete chat ${chat.id}:`, error)
+        );
       });
-      
-      // Update state
-      setChats([]);
       return true;
     } catch (error) {
       console.error('Error deleting all chats:', error);
@@ -583,7 +593,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     toggleTheme,
 
     // Chats
-    chats,
+    chats: chats || [],
     activeChat,
     createChat,
     selectChat,
@@ -598,7 +608,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     deleteAllChats,
 
     // Models
-    models,
+    models: models || [],
     getModel,
     addModel,
     updateModel,

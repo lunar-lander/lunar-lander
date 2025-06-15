@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onMobileClose }) =
   const editInputRef = useRef<HTMLInputElement>(null);
 
   // Filter and sort chats based on search term and star status
-  const filteredChats = chats
+  const filteredChats = (chats || [])
     .filter((chat) => {
       const searchLower = searchTerm.toLowerCase();
       return chat.summary.toLowerCase().includes(searchLower);
@@ -307,17 +307,17 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onMobileClose }) =
       <div className={styles.modelToggles}>
         <div className={styles.chatListHeaderTop}>
           <h3 className={styles.sectionTitle}>Models</h3>
-          {models.length > 0 && (
+          {(models || []).length > 0 && (
             <span className={styles.modelCount}>
-              {models.filter((m) => m.isActive).length} active
+              {(models || []).filter((m) => m.isActive).length} active
             </span>
           )}
         </div>
-        {models.length === 0 ? (
+        {(models || []).length === 0 ? (
           <div className={styles.noModels}>No models configured yet</div>
         ) : (
           <div className={styles.modelList}>
-            {models.map((model, index) => (
+            {(models || []).map((model, index) => (
               <div
                 key={model.id}
                 className={`${styles.modelToggle} ${
