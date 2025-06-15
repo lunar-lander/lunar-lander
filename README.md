@@ -5,7 +5,7 @@
   <p>Compare responses, create collaborative discussions, and explore new interaction patterns</p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey)]()
+[![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux%20%7C%20ios%20%7C%20android-lightgrey)]()
 
 </div>
 
@@ -13,7 +13,7 @@
 
 ## 🔍 Overview
 
-Lunar Lander is a desktop application that enables seamless interaction with multiple Large Language Models simultaneously. Designed for researchers, developers, and AI enthusiasts, it allows you to:
+Lunar Lander is a cross-platform application (desktop and mobile) that enables seamless interaction with multiple Large Language Models simultaneously. Designed for researchers, developers, and AI enthusiasts, it allows you to:
 
 - **Compare responses** from different models to the same prompt
 - **Create collaborative discussions** where models build on each other's thoughts
@@ -50,6 +50,17 @@ Lunar Lander is a desktop application that enables seamless interaction with mul
 - Markdown support in messages
 - Exportable conversation history
 
+### Cross-Platform Compatibility
+
+- **Desktop**: Native Electron applications for Windows, macOS, and Linux
+- **Mobile**: Capacitor-powered apps for iOS and Android with native performance
+- **Unified Experience**: Shared codebase ensures consistent features across all platforms
+- **Platform-Specific Optimizations**: 
+  - Touch-friendly interface on mobile devices
+  - Mobile-optimized navigation with drawer sidebar
+  - Responsive design that adapts to screen sizes
+  - Platform-specific storage and file handling
+
 ## 🚀 Getting Started
 
 ### Download
@@ -79,8 +90,10 @@ make dev
 
 #### Build & Package
 
+##### Desktop Applications
+
 ```bash
-# Build the application
+# Build the desktop application
 make build
 
 # Package for your current platform
@@ -88,9 +101,6 @@ make package
 
 # Package for Linux only (on Linux systems)
 make package-linux
-
-# Package for all Linux formats
-make package-linux-all
 
 # Package for Windows only
 make package-win
@@ -101,6 +111,33 @@ make package-mac
 # Package for all platforms
 make package-all
 ```
+
+##### Mobile Applications
+
+```bash
+# Build for mobile platforms
+yarn build:mobile
+
+# Sync with Capacitor (copies web assets to mobile projects)
+yarn mobile:sync
+
+# Run on Android (requires Android Studio)
+yarn mobile:run:android
+
+# Run on iOS (requires Xcode - macOS only)
+yarn mobile:run:ios
+
+# Build Android APK
+yarn mobile:build:android
+
+# Build iOS app
+yarn mobile:build:ios
+```
+
+**Mobile Prerequisites:**
+- **Android**: Android Studio with SDK tools
+- **iOS**: Xcode (macOS only) with iOS development tools
+- **Both**: Capacitor CLI (`@capacitor/cli` - installed as project dependency)
 
 ## 🧩 Conversation Modes Explained
 

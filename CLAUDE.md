@@ -24,7 +24,7 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
    - Copy button for easy message copying from LLM responses
    - Compact sidebar design for better space utilization
    - Resizable sidebar and input textarea with persistent settings
-   - Proper zoom functionality with consistent scaling
+   - Proper zoom functionality with consistent scaling and stable sidebar positioning
    - Enhanced dark theme support with proper code block visibility
    - Transparent theme-based model toggle colors for better integration
 5. **Comprehensive Keyboard Shortcuts**:
@@ -34,7 +34,7 @@ Lunar Lander is a desktop application that allows users to chat with multiple LL
    - **Model Control**: Alt+1-9 (toggle first 9 models)
    - **System**: Ctrl+Shift+T (toggle theme), Escape (close dialogs)
    - **Visual Indicators**: Tooltips showing keyboard shortcuts throughout UI
-6. **Cross-Platform**: Available for Linux, Windows, and macOS
+6. **Cross-Platform**: Available for Linux, Windows, macOS, iOS, and Android
 
 ## Technical Implementation
 
@@ -257,10 +257,18 @@ src/
   - `make clean`: Clean build files
 
 ### Cross-Platform Packaging
+
+#### Desktop Applications
 - **Linux Packaging**: Uses electron-builder to create ZIP packages
 - **Windows Packaging**: Custom script (scripts/package-win.js) to create ZIP packages
 - **macOS Packaging**: Custom script (scripts/package-mac.js) to create ZIP packages
 - Platform-specific build outputs in the `build` directory
+
+#### Mobile Applications
+- **Capacitor Integration**: Added Capacitor for iOS and Android support
+- **Mobile Build Scripts**: `yarn build:mobile`, `yarn mobile:sync`, `yarn mobile:run:android/ios`
+- **Cross-Platform Compatibility**: Unified codebase with platform-specific adaptations
+- **Mobile-Optimized**: Touch-friendly UI, responsive design, and native performance
 
 ### CI/CD
 - GitHub Actions workflow for building and releasing:
@@ -328,6 +336,48 @@ src/
 - **Enhanced Help Text**: Chat input area shows key shortcuts (Ctrl+Enter, Ctrl+K, Ctrl+N)
 - **Model Toggle Shortcuts**: Alt+1-9 for quick model activation/deactivation
 - **Navigation Shortcuts**: Ctrl+, for settings, Ctrl+1/2 for view switching
+
+### Mobile Implementation
+
+#### Capacitor Integration
+- **Framework**: Uses Capacitor 7.x for iOS and Android support
+- **Web-to-Native Bridge**: Maintains React/TypeScript codebase while providing native capabilities
+- **Platform Detection**: Runtime detection for mobile vs desktop functionality
+- **Native Plugins**: Leverages Capacitor's Preferences, Filesystem, Device, and App plugins
+
+#### Cross-Platform Compatibility Layer
+- **Location**: `src/renderer/services/capacitor.ts`
+- **Unified API**: Single interface for both Electron IPC and Capacitor native APIs
+- **Storage Abstraction**: Transparent switching between localStorage (desktop) and Capacitor Preferences (mobile)
+- **File System**: Cross-platform file operations using Capacitor Filesystem on mobile
+- **Configuration Management**: Platform-specific storage with unified interface
+
+#### Mobile-Responsive UI Design
+- **Responsive Layout**: Mobile-first CSS with breakpoints at 768px and 1024px
+- **Touch-Friendly Interface**: 44px minimum touch targets per iOS guidelines
+- **Mobile Navigation**: Sidebar converts to slide-out drawer with overlay on mobile
+- **Fixed Input**: Chat input becomes fixed at bottom on mobile for easier typing
+- **Viewport Handling**: Proper mobile viewport configuration and zoom prevention
+
+#### Platform-Specific Optimizations
+- **iOS Optimizations**: 
+  - Smooth scrolling with `-webkit-overflow-scrolling: touch`
+  - Proper safe area handling
+  - Native keyboard behavior
+- **Android Optimizations**:
+  - Material Design patterns
+  - Back button handling
+  - Hardware acceleration
+- **Performance**:
+  - Efficient rendering for mobile hardware
+  - Optimized bundle size for mobile networks
+  - Battery-conscious background behavior
+
+#### Development Workflow
+- **Git Practices**: Commit and push changes after every feature or bug fix
+- **Commit Messages**: Use conventional commit format (fix:, feat:, etc.)
+- **Code Quality**: Run lint and typecheck before committing changes
+- **Documentation**: Update CLAUDE.md when adding new features or fixes
 
 ### Documentation
 - README.md with comprehensive documentation:
