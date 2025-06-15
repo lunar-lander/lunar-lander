@@ -300,6 +300,19 @@
   gap: 4px;
   opacity: 0;
   transition: opacity 0.2s;
+  max-width: 1em;
+}
+
+.chatdate:hover .chatControls {
+  opacity: 1;
+  max-width: 100px;
+  transition: opacity 0.4s, max-width 0.4s;
+}
+
+.chatControls:hover {
+  opacity: 1;
+  max-width: 100px;
+  transition: opacity 0.4s, max-width 0.4s;
 }
 
 .chatControl {
