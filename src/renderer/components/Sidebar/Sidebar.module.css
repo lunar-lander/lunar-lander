@@ -295,11 +295,16 @@
 }
 
 .chatControls {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 4px;
   opacity: 0;
   transition: opacity 0.2s;
+  min-width: 8px;
+}
+
+.chatControls:hover {
+  display: flex;
 }
 
 .chatControl {
