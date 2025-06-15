@@ -241,6 +241,8 @@ src/
 
 ### Makefile
 - Comprehensive Makefile for all common operations:
+  
+  **Desktop Development:**
   - `make install`: Install dependencies
   - `make dev`: Start development server
   - `make build`: Build for production
@@ -255,6 +257,15 @@ src/
   - `make package-all`: Package for all platforms
   - `make release`: Create a release
   - `make clean`: Clean build files
+  
+  **Mobile Development:**
+  - `make build-mobile`: Build application for mobile platforms
+  - `make mobile-sync`: Sync with Capacitor (copies web assets)
+  - `make mobile-setup`: Initial mobile development setup
+  - `make mobile-run-android`: Run on Android device/emulator
+  - `make mobile-run-ios`: Run on iOS device/simulator (macOS only)
+  - `make mobile-build-android`: Build Android APK
+  - `make mobile-build-ios`: Build iOS app (macOS only)
 
 ### Cross-Platform Packaging
 

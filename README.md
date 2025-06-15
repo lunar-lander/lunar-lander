@@ -115,23 +115,20 @@ make package-all
 ##### Mobile Applications
 
 ```bash
-# Build for mobile platforms
-yarn build:mobile
+# Using Makefile (recommended)
+make mobile-setup          # Initial setup and sync
+make mobile-run-android     # Run on Android device/emulator
+make mobile-run-ios         # Run on iOS device/simulator (macOS only)
+make mobile-build-android   # Build Android APK
+make mobile-build-ios       # Build iOS app (macOS only)
 
-# Sync with Capacitor (copies web assets to mobile projects)
-yarn mobile:sync
-
-# Run on Android (requires Android Studio)
-yarn mobile:run:android
-
-# Run on iOS (requires Xcode - macOS only)
-yarn mobile:run:ios
-
-# Build Android APK
-yarn mobile:build:android
-
-# Build iOS app
-yarn mobile:build:ios
+# Using Yarn directly
+yarn build:mobile           # Build for mobile platforms
+yarn mobile:sync            # Sync with Capacitor
+yarn mobile:run:android     # Run on Android
+yarn mobile:run:ios         # Run on iOS
+yarn mobile:build:android   # Build Android APK
+yarn mobile:build:ios       # Build iOS app
 ```
 
 **Mobile Prerequisites:**

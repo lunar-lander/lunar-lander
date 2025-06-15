@@ -167,6 +167,49 @@ else ifeq ($(PLATFORM),mac)
 	@NODE_ENV=production yarn pack:mac
 endif
 
+# Mobile build targets
+.PHONY: build-mobile
+build-mobile: $(NODE_MODULES)
+	@echo -e "$(COLOR_BOLD)$(COLOR_GREEN)Building for mobile platforms...$(COLOR_RESET)"
+	@yarn build:mobile
+
+.PHONY: mobile-sync
+mobile-sync: $(NODE_MODULES) build-mobile
+	@echo -e "$(COLOR_BOLD)$(COLOR_BLUE)Syncing with Capacitor...$(COLOR_RESET)"
+	@yarn mobile:sync
+
+.PHONY: mobile-run-android
+mobile-run-android: $(NODE_MODULES)
+	@echo -e "$(COLOR_BOLD)$(COLOR_GREEN)Running on Android...$(COLOR_RESET)"
+	@echo -e "$(COLOR_YELLOW)Note: Requires Android Studio and Android SDK$(COLOR_RESET)"
+	@yarn mobile:run:android
+
+.PHONY: mobile-run-ios
+mobile-run-ios: $(NODE_MODULES)
+	@echo -e "$(COLOR_BOLD)$(COLOR_GREEN)Running on iOS...$(COLOR_RESET)"
+	@echo -e "$(COLOR_YELLOW)Note: Requires Xcode (macOS only)$(COLOR_RESET)"
+	@yarn mobile:run:ios
+
+.PHONY: mobile-build-android
+mobile-build-android: $(NODE_MODULES)
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Building Android APK...$(COLOR_RESET)"
+	@yarn mobile:build:android
+
+.PHONY: mobile-build-ios
+mobile-build-ios: $(NODE_MODULES)
+	@echo -e "$(COLOR_BOLD)$(COLOR_MAGENTA)Building iOS app...$(COLOR_RESET)"
+	@echo -e "$(COLOR_YELLOW)Note: Requires Xcode (macOS only)$(COLOR_RESET)"
+	@yarn mobile:build:ios
+
+.PHONY: mobile-setup
+mobile-setup: $(NODE_MODULES) build-mobile
+	@echo -e "$(COLOR_BOLD)$(COLOR_CYAN)Setting up mobile development environment...$(COLOR_RESET)"
+	@yarn mobile:sync
+	@echo -e "$(COLOR_GREEN)Mobile setup complete!$(COLOR_RESET)"
+	@echo -e "$(COLOR_YELLOW)Next steps:$(COLOR_RESET)"
+	@echo -e "  - For Android: Open 'android' folder in Android Studio"
+	@echo -e "  - For iOS: Open 'ios/App/App.xcworkspace' in Xcode"
+
 # Create release
 .PHONY: release
 release: build package
@@ -200,6 +243,16 @@ help:
 	@echo -e "  $(COLOR_GREEN)pack$(COLOR_RESET)        Pack application without creating installers"
 	@echo -e "  $(COLOR_GREEN)release$(COLOR_RESET)     Create a release"
 	@echo -e "  $(COLOR_GREEN)clean$(COLOR_RESET)       Clean build files"
+	@echo
+	@echo -e "$(COLOR_BOLD)Mobile Targets:$(COLOR_RESET)"
+	@echo -e "  $(COLOR_GREEN)build-mobile$(COLOR_RESET) Build application for mobile platforms"
+	@echo -e "  $(COLOR_GREEN)mobile-sync$(COLOR_RESET) Sync with Capacitor (copies web assets)"
+	@echo -e "  $(COLOR_GREEN)mobile-setup$(COLOR_RESET) Initial mobile development setup"
+	@echo -e "  $(COLOR_GREEN)mobile-run-android$(COLOR_RESET) Run on Android device/emulator"
+	@echo -e "  $(COLOR_GREEN)mobile-run-ios$(COLOR_RESET) Run on iOS device/simulator (macOS only)"
+	@echo -e "  $(COLOR_GREEN)mobile-build-android$(COLOR_RESET) Build Android APK"
+	@echo -e "  $(COLOR_GREEN)mobile-build-ios$(COLOR_RESET) Build iOS app (macOS only)"
+	@echo
 	@echo -e "  $(COLOR_GREEN)help$(COLOR_RESET)        Show this help message"
 	@echo
 	@echo -e "$(COLOR_BOLD)Environment:$(COLOR_RESET)"
