@@ -1,30 +1,77 @@
-// Simple database service using localStorage
-// This can be replaced with SQLite or file-based storage later
+// Cross-platform database service using localStorage (desktop) or Capacitor Preferences (mobile)
+// This provides a unified interface for data persistence across platforms
 
 import { Chat, ChatMessage } from '../../shared/types/chat';
 import { Model } from '../../shared/types/model';
+import { Preferences } from '@capacitor/preferences';
 
-// Prefix for localStorage keys
+// Prefix for storage keys
 const STORAGE_PREFIX = 'chatapp_';
+
+// Platform detection
+const isCapacitor = () => {
+  return !!(window as any).Capacitor;
+};
+
+// Storage abstraction layer
+class Storage {
+  static async getItem(key: string): Promise<string | null> {
+    if (isCapacitor()) {
+      try {
+        const { value } = await Preferences.get({ key });
+        return value;
+      } catch (error) {
+        console.error('Capacitor storage error:', error);
+        return null;
+      }
+    } else {
+      return localStorage.getItem(key);
+    }
+  }
+
+  static async setItem(key: string, value: string): Promise<void> {
+    if (isCapacitor()) {
+      try {
+        await Preferences.set({ key, value });
+      } catch (error) {
+        console.error('Capacitor storage error:', error);
+      }
+    } else {
+      localStorage.setItem(key, value);
+    }
+  }
+
+  static async removeItem(key: string): Promise<void> {
+    if (isCapacitor()) {
+      try {
+        await Preferences.remove({ key });
+      } catch (error) {
+        console.error('Capacitor storage error:', error);
+      }
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+}
 
 // DB Service
 export class DbService {
   // Chat methods
-  static getChats(): Chat[] {
-    const chatsJson = localStorage.getItem(`${STORAGE_PREFIX}chats`);
+  static async getChats(): Promise<Chat[]> {
+    const chatsJson = await Storage.getItem(`${STORAGE_PREFIX}chats`);
     return chatsJson ? JSON.parse(chatsJson) : [];
   }
 
-  static saveChats(chats: Chat[]): void {
-    localStorage.setItem(`${STORAGE_PREFIX}chats`, JSON.stringify(chats));
+  static async saveChats(chats: Chat[]): Promise<void> {
+    await Storage.setItem(`${STORAGE_PREFIX}chats`, JSON.stringify(chats));
   }
 
-  static getChat(chatId: string): Chat | null {
-    const chats = this.getChats();
+  static async getChat(chatId: string): Promise<Chat | null> {
+    const chats = await this.getChats();
     return chats.find(chat => chat.id === chatId) || null;
   }
 
-  static saveChat(chat: Chat): boolean {
+  static async saveChat(chat: Chat): Promise<boolean> {
     try {
       if (!chat || !chat.id) {
         console.error('DB: Cannot save chat with invalid ID');
@@ -32,7 +79,7 @@ export class DbService {
       }
 
       // Get current chats
-      const chats = this.getChats();
+      const chats = await this.getChats();
       const index = chats.findIndex(c => c.id === chat.id);
 
       // Ensure chat has a lastUpdated timestamp
@@ -49,10 +96,10 @@ export class DbService {
       }
 
       // Save updated chats list
-      this.saveChats(chats);
+      await this.saveChats(chats);
 
       // Verify chat was saved
-      const savedChats = this.getChats();
+      const savedChats = await this.getChats();
       const chatExists = savedChats.some(c => c.id === chat.id);
 
       if (!chatExists) {
@@ -67,15 +114,15 @@ export class DbService {
     }
   }
 
-  static deleteChat(chatId: string): void {
-    const chats = this.getChats();
-    this.saveChats(chats.filter(chat => chat.id !== chatId));
+  static async deleteChat(chatId: string): Promise<void> {
+    const chats = await this.getChats();
+    await this.saveChats(chats.filter(chat => chat.id !== chatId));
   }
 
-  static addMessageToChat(chatId: string, message: ChatMessage): Chat | null {
+  static async addMessageToChat(chatId: string, message: ChatMessage): Promise<Chat | null> {
     try {
       // First get the most current version of the chat
-      const chat = this.getChat(chatId);
+      const chat = await this.getChat(chatId);
       if (!chat) {
         console.error(`DB: Chat ${chatId} not found when adding message ${message.id}`);
         return null;
@@ -95,10 +142,10 @@ export class DbService {
       };
 
       // Save the updated chat
-      this.saveChat(updatedChat);
+      await this.saveChat(updatedChat);
 
       // Verify message was saved
-      const verifyChat = this.getChat(chatId);
+      const verifyChat = await this.getChat(chatId);
       const messageExists = verifyChat?.messages.some(m => m.id === message.id);
 
       if (!messageExists) {
@@ -115,22 +162,22 @@ export class DbService {
   }
 
   // Model methods
-  static getModels(): Model[] {
-    const modelsJson = localStorage.getItem(`${STORAGE_PREFIX}models`);
+  static async getModels(): Promise<Model[]> {
+    const modelsJson = await Storage.getItem(`${STORAGE_PREFIX}models`);
     return modelsJson ? JSON.parse(modelsJson) : [];
   }
 
-  static saveModels(models: Model[]): void {
-    localStorage.setItem(`${STORAGE_PREFIX}models`, JSON.stringify(models));
+  static async saveModels(models: Model[]): Promise<void> {
+    await Storage.setItem(`${STORAGE_PREFIX}models`, JSON.stringify(models));
   }
 
-  static getModel(modelId: string): Model | null {
-    const models = this.getModels();
+  static async getModel(modelId: string): Promise<Model | null> {
+    const models = await this.getModels();
     return models.find(model => model.id === modelId) || null;
   }
 
-  static saveModel(model: Model): void {
-    const models = this.getModels();
+  static async saveModel(model: Model): Promise<void> {
+    const models = await this.getModels();
     const index = models.findIndex(m => m.id === model.id);
 
     if (index !== -1) {
@@ -139,21 +186,21 @@ export class DbService {
       models.push(model);
     }
 
-    this.saveModels(models);
+    await this.saveModels(models);
   }
 
-  static addModel(model: Omit<Model, 'id'>): Model {
+  static async addModel(model: Omit<Model, 'id'>): Promise<Model> {
     const newModel: Model = {
       id: `model_${Date.now()}`,
       ...model
     };
 
-    this.saveModel(newModel);
+    await this.saveModel(newModel);
     return newModel;
   }
 
-  static updateModel(model: Partial<Model> & { id: string }): Model | null {
-    const existingModel = this.getModel(model.id);
+  static async updateModel(model: Partial<Model> & { id: string }): Promise<Model | null> {
+    const existingModel = await this.getModel(model.id);
 
     if (!existingModel) {
       return null;
@@ -164,18 +211,18 @@ export class DbService {
       ...model
     };
 
-    this.saveModel(updatedModel);
+    await this.saveModel(updatedModel);
     return updatedModel;
   }
 
-  static deleteModel(modelId: string): void {
-    const models = this.getModels();
-    this.saveModels(models.filter(model => model.id !== modelId));
+  static async deleteModel(modelId: string): Promise<void> {
+    const models = await this.getModels();
+    await this.saveModels(models.filter(model => model.id !== modelId));
   }
 
   // Generate a chat summary using the first message exchange
-  static generateChatSummary(chatId: string): string {
-    const chat = this.getChat(chatId);
+  static async generateChatSummary(chatId: string): Promise<string> {
+    const chat = await this.getChat(chatId);
     if (!chat || chat.messages.length < 2) return 'New conversation';
 
     // Get the first user message
