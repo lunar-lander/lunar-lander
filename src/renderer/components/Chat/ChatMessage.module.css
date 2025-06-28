@@ -2,7 +2,9 @@
   display: flex;
   margin-bottom: 12px; /* Reduced from 16px */
   position: relative;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 6px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+
   border-radius: 16px; /* Reduced from 20px */
   transition: all 0.2s ease;
   width: 100%;
@@ -26,7 +28,7 @@
 
 .user .messageContent {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--text-color);
   border-top-right-radius: 2px;
 }
 
@@ -69,7 +71,7 @@
 }
 
 .messageText :global(code) {
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
   font-size: 0.9em;
   padding: 3px 5px;
   border-radius: 4px;
@@ -142,7 +144,8 @@
   color: var(--text-secondary);
 }
 
-.messageText :global(ul), .messageText :global(ol) {
+.messageText :global(ul),
+.messageText :global(ol) {
   margin: 6px 0;
   padding-left: 20px;
 }
@@ -151,18 +154,34 @@
   margin-bottom: 2px;
 }
 
-.messageText :global(h1), .messageText :global(h2), .messageText :global(h3),
-.messageText :global(h4), .messageText :global(h5), .messageText :global(h6) {
+.messageText :global(h1),
+.messageText :global(h2),
+.messageText :global(h3),
+.messageText :global(h4),
+.messageText :global(h5),
+.messageText :global(h6) {
   margin: 12px 0 6px;
   line-height: 1.2;
 }
 
-.messageText :global(h1) { font-size: 1.5em; }
-.messageText :global(h2) { font-size: 1.3em; }
-.messageText :global(h3) { font-size: 1.15em; }
-.messageText :global(h4) { font-size: 1.1em; }
-.messageText :global(h5) { font-size: 1.05em; }
-.messageText :global(h6) { font-size: 1em; }
+.messageText :global(h1) {
+  font-size: 1.5em;
+}
+.messageText :global(h2) {
+  font-size: 1.3em;
+}
+.messageText :global(h3) {
+  font-size: 1.15em;
+}
+.messageText :global(h4) {
+  font-size: 1.1em;
+}
+.messageText :global(h5) {
+  font-size: 1.05em;
+}
+.messageText :global(h6) {
+  font-size: 1em;
+}
 
 /* KaTeX math styling */
 .messageText :global(.math-inline) {
@@ -199,6 +218,12 @@
   margin: 6px 0;
 }
 
+.messageContainer pre {
+  border: 6px solid rgba(0, 0, 0, 0.1);
+  /* font alpha */
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 .codeLanguage {
   position: absolute;
   top: -8px;
@@ -208,7 +233,7 @@
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 6px;
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
   text-transform: uppercase;
   z-index: 2;
 }
@@ -273,7 +298,7 @@
 }
 
 .user .timestamp {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
 }
 
 .assistant .timestamp {
@@ -342,7 +367,7 @@
 }
 
 .streaming::after {
-  content: '▌';
+  content: "▌";
   display: inline-block;
   animation: blink 1s step-end infinite;
 }
@@ -414,4 +439,3 @@
 .latexHelperContent a:hover {
   text-decoration: underline;
 }
-
