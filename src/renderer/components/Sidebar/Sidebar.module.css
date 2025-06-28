@@ -170,8 +170,8 @@
 }
 
 .modelToggle.active {
-  background-color: rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  border-left: 10px solid #1786ab;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   font-weight: 600;
 }
 
@@ -344,8 +344,8 @@
 }
 
 .starredChat {
-  border-left: 3px solid #f8c33c;
-  background-color: rgba(248, 195, 60, 0.08);
+  border-left: 10px solid #f8c33c;
+  background-color: rgba(80, 241, 250, 0.08);
   font-weight: 600;
 }
 

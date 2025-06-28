@@ -181,21 +181,21 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
 
     // Use predefined RGB values for theme colors with very low opacity
     const lightColorVariants = [
-      "rgba(26, 115, 232, 0.06)", // primary-color with 6% opacity
-      "rgba(66, 133, 244, 0.06)", // secondary-color with 6% opacity
-      "rgba(251, 188, 4, 0.06)", // accent-color with 6% opacity
-      "rgba(52, 168, 83, 0.06)", // success-color with 6% opacity
-      "rgba(234, 67, 53, 0.06)", // error-color with 6% opacity
-      "rgba(156, 39, 176, 0.06)", // purple variant with 6% opacity
+      "rgba(13, 79, 164, 0.2)", // primary-color with 6% opacity
+      "rgba(61, 181, 149, 0.2)", // secondary-color with 6% opacity
+      "rgba(251, 188, 4, 0.2)", // accent-color with 6% opacity
+      "rgba(37, 185, 76, 0.2)", // success-color with 6% opacity
+      "rgba(234, 67, 53, 0.2)", // error-color with 6% opacity
+      "rgba(184, 72, 169, 0.2)", // purple variant with 6% opacity
     ];
 
     const darkColorVariants = [
-      "rgba(138, 180, 248, 0.08)", // primary-color dark with 8% opacity
-      "rgba(66, 133, 244, 0.08)", // secondary-color with 8% opacity
-      "rgba(251, 188, 4, 0.08)", // accent-color with 8% opacity
-      "rgba(52, 168, 83, 0.08)", // success-color with 8% opacity
-      "rgba(234, 67, 53, 0.08)", // error-color with 8% opacity
-      "rgba(171, 71, 188, 0.08)", // purple variant with 8% opacity
+      "rgba(40, 99, 193, 0.2)", // primary-color dark with 8% opacity
+      "rgba(33, 159, 104, 0.2)", // secondary-color with 8% opacity
+      "rgba(251, 188, 4, 0.2)", // accent-color with 8% opacity
+      "rgba(52, 168, 83, 0.2)", // success-color with 8% opacity
+      "rgba(234, 67, 53, 0.2)", // error-color with 8% opacity
+      "rgba(175, 38, 177, 0.2)", // purple variant with 8% opacity
     ];
 
     const colorVariants = isDark ? darkColorVariants : lightColorVariants;
@@ -251,9 +251,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         <button
           className={styles.actionButton}
           onClick={cycleTheme}
-          title={`Current Theme: ${
-            availableThemes[themeIndex] || "Default"
-          } - Click to cycle themes (Ctrl+Shift+T)`}
+          title={`Current Theme: ${availableThemes[themeIndex] || "Default"
+            } - Click to cycle themes (Ctrl+Shift+T)`}
         >
           {getThemeEmoji()}
         </button>
@@ -319,14 +318,12 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
             {models.map((model, index) => (
               <div
                 key={model.id}
-                className={`${styles.modelToggle} ${
-                  model.isActive ? styles.active : ""
-                }`}
+                className={`${styles.modelToggle} ${model.isActive ? styles.active : ""
+                  }`}
                 style={{ backgroundColor: getModelColor(model.id) }}
                 onClick={() => handleToggleModel(model.id, model.isActive)}
-                title={`${model.name} - Click to toggle${
-                  index < 9 ? ` (Alt+${index + 1})` : ""
-                }`}
+                title={`${model.name} - Click to toggle${index < 9 ? ` (Alt+${index + 1})` : ""
+                  }`}
               >
                 <span className={styles.modelName}>{model.name}</span>
                 <span className={styles.toggleIndicator}>
@@ -395,9 +392,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                   .map((chat) => (
                     <div
                       key={chat.id}
-                      className={`${styles.chatItem} ${
-                        activeChat === chat.id ? styles.active : ""
-                      } ${styles.starredChat}`}
+                      className={`${styles.chatItem} ${activeChat === chat.id ? styles.active : ""
+                        } ${styles.starredChat}`}
                       onClick={() => selectChat(chat.id)}
                     >
                       {editingChatId === chat.id ? (
@@ -491,9 +487,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               .map((chat) => (
                 <div
                   key={chat.id}
-                  className={`${styles.chatItem} ${
-                    activeChat === chat.id ? styles.active : ""
-                  }`}
+                  className={`${styles.chatItem} ${activeChat === chat.id ? styles.active : ""
+                    }`}
                   onClick={() => selectChat(chat.id)}
                 >
                   {editingChatId === chat.id ? (
