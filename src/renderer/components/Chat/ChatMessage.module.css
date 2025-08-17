@@ -27,13 +27,11 @@
 }
 
 .user .messageContent {
-  background-color: var(--primary-color);
   color: var(--text-color);
   border-top-right-radius: 2px;
 }
 
 .assistant .messageContent {
-  background-color: var(--hover-bg-color);
   color: var(--text-color);
   border-top-left-radius: 2px;
 }
