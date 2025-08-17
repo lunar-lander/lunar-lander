@@ -6,6 +6,7 @@
   overflow-y: auto;
   min-height: 0; /* Critical for flexbox scrolling */
   height: 100%;
+  background-color: var(--chatBackground, var(--background));
 }
 
 .messagesEnd {

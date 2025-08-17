@@ -223,6 +223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     root.style.setProperty('--error-color', currentTheme.error);
     root.style.setProperty('--warning-color', currentTheme.warning);
     root.style.setProperty('--info-color', currentTheme.info);
+    root.style.setProperty('--chatBackground', currentTheme.chatBackground);
     
     // Set hover background color - lighter for light themes, darker for dark themes
     const isLightTheme = isThemeLight(currentTheme);
