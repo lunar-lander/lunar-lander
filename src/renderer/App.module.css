@@ -2,4 +2,200 @@
   height: 100%;
   width: 100%;
   overflow: hidden;
+  background-color: var(--background);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  
+  /* Map new theme variables to legacy variable names for compatibility */
+  --primary-color: var(--primary);
+  --primary-color-rgb: var(--primary-rgb);
+  --secondary-color: var(--secondary);
+  --background-color: var(--background);
+  --text-color: var(--text);
+  --sidebar-color: var(--sidebar);
+  --accent-color: var(--accent);
+  --success-color: var(--success);
+  --error-color: var(--error);
+  --warning-color: var(--warning);
+  --info-color: var(--info);
+}
+
+/* Light Theme */
+.light {
+  --primary: #1a73e8;
+  --primary-rgb: 26, 115, 232;
+  --secondary: #4285f4;
+  --background: #ffffff;
+  --text: #202124;
+  --sidebar: #f5f5f5;
+  --accent: #fbbc04;
+  --success: #34a853;
+  --error: #ea4335;
+  --warning: #fbbc04;
+  --info: #4285f4;
+  --chatBackground: #fafbfc;
+  --border-color: #dadce0;
+  --hover-bg-color: rgba(60, 64, 67, 0.08);
+}
+
+/* Dark Theme */
+.dark {
+  --primary: #8ab4f8;
+  --primary-rgb: 138, 180, 248;
+  --secondary: #4285f4;
+  --background: #202124;
+  --text: #e8eaed;
+  --sidebar: #303134;
+  --accent: #fbbc04;
+  --success: #34a853;
+  --error: #ea4335;
+  --warning: #fbbc04;
+  --info: #8ab4f8;
+  --chatBackground: #1a1b1f;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --hover-bg-color: rgba(232, 234, 237, 0.08);
+}
+
+/* GitHub Light Theme */
+.github-light {
+  --primary: #0969da;
+  --primary-rgb: 9, 105, 218;
+  --secondary: #1f883d;
+  --background: #ffffff;
+  --text: #1f2328;
+  --sidebar: #f6f8fa;
+  --accent: #8250df;
+  --success: #1f883d;
+  --error: #d1242f;
+  --warning: #fb8500;
+  --info: #0969da;
+  --chatBackground: #f6f8fa;
+  --border-color: #d0d7de;
+  --hover-bg-color: rgba(208, 215, 222, 0.32);
+}
+
+/* Cyberpunk Theme */
+.cyberpunk {
+  --primary: #ff2a6d;
+  --primary-rgb: 255, 42, 109;
+  --secondary: #05d9e8;
+  --background: #1a1a2e;
+  --text: #d1f7ff;
+  --sidebar: #0f0f1a;
+  --accent: #f7fd04;
+  --success: #00ff9f;
+  --error: #ff2a6d;
+  --warning: #fdca40;
+  --info: #05d9e8;
+  --chatBackground: #0f0f1a;
+  --border-color: #333333;
+  --hover-bg-color: rgba(255, 42, 109, 0.1);
+}
+
+/* Nord Theme */
+.nord {
+  --primary: #5e81ac;
+  --primary-rgb: 94, 129, 172;
+  --secondary: #81a1c1;
+  --background: #2e3440;
+  --text: #eceff4;
+  --sidebar: #3b4252;
+  --accent: #ebcb8b;
+  --success: #a3be8c;
+  --error: #bf616a;
+  --warning: #d08770;
+  --info: #b48ead;
+  --chatBackground: #242933;
+  --border-color: rgba(216, 222, 233, 0.15);
+  --hover-bg-color: rgba(236, 239, 244, 0.1);
+}
+
+/* Dracula Theme */
+.dracula {
+  --primary: #bd93f9;
+  --primary-rgb: 189, 147, 249;
+  --secondary: #8be9fd;
+  --background: #282a36;
+  --text: #f8f8f2;
+  --sidebar: #44475a;
+  --accent: #ffb86c;
+  --success: #50fa7b;
+  --error: #ff5555;
+  --warning: #f1fa8c;
+  --info: #8be9fd;
+  --chatBackground: #44475a;
+  --border-color: rgba(248, 248, 242, 0.1);
+  --hover-bg-color: rgba(248, 248, 242, 0.05);
+}
+
+/* Forest Theme */
+.forest {
+  --primary: #2d5016;
+  --primary-rgb: 45, 80, 22;
+  --secondary: #3f6b2a;
+  --background: #1a2e05;
+  --text: #c5d3b5;
+  --sidebar: #0f1c02;
+  --accent: #8da25a;
+  --success: #5c8a3a;
+  --error: #d32f2f;
+  --warning: #ff9800;
+  --info: #5dade2;
+  --chatBackground: #0f1c02;
+  --border-color: rgba(197, 211, 181, 0.2);
+  --hover-bg-color: rgba(197, 211, 181, 0.05);
+}
+
+/* Cotton Candy Theme */
+.cotton-candy {
+  --primary: #ec4899;
+  --primary-rgb: 236, 72, 153;
+  --secondary: #8b5cf6;
+  --background: #fdf2f8;
+  --text: #831843;
+  --sidebar: #fce7f3;
+  --accent: #06b6d4;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #2563eb;
+  --chatBackground: #fce7f3;
+  --border-color: #f9a8d4;
+  --hover-bg-color: rgba(236, 72, 153, 0.05);
+}
+
+/* Ocean Breeze Theme */
+.ocean-breeze {
+  --primary: #0284c7;
+  --primary-rgb: 2, 132, 199;
+  --secondary: #06b6d4;
+  --background: #f0f9ff;
+  --text: #0c4a6e;
+  --sidebar: #e0f2fe;
+  --accent: #0891b2;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #0284c7;
+  --chatBackground: #e0f2fe;
+  --border-color: #7dd3fc;
+  --hover-bg-color: rgba(2, 132, 199, 0.05);
+}
+
+/* Sunset Theme */
+.sunset {
+  --primary: #ff6b35;
+  --primary-rgb: 255, 107, 53;
+  --secondary: #f7931e;
+  --background: #2c1810;
+  --text: #fff3e0;
+  --sidebar: #1a0e08;
+  --accent: #ff9800;
+  --success: #4caf50;
+  --error: #e91e63;
+  --warning: #ffeb3b;
+  --info: #2196f3;
+  --chatBackground: #1a0e08;
+  --border-color: rgba(255, 243, 224, 0.2);
+  --hover-bg-color: rgba(255, 243, 224, 0.05);
 }
