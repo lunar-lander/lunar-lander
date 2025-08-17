@@ -118,6 +118,406 @@
   --info: #C792EA;
 }
 
+/* GitHub Light Theme */
+.theme-GitHub-Light {
+  --primary: #0969da;
+  --primary-rgb: 9, 105, 218;
+  --secondary: #1f883d;
+  --secondary-rgb: 31, 136, 61;
+  --background: #ffffff;
+  --text: #1f2328;
+  --sidebar: #f6f8fa;
+  --accent: #8250df;
+  --success: #1f883d;
+  --error: #d1242f;
+  --warning: #fb8500;
+  --info: #0969da;
+}
+
+/* Paper Theme */
+.theme-Paper {
+  --primary: #5e72e4;
+  --primary-rgb: 94, 114, 228;
+  --secondary: #34bfa3;
+  --secondary-rgb: 52, 191, 163;
+  --background: #fefefe;
+  --text: #37474f;
+  --sidebar: #f7f9fc;
+  --accent: #ff6b6b;
+  --success: #4caf50;
+  --error: #f44336;
+  --warning: #ff9800;
+  --info: #2196f3;
+}
+
+/* Vanilla Cream Theme */
+.theme-Vanilla-Cream {
+  --primary: #8b5cf6;
+  --primary-rgb: 139, 92, 246;
+  --secondary: #06b6d4;
+  --secondary-rgb: 6, 182, 212;
+  --background: #fefcf3;
+  --text: #4a5568;
+  --sidebar: #f7f5f0;
+  --accent: #f59e0b;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+}
+
+/* Cotton Candy Theme */
+.theme-Cotton-Candy {
+  --primary: #ec4899;
+  --primary-rgb: 236, 72, 153;
+  --secondary: #8b5cf6;
+  --secondary-rgb: 139, 92, 246;
+  --background: #fdf2f8;
+  --text: #831843;
+  --sidebar: #fce7f3;
+  --accent: #06b6d4;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #2563eb;
+}
+
+/* Mint Fresh Theme */
+.theme-Mint-Fresh {
+  --primary: #059669;
+  --primary-rgb: 5, 150, 105;
+  --secondary: #0891b2;
+  --secondary-rgb: 8, 145, 178;
+  --background: #f0fdfa;
+  --text: #134e4a;
+  --sidebar: #ecfdf5;
+  --accent: #7c3aed;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #0284c7;
+}
+
+/* Warm Sand Theme */
+.theme-Warm-Sand {
+  --primary: #c2410c;
+  --primary-rgb: 194, 65, 12;
+  --secondary: #92400e;
+  --secondary-rgb: 146, 64, 14;
+  --background: #fffbeb;
+  --text: #78350f;
+  --sidebar: #fef3c7;
+  --accent: #7c2d12;
+  --success: #166534;
+  --error: #991b1b;
+  --warning: #b45309;
+  --info: #1e40af;
+}
+
+/* Lavender Dream Theme */
+.theme-Lavender-Dream {
+  --primary: #8b5cf6;
+  --primary-rgb: 139, 92, 246;
+  --secondary: #a855f7;
+  --secondary-rgb: 168, 85, 247;
+  --background: #faf5ff;
+  --text: #581c87;
+  --sidebar: #f3e8ff;
+  --accent: #ec4899;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #2563eb;
+}
+
+/* Ocean Breeze Theme */
+.theme-Ocean-Breeze {
+  --primary: #0284c7;
+  --primary-rgb: 2, 132, 199;
+  --secondary: #06b6d4;
+  --secondary-rgb: 6, 182, 212;
+  --background: #f0f9ff;
+  --text: #0c4a6e;
+  --sidebar: #e0f2fe;
+  --accent: #0891b2;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #0284c7;
+}
+
+/* Slate Gray Theme (Neutral) */
+.theme-Slate-Gray {
+  --primary: #475569;
+  --primary-rgb: 71, 85, 105;
+  --secondary: #64748b;
+  --secondary-rgb: 100, 116, 139;
+  --background: #f8fafc;
+  --text: #334155;
+  --sidebar: #f1f5f9;
+  --accent: #7c3aed;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #0284c7;
+}
+
+/* Warm Gray Theme (Neutral) */
+.theme-Warm-Gray {
+  --primary: #78716c;
+  --primary-rgb: 120, 113, 108;
+  --secondary: #a8a29e;
+  --secondary-rgb: 168, 162, 158;
+  --background: #fafaf9;
+  --text: #44403c;
+  --sidebar: #f5f5f4;
+  --accent: #f59e0b;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #0284c7;
+}
+
+/* Stone Theme (Neutral) */
+.theme-Stone {
+  --primary: #57534e;
+  --primary-rgb: 87, 83, 78;
+  --secondary: #78716c;
+  --secondary-rgb: 120, 113, 108;
+  --background: #fafaf9;
+  --text: #292524;
+  --sidebar: #f5f5f4;
+  --accent: #ea580c;
+  --success: #16a34a;
+  --error: #dc2626;
+  --warning: #ca8a04;
+  --info: #0369a1;
+}
+
+/* Mocha Theme (Neutral) */
+.theme-Mocha {
+  --primary: #92400e;
+  --primary-rgb: 146, 64, 14;
+  --secondary: #a16207;
+  --secondary-rgb: 161, 98, 7;
+  --background: #fef7ed;
+  --text: #451a03;
+  --sidebar: #fed7aa;
+  --accent: #7c2d12;
+  --success: #166534;
+  --error: #991b1b;
+  --warning: #b45309;
+  --info: #1e40af;
+}
+
+/* Gruvbox Light Theme */
+.theme-Gruvbox-Light {
+  --primary: #af3a03;
+  --primary-rgb: 175, 58, 3;
+  --secondary: #427b58;
+  --secondary-rgb: 66, 123, 88;
+  --background: #fbf1c7;
+  --text: #3c3836;
+  --sidebar: #f2e5bc;
+  --accent: #b57614;
+  --success: #79740e;
+  --error: #cc241d;
+  --warning: #d65d0e;
+  --info: #076678;
+}
+
+/* One Light Theme */
+.theme-One-Light {
+  --primary: #4078f2;
+  --primary-rgb: 64, 120, 242;
+  --secondary: #0184bc;
+  --secondary-rgb: 1, 132, 188;
+  --background: #fafafa;
+  --text: #383a42;
+  --sidebar: #f0f0f1;
+  --accent: #a626a4;
+  --success: #50a14f;
+  --error: #e45649;
+  --warning: #c18401;
+  --info: #0184bc;
+}
+
+/* Atom Light Theme */
+.theme-Atom-Light {
+  --primary: #4078f2;
+  --primary-rgb: 64, 120, 242;
+  --secondary: #0184bc;
+  --secondary-rgb: 1, 132, 188;
+  --background: #ffffff;
+  --text: #333333;
+  --sidebar: #f6f7f8;
+  --accent: #a626a4;
+  --success: #50a14f;
+  --error: #e45649;
+  --warning: #986801;
+  --info: #0184bc;
+}
+
+/* Tokyo Night Storm Theme */
+.theme-Tokyo-Night-Storm {
+  --primary: #7aa2f7;
+  --primary-rgb: 122, 162, 247;
+  --secondary: #73daca;
+  --secondary-rgb: 115, 218, 202;
+  --background: #24283b;
+  --text: #c0caf5;
+  --sidebar: #1f2335;
+  --accent: #bb9af7;
+  --success: #9ece6a;
+  --error: #f7768e;
+  --warning: #e0af68;
+  --info: #7dcfff;
+}
+
+/* Catppuccin Latte Theme */
+.theme-Catppuccin-Latte {
+  --primary: #1e66f5;
+  --primary-rgb: 30, 102, 245;
+  --secondary: #04a5e5;
+  --secondary-rgb: 4, 165, 229;
+  --background: #eff1f5;
+  --text: #4c4f69;
+  --sidebar: #e6e9ef;
+  --accent: #8839ef;
+  --success: #40a02b;
+  --error: #d20f39;
+  --warning: #df8e1d;
+  --info: #209fb5;
+}
+
+/* Catppuccin Mocha Theme */
+.theme-Catppuccin-Mocha {
+  --primary: #89b4fa;
+  --primary-rgb: 137, 180, 250;
+  --secondary: #74c7ec;
+  --secondary-rgb: 116, 199, 236;
+  --background: #1e1e2e;
+  --text: #cdd6f4;
+  --sidebar: #181825;
+  --accent: #cba6f7;
+  --success: #a6e3a1;
+  --error: #f38ba8;
+  --warning: #f9e2af;
+  --info: #89dceb;
+}
+
+/* Forest Theme */
+.theme-Forest {
+  --primary: #2d5016;
+  --primary-rgb: 45, 80, 22;
+  --secondary: #3f6b2a;
+  --secondary-rgb: 63, 107, 42;
+  --background: #1a2e05;
+  --text: #c5d3b5;
+  --sidebar: #0f1c02;
+  --accent: #8da25a;
+  --success: #5c8a3a;
+  --error: #d32f2f;
+  --warning: #ff9800;
+  --info: #5dade2;
+}
+
+/* Sunset Theme */
+.theme-Sunset {
+  --primary: #ff6b35;
+  --primary-rgb: 255, 107, 53;
+  --secondary: #f7931e;
+  --secondary-rgb: 247, 147, 30;
+  --background: #2c1810;
+  --text: #fff3e0;
+  --sidebar: #1a0e08;
+  --accent: #ff9800;
+  --success: #4caf50;
+  --error: #e91e63;
+  --warning: #ffeb3b;
+  --info: #2196f3;
+}
+
+/* Dracula Theme */
+.theme-Dracula {
+  --primary: #bd93f9;
+  --primary-rgb: 189, 147, 249;
+  --secondary: #8be9fd;
+  --secondary-rgb: 139, 233, 253;
+  --background: #282a36;
+  --text: #f8f8f2;
+  --sidebar: #44475a;
+  --accent: #ffb86c;
+  --success: #50fa7b;
+  --error: #ff5555;
+  --warning: #f1fa8c;
+  --info: #8be9fd;
+}
+
+/* Monokai Theme */
+.theme-Monokai {
+  --primary: #f92672;
+  --primary-rgb: 249, 38, 114;
+  --secondary: #a6e22e;
+  --secondary-rgb: 166, 226, 46;
+  --background: #272822;
+  --text: #f8f8f2;
+  --sidebar: #3e3d32;
+  --accent: #fd971f;
+  --success: #a6e22e;
+  --error: #f92672;
+  --warning: #e6db74;
+  --info: #66d9ef;
+}
+
+/* High Contrast Light Theme */
+.theme-High-Contrast-Light {
+  --primary: #0000ff;
+  --primary-rgb: 0, 0, 255;
+  --secondary: #008000;
+  --secondary-rgb: 0, 128, 0;
+  --background: #ffffff;
+  --text: #000000;
+  --sidebar: #f0f0f0;
+  --accent: #800080;
+  --success: #008000;
+  --error: #ff0000;
+  --warning: #ff8000;
+  --info: #0000ff;
+}
+
+/* High Contrast Dark Theme */
+.theme-High-Contrast-Dark {
+  --primary: #00ffff;
+  --primary-rgb: 0, 255, 255;
+  --secondary: #00ff00;
+  --secondary-rgb: 0, 255, 0;
+  --background: #000000;
+  --text: #ffffff;
+  --sidebar: #1a1a1a;
+  --accent: #ffff00;
+  --success: #00ff00;
+  --error: #ff0000;
+  --warning: #ffaa00;
+  --info: #00ffff;
+}
+
+/* Sepia Theme */
+.theme-Sepia {
+  --primary: #8b4513;
+  --primary-rgb: 139, 69, 19;
+  --secondary: #a0522d;
+  --secondary-rgb: 160, 82, 45;
+  --background: #f4f1e8;
+  --text: #5d4e37;
+  --sidebar: #ede6d3;
+  --accent: #cd853f;
+  --success: #6b8e23;
+  --error: #b22222;
+  --warning: #daa520;
+  --info: #4682b4;
+}
+
 /* Apply theme variables to elements */
 body {
   background-color: var(--background);
