@@ -12,7 +12,8 @@ export const lightTheme: ThemeConfig = {
   success: '#34a853',
   error: '#ea4335',
   warning: '#fbbc04',
-  info: '#4285f4'
+  info: '#4285f4',
+  chatBackground: '#fafbfc'
 };
 
 // Default Dark Theme
@@ -27,7 +28,8 @@ export const darkTheme: ThemeConfig = {
   success: '#34a853',
   error: '#ea4335',
   warning: '#fbbc04',
-  info: '#8ab4f8'
+  info: '#8ab4f8',
+  chatBackground: '#1a1b1f'
 };
 
 // Cyberpunk Theme
@@ -42,7 +44,8 @@ export const cyberpunkTheme: ThemeConfig = {
   success: '#00ff9f',
   error: '#ff2a6d',
   warning: '#fdca40',
-  info: '#05d9e8'
+  info: '#05d9e8',
+  chatBackground: '#0f0f1a'
 };
 
 // Solarized Light Theme
@@ -132,7 +135,8 @@ export const githubLightTheme: ThemeConfig = {
   success: '#1f883d',
   error: '#d1242f',
   warning: '#fb8500',
-  info: '#0969da'
+  info: '#0969da',
+  chatBackground: '#f6f8fa'
 };
 
 // Paper Theme
@@ -147,7 +151,8 @@ export const paperTheme: ThemeConfig = {
   success: '#4caf50',
   error: '#f44336',
   warning: '#ff9800',
-  info: '#2196f3'
+  info: '#2196f3',
+  chatBackground: '#f9fbfe'
 };
 
 // Vanilla Cream Theme
@@ -162,7 +167,8 @@ export const vanillaCreamTheme: ThemeConfig = {
   success: '#10b981',
   error: '#ef4444',
   warning: '#f59e0b',
-  info: '#3b82f6'
+  info: '#3b82f6',
+  chatBackground: '#f8f6ed'
 };
 
 // Cotton Candy Theme
@@ -177,7 +183,8 @@ export const cottonCandyTheme: ThemeConfig = {
   success: '#059669',
   error: '#dc2626',
   warning: '#d97706',
-  info: '#2563eb'
+  info: '#2563eb',
+  chatBackground: '#fce7f3'
 };
 
 // Mint Fresh Theme
@@ -192,7 +199,8 @@ export const mintFreshTheme: ThemeConfig = {
   success: '#059669',
   error: '#dc2626',
   warning: '#d97706',
-  info: '#0284c7'
+  info: '#0284c7',
+  chatBackground: '#ecfdf5'
 };
 
 // Warm Sand Theme
@@ -207,7 +215,8 @@ export const warmSandTheme: ThemeConfig = {
   success: '#166534',
   error: '#991b1b',
   warning: '#b45309',
-  info: '#1e40af'
+  info: '#1e40af',
+  chatBackground: '#fef3c7'
 };
 
 // Lavender Dream Theme
@@ -222,7 +231,8 @@ export const lavenderDreamTheme: ThemeConfig = {
   success: '#059669',
   error: '#dc2626',
   warning: '#d97706',
-  info: '#2563eb'
+  info: '#2563eb',
+  chatBackground: '#f3e8ff'
 };
 
 // Ocean Breeze Theme
@@ -237,7 +247,8 @@ export const oceanBreezeTheme: ThemeConfig = {
   success: '#059669',
   error: '#dc2626',
   warning: '#d97706',
-  info: '#0284c7'
+  info: '#0284c7',
+  chatBackground: '#e0f2fe'
 };
 
 // Slate Gray Theme (Neutral)
@@ -252,7 +263,8 @@ export const slateGrayTheme: ThemeConfig = {
   success: '#059669',
   error: '#dc2626',
   warning: '#d97706',
-  info: '#0284c7'
+  info: '#0284c7',
+  chatBackground: '#f6f8fa'
 };
 
 // Warm Gray Theme (Neutral)
@@ -267,7 +279,8 @@ export const warmGrayTheme: ThemeConfig = {
   success: '#059669',
   error: '#dc2626',
   warning: '#d97706',
-  info: '#0284c7'
+  info: '#0284c7',
+  chatBackground: '#f6f8fa'
 };
 
 // Stone Theme (Neutral)
@@ -282,7 +295,8 @@ export const stoneTheme: ThemeConfig = {
   success: '#16a34a',
   error: '#dc2626',
   warning: '#ca8a04',
-  info: '#0369a1'
+  info: '#0369a1',
+  chatBackground: '#f6f8fa'
 };
 
 // Mocha Theme (Neutral)
@@ -297,7 +311,8 @@ export const mochaTheme: ThemeConfig = {
   success: '#166534',
   error: '#991b1b',
   warning: '#b45309',
-  info: '#1e40af'
+  info: '#1e40af',
+  chatBackground: '#f6f8fa'
 };
 
 // Gruvbox Light Theme
@@ -312,7 +327,8 @@ export const gruvboxLightTheme: ThemeConfig = {
   success: '#79740e',
   error: '#cc241d',
   warning: '#d65d0e',
-  info: '#076678'
+  info: '#076678',
+  chatBackground: '#f2e5bc'
 };
 
 // One Light Theme
@@ -327,7 +343,8 @@ export const oneLightTheme: ThemeConfig = {
   success: '#50a14f',
   error: '#e45649',
   warning: '#c18401',
-  info: '#0184bc'
+  info: '#0184bc',
+  chatBackground: '#f0f0f1'
 };
 
 // Atom Light Theme
@@ -342,7 +359,8 @@ export const atomLightTheme: ThemeConfig = {
   success: '#50a14f',
   error: '#e45649',
   warning: '#986801',
-  info: '#0184bc'
+  info: '#0184bc',
+  chatBackground: '#f6f7f8'
 };
 
 // Tokyo Night Storm Theme
@@ -357,7 +375,8 @@ export const tokyoNightStormTheme: ThemeConfig = {
   success: '#9ece6a',
   error: '#f7768e',
   warning: '#e0af68',
-  info: '#7dcfff'
+  info: '#7dcfff',
+  chatBackground: '#1f2335'
 };
 
 // Catppuccin Latte Theme
@@ -372,7 +391,8 @@ export const catppuccinLatteTheme: ThemeConfig = {
   success: '#40a02b',
   error: '#d20f39',
   warning: '#df8e1d',
-  info: '#209fb5'
+  info: '#209fb5',
+  chatBackground: '#e6e9ef'
 };
 
 // Catppuccin Mocha Theme
@@ -387,7 +407,8 @@ export const catppuccinMochaTheme: ThemeConfig = {
   success: '#a6e3a1',
   error: '#f38ba8',
   warning: '#f9e2af',
-  info: '#89dceb'
+  info: '#89dceb',
+  chatBackground: '#181825'
 };
 
 // Forest Theme
@@ -402,7 +423,8 @@ export const forestTheme: ThemeConfig = {
   success: '#5c8a3a',
   error: '#d32f2f',
   warning: '#ff9800',
-  info: '#5dade2'
+  info: '#5dade2',
+  chatBackground: '#0f1c02'
 };
 
 // Sunset Theme
@@ -417,7 +439,8 @@ export const sunsetTheme: ThemeConfig = {
   success: '#4caf50',
   error: '#e91e63',
   warning: '#ffeb3b',
-  info: '#2196f3'
+  info: '#2196f3',
+  chatBackground: '#1a0e08'
 };
 
 // Dracula Theme
@@ -432,7 +455,8 @@ export const draculaTheme: ThemeConfig = {
   success: '#50fa7b',
   error: '#ff5555',
   warning: '#f1fa8c',
-  info: '#8be9fd'
+  info: '#8be9fd',
+  chatBackground: '#44475a'
 };
 
 // Monokai Theme
@@ -447,7 +471,8 @@ export const monokaiTheme: ThemeConfig = {
   success: '#a6e22e',
   error: '#f92672',
   warning: '#e6db74',
-  info: '#66d9ef'
+  info: '#66d9ef',
+  chatBackground: '#3e3d32'
 };
 
 // High Contrast Light Theme
@@ -462,7 +487,8 @@ export const highContrastLightTheme: ThemeConfig = {
   success: '#008000',
   error: '#ff0000',
   warning: '#ff8000',
-  info: '#0000ff'
+  info: '#0000ff',
+  chatBackground: '#f0f0f0'
 };
 
 // High Contrast Dark Theme
@@ -477,7 +503,8 @@ export const highContrastDarkTheme: ThemeConfig = {
   success: '#00ff00',
   error: '#ff0000',
   warning: '#ffaa00',
-  info: '#00ffff'
+  info: '#00ffff',
+  chatBackground: '#1a1a1a'
 };
 
 // Sepia Theme
@@ -492,7 +519,8 @@ export const sepiaTheme: ThemeConfig = {
   success: '#6b8e23',
   error: '#b22222',
   warning: '#daa520',
-  info: '#4682b4'
+  info: '#4682b4',
+  chatBackground: '#ede6d3'
 };
 
 // Get all predefined themes

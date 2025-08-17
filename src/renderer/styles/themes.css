@@ -276,6 +276,7 @@
   --error: #dc2626;
   --warning: #d97706;
   --info: #0284c7;
+  --chatBackground: #f1f5f9;
 }
 
 /* Warm Gray Theme (Neutral) */
@@ -292,6 +293,7 @@
   --error: #dc2626;
   --warning: #d97706;
   --info: #0284c7;
+  --chatBackground: #f5f5f4;
 }
 
 /* Stone Theme (Neutral) */
@@ -308,6 +310,7 @@
   --error: #dc2626;
   --warning: #ca8a04;
   --info: #0369a1;
+  --chatBackground: #f5f5f4;
 }
 
 /* Mocha Theme (Neutral) */
@@ -324,6 +327,7 @@
   --error: #991b1b;
   --warning: #b45309;
   --info: #1e40af;
+  --chatBackground: #fed7aa;
 }
 
 /* Gruvbox Light Theme */
@@ -340,6 +344,7 @@
   --error: #cc241d;
   --warning: #d65d0e;
   --info: #076678;
+  --chatBackground: #f2e5bc;
 }
 
 /* One Light Theme */
@@ -356,6 +361,7 @@
   --error: #e45649;
   --warning: #c18401;
   --info: #0184bc;
+  --chatBackground: #f0f0f1;
 }
 
 /* Atom Light Theme */
@@ -372,6 +378,7 @@
   --error: #e45649;
   --warning: #986801;
   --info: #0184bc;
+  --chatBackground: #f6f7f8;
 }
 
 /* Tokyo Night Storm Theme */
@@ -388,6 +395,7 @@
   --error: #f7768e;
   --warning: #e0af68;
   --info: #7dcfff;
+  --chatBackground: #1f2335;
 }
 
 /* Catppuccin Latte Theme */
@@ -404,6 +412,7 @@
   --error: #d20f39;
   --warning: #df8e1d;
   --info: #209fb5;
+  --chatBackground: #e6e9ef;
 }
 
 /* Catppuccin Mocha Theme */
@@ -420,6 +429,7 @@
   --error: #f38ba8;
   --warning: #f9e2af;
   --info: #89dceb;
+  --chatBackground: #181825;
 }
 
 /* Forest Theme */
@@ -436,6 +446,7 @@
   --error: #d32f2f;
   --warning: #ff9800;
   --info: #5dade2;
+  --chatBackground: #0f1c02;
 }
 
 /* Sunset Theme */
@@ -452,6 +463,7 @@
   --error: #e91e63;
   --warning: #ffeb3b;
   --info: #2196f3;
+  --chatBackground: #1a0e08;
 }
 
 /* Dracula Theme */
@@ -468,6 +480,7 @@
   --error: #ff5555;
   --warning: #f1fa8c;
   --info: #8be9fd;
+  --chatBackground: #44475a;
 }
 
 /* Monokai Theme */
@@ -484,6 +497,7 @@
   --error: #f92672;
   --warning: #e6db74;
   --info: #66d9ef;
+  --chatBackground: #3e3d32;
 }
 
 /* High Contrast Light Theme */
@@ -500,6 +514,7 @@
   --error: #ff0000;
   --warning: #ff8000;
   --info: #0000ff;
+  --chatBackground: #f0f0f0;
 }
 
 /* High Contrast Dark Theme */
@@ -516,6 +531,7 @@
   --error: #ff0000;
   --warning: #ffaa00;
   --info: #00ffff;
+  --chatBackground: #1a1a1a;
 }
 
 /* Sepia Theme */
@@ -532,6 +548,7 @@
   --error: #b22222;
   --warning: #daa520;
   --info: #4682b4;
+  --chatBackground: #ede6d3;
 }
 
 /* Apply theme variables to elements */

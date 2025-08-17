@@ -20,6 +20,7 @@ export interface ThemeConfig {
   error: string;
   warning: string;
   info: string;
+  chatBackground: string;
 }
 
 // Define the application settings interface
