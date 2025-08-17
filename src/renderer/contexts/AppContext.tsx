@@ -180,9 +180,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
   // Get config for theme management
   const { currentTheme } = useConfig();
 
+  // Sync isDarkTheme state with currentTheme changes
+  useEffect(() => {
+    if (currentTheme) {
+      const isCurrentThemeDark = !isThemeLight(currentTheme);
+      if (isDarkTheme !== isCurrentThemeDark) {
+        console.log(`Theme sync: Updating isDarkTheme from ${isDarkTheme} to ${isCurrentThemeDark} for theme "${currentTheme.name}"`);
+        setIsDarkTheme(isCurrentThemeDark);
+      }
+    }
+  }, [currentTheme, isDarkTheme]);
+
   // Apply theme class to document body
   useEffect(() => {
     if (!currentTheme) return;
+
+    console.log(`Applying theme: "${currentTheme.name}" (isDarkTheme: ${isDarkTheme})`);
 
     // Remove all theme classes
     document.body.classList.forEach((className) => {
@@ -194,6 +207,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     // Add the appropriate theme class with spaces replaced by hyphens
     const themeClassName = `theme-${currentTheme.name.replace(/\s+/g, "-")}`;
     document.body.classList.add(themeClassName);
+    
+    console.log(`Added theme class: ${themeClassName}`);
 
     // Sync new theme variables with old CSS variable names for compatibility
     const root = document.documentElement;

@@ -81,8 +81,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
 
   // Cycle through themes
   const cycleTheme = async () => {
+    console.log(`Cycling theme: current index ${themeIndex}, available themes:`, availableThemes);
+    
     if (availableThemes.length <= 1) {
       // If only one theme, just use the simple toggle
+      console.log('Using simple theme toggle (only one theme available)');
       toggleTheme();
       return;
     }
@@ -91,8 +94,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     const nextIndex = (themeIndex + 1) % availableThemes.length;
     const nextTheme = availableThemes[nextIndex];
 
+    console.log(`Switching from "${availableThemes[themeIndex]}" to "${nextTheme}" (index ${themeIndex} -> ${nextIndex})`);
+
     // Update theme
     const success = await setTheme(nextTheme);
+    console.log(`Theme switch result: ${success}`);
     if (success) {
       setThemeIndex(nextIndex);
     }
