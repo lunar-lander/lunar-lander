@@ -101,6 +101,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     console.log(`Theme switch result: ${success}`);
     if (success) {
       setThemeIndex(nextIndex);
+      // Just reload - simple and it works!
+      window.location.reload();
     }
   };
 
