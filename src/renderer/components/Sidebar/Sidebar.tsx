@@ -95,10 +95,6 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     const success = await setTheme(nextTheme);
     if (success) {
       setThemeIndex(nextIndex);
-
-      // Force a manual refresh of the page to apply theme changes immediately
-      // This is a temporary solution - in production, you'd want to avoid this approach
-      window.location.reload();
     }
   };
 

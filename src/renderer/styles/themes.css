@@ -14,6 +14,7 @@
   --error: #ea4335;
   --warning: #fbbc04;
   --info: #4285f4;
+  --chatBackground: #fafbfc;
 }
 
 /* Dark Theme */
@@ -30,6 +31,7 @@
   --error: #ea4335;
   --warning: #fbbc04;
   --info: #8ab4f8;
+  --chatBackground: #1a1b1f;
 }
 
 /* Cyberpunk Theme */
@@ -46,6 +48,7 @@
   --error: #ff2a6d;
   --warning: #fdca40;
   --info: #05d9e8;
+  --chatBackground: #0f0f1a;
 }
 
 /* Solarized Light Theme */
@@ -60,6 +63,7 @@
   --error: #dc322f;
   --warning: #cb4b16;
   --info: #6c71c4;
+  --chatBackground: #f7f0dc;
 }
 
 /* Solarized Dark Theme */
@@ -74,6 +78,7 @@
   --error: #dc322f;
   --warning: #cb4b16;
   --info: #6c71c4;
+  --chatBackground: #001f24;
 }
 
 /* Synthwave Theme */
@@ -88,6 +93,7 @@
   --error: #ff00ff;
   --warning: #ffff00;
   --info: #00fffb;
+  --chatBackground: #1a1325;
 }
 
 /* Nord Theme */
@@ -102,6 +108,7 @@
   --error: #bf616a;
   --warning: #d08770;
   --info: #b48ead;
+  --chatBackground: #242933;
 }
 
 /* Material Oceanic Theme */
@@ -116,6 +123,7 @@
   --error: #FF5370;
   --warning: #FFCB6B;
   --info: #C792EA;
+  --chatBackground: #0d0f16;
 }
 
 /* GitHub Light Theme */
@@ -132,6 +140,7 @@
   --error: #d1242f;
   --warning: #fb8500;
   --info: #0969da;
+  --chatBackground: #f6f8fa;
 }
 
 /* Paper Theme */
@@ -148,6 +157,7 @@
   --error: #f44336;
   --warning: #ff9800;
   --info: #2196f3;
+  --chatBackground: #f9fbfe;
 }
 
 /* Vanilla Cream Theme */
@@ -164,6 +174,7 @@
   --error: #ef4444;
   --warning: #f59e0b;
   --info: #3b82f6;
+  --chatBackground: #f8f6ed;
 }
 
 /* Cotton Candy Theme */
@@ -180,6 +191,7 @@
   --error: #dc2626;
   --warning: #d97706;
   --info: #2563eb;
+  --chatBackground: #fce7f3;
 }
 
 /* Mint Fresh Theme */
@@ -196,6 +208,7 @@
   --error: #dc2626;
   --warning: #d97706;
   --info: #0284c7;
+  --chatBackground: #ecfdf5;
 }
 
 /* Warm Sand Theme */
@@ -212,6 +225,7 @@
   --error: #991b1b;
   --warning: #b45309;
   --info: #1e40af;
+  --chatBackground: #fef3c7;
 }
 
 /* Lavender Dream Theme */
@@ -228,6 +242,7 @@
   --error: #dc2626;
   --warning: #d97706;
   --info: #2563eb;
+  --chatBackground: #f3e8ff;
 }
 
 /* Ocean Breeze Theme */
@@ -244,6 +259,7 @@
   --error: #dc2626;
   --warning: #d97706;
   --info: #0284c7;
+  --chatBackground: #e0f2fe;
 }
 
 /* Slate Gray Theme (Neutral) */

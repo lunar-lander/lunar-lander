@@ -4,9 +4,25 @@ import { Model } from "../../shared/types/model";
 import { DbService } from "../services/db";
 import { initializeMockData } from "../services/mockData";
 import { useConfig } from "../hooks/useConfig";
+import { ThemeConfig } from "../../main/themes";
 
 // Import types from ConversationMode
 import { ConversationModeType } from "../components/Settings/ConversationMode";
+
+// Utility function to determine if a theme is light or dark
+const isThemeLight = (theme: ThemeConfig): boolean => {
+  // Convert hex to RGB and calculate luminance
+  const hex = theme.background.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  
+  // Calculate relative luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  
+  // If luminance is greater than 0.5, it's a light theme
+  return luminance > 0.5;
+};
 
 // Define the CustomConfig interface
 export interface CustomConfig {
@@ -178,6 +194,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     // Add the appropriate theme class with spaces replaced by hyphens
     const themeClassName = `theme-${currentTheme.name.replace(/\s+/g, "-")}`;
     document.body.classList.add(themeClassName);
+
+    // Sync new theme variables with old CSS variable names for compatibility
+    const root = document.documentElement;
+    root.style.setProperty('--primary-color', currentTheme.primary);
+    root.style.setProperty('--primary-color-rgb', `${parseInt(currentTheme.primary.slice(1, 3), 16)}, ${parseInt(currentTheme.primary.slice(3, 5), 16)}, ${parseInt(currentTheme.primary.slice(5, 7), 16)}`);
+    root.style.setProperty('--secondary-color', currentTheme.secondary);
+    root.style.setProperty('--background-color', currentTheme.background);
+    root.style.setProperty('--text-color', currentTheme.text);
+    root.style.setProperty('--sidebar-color', currentTheme.sidebar);
+    root.style.setProperty('--accent-color', currentTheme.accent);
+    root.style.setProperty('--success-color', currentTheme.success);
+    root.style.setProperty('--error-color', currentTheme.error);
+    root.style.setProperty('--warning-color', currentTheme.warning);
+    root.style.setProperty('--info-color', currentTheme.info);
+    
+    // Set hover background color - lighter for light themes, darker for dark themes
+    const isLightTheme = isThemeLight(currentTheme);
+    const hoverBg = isLightTheme ? 'rgba(60, 64, 67, 0.08)' : 'rgba(232, 234, 237, 0.08)';
+    root.style.setProperty('--hover-bg-color', hoverBg);
+    
+    // Set border color
+    const borderColor = isLightTheme ? '#dadce0' : 'rgba(255, 255, 255, 0.1)';
+    root.style.setProperty('--border-color', borderColor);
 
     // Also set dark/light theme for compatibility
     if (isDarkTheme) {
