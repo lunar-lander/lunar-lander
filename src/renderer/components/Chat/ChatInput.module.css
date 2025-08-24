@@ -105,7 +105,7 @@
   background-color: var(--input-bg);
   transition: border-color 0.2s;
   flex: 1;
-  min-height: 100px;
+  /* min-height: 100px; */
   display: flex;
   flex-direction: column;
 }
@@ -114,8 +114,8 @@
   width: 100%;
   border-radius: 8px !important;
   flex: 1;
-  min-height: 100px;
-  height: calc(100% - 20px) !important; /* Account for bottom padding */
+  /* min-height: 100px; */
+
   display: flex;
   flex-direction: column;
 }
