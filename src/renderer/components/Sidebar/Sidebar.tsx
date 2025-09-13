@@ -355,10 +355,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                       totalChats: chats.length,
                       chats: chats.map(chat => ({
                         id: chat.id,
-                        title: chat.title,
                         summary: chat.summary,
-                        createdAt: chat.createdAt,
-                        updatedAt: chat.updatedAt,
+                        date: chat.date,
+                        lastUpdated: chat.lastUpdated,
                         messages: chat.messages,
                         isStarred: chat.isStarred
                       }))
@@ -410,8 +409,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                         const isDuplicate = chats.some(existingChat => {
                           // Match by summary and similar creation time (within 1 minute)
                           const summaryMatch = existingChat.summary === chatData.summary;
-                          const timeMatch = chatData.createdAt &&
-                            Math.abs(existingChat.createdAt - chatData.createdAt) < 60000;
+                          const timeMatch = chatData.date && existingChat.date &&
+                            Math.abs(new Date(existingChat.date).getTime() - new Date(chatData.date).getTime()) < 60000;
 
                           // Also check if first message content matches (if available)
                           const firstMessageMatch = existingChat.messages.length > 0 &&
@@ -448,10 +447,9 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                         const newChat = {
                           ...chatData,
                           id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                          title: chatData.title || 'Imported Chat',
                           summary: chatData.summary || 'Imported conversation',
-                          createdAt: chatData.createdAt || Date.now(),
-                          updatedAt: Date.now(),
+                          date: chatData.date || new Date().toISOString(),
+                          lastUpdated: chatData.lastUpdated || Date.now(),
                           isStarred: chatData.isStarred || false,
                           messages: chatData.messages || []
                         };
