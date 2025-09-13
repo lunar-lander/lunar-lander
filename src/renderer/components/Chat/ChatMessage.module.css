@@ -27,12 +27,12 @@
 }
 
 .user .messageContent {
-  color: var(--text-color);
+  color: var(--text);
   border-top-right-radius: 2px;
 }
 
 .assistant .messageContent {
-  color: var(--text-color);
+  color: var(--text);
   border-top-left-radius: 2px;
 }
 
@@ -87,7 +87,7 @@
 
 /* Dark theme code block text fix */
 :global(.dark-theme) .messageText :global(pre code) {
-  color: #e8eaed;
+  color: var(--text);
 }
 
 /* Code syntax highlighting */
@@ -311,7 +311,7 @@
 }
 
 .assistant .modelTag {
-  color: var(--primary-color);
+  color: var(--primary);
 }
 
 .toggleVisibility {
@@ -384,7 +384,7 @@
 }
 
 .latexHelperToggle {
-  background-color: var(--primary-color, #1a73e8);
+  background-color: var(--primary, #1a73e8);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -395,7 +395,7 @@
 }
 
 .latexHelperToggle:hover {
-  background-color: var(--secondary-color, #0d47a1);
+  background-color: var(--secondary, #0d47a1);
 }
 
 .latexHelperContent {
@@ -409,7 +409,7 @@
 
 .latexHelperContent h4 {
   margin-top: 0;
-  color: var(--primary-color, #1a73e8);
+  color: var(--primary, #1a73e8);
 }
 
 .latexHelperContent h5 {
@@ -430,7 +430,7 @@
 }
 
 .latexHelperContent a {
-  color: var(--primary-color, #1a73e8);
+  color: var(--primary, #1a73e8);
   text-decoration: none;
 }
 

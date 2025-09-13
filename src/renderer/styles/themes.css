@@ -557,6 +557,20 @@ body {
   color: var(--text);
 }
 
+/* Map short names to long names for compatibility */
+:root, .theme-Dark, .theme-Cyberpunk, .theme-Solarized-Light, .theme-Solarized-Dark, .theme-Synthwave, .theme-Nord, .theme-Material-Oceanic, .theme-GitHub-Light, .theme-Paper, .theme-Vanilla-Cream, .theme-Cotton-Candy, .theme-Mint-Fresh, .theme-Warm-Sand, .theme-Lavender-Dream, .theme-Ocean-Breeze, .theme-Slate-Gray, .theme-Warm-Gray, .theme-Stone, .theme-Mocha, .theme-Gruvbox-Light, .theme-One-Light, .theme-Atom-Light, .theme-Tokyo-Night-Storm, .theme-Catppuccin-Latte, .theme-Catppuccin-Mocha, .theme-Forest, .theme-Sunset, .theme-Dracula, .theme-Monokai, .theme-High-Contrast-Light, .theme-High-Contrast-Dark, .theme-Sepia {
+  --text-color: var(--text);
+  --background-color: var(--background);
+  --primary-color: var(--primary);
+  --secondary-color: var(--secondary);
+  --sidebar-color: var(--sidebar);
+  --accent-color: var(--accent);
+  --success-color: var(--success);
+  --error-color: var(--error);
+  --warning-color: var(--warning);
+  --info-color: var(--info);
+}
+
 button.primary {
   background-color: var(--primary);
   color: white;

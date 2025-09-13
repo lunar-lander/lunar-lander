@@ -8,7 +8,7 @@
 
 .header {
   padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .actions {
@@ -16,7 +16,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .actionButton {
@@ -113,7 +113,7 @@
   font-size: 0.9em;
   text-transform: uppercase;
   font-weight: 500;
-  color: #5f6368;
+  color: var(--text-secondary);
   margin: 16px 0 8px 12px;
   display: flex;
   align-items: center;
@@ -123,27 +123,19 @@
   content: "";
   flex-grow: 1;
   height: 1px;
-  background-color: #e0e0e0;
+  background-color: var(--border-color);
   margin-left: 8px;
   margin-right: 12px;
 }
 
-:global(.dark-theme) .sectionTitle {
-  color: #9aa0a6;
-}
-
-:global(.dark-theme) .sectionTitle::after {
-  background-color: #5f6368;
-}
+/* Section title colors are now handled by CSS variables */
 
 .modelToggles {
   padding: 0 8px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-color);
 }
 
-:global(.dark-theme) .modelToggles {
-  border-bottom-color: #5f6368;
-}
+/* Model toggles border color is now handled by CSS variables */
 
 .modelList {
   display: flex;
@@ -182,7 +174,7 @@
 
 /* Ensure text remains readable */
 .modelToggle .modelName {
-  color: var(--text-color);
+  color: var(--text);
 }
 
 .modelToggle .toggleIndicator {
@@ -199,7 +191,7 @@
 
 .noModels {
   padding: 12px;
-  color: #5f6368;
+  color: var(--text-secondary);
   font-style: italic;
   text-align: center;
   font-size: 0.9em;
@@ -213,23 +205,18 @@
   background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-:global(.dark-theme) .noModels {
-  color: #9aa0a6;
-}
+/* No models text color is now handled by CSS variables */
 
 .modelCount {
   font-size: 0.8em;
-  color: #5f6368;
+  color: var(--text-secondary);
   margin-right: 12px;
   padding: 2px 6px;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--hover-bg-color);
   border-radius: 10px;
 }
 
-:global(.dark-theme) .modelCount {
-  color: #9aa0a6;
-  background-color: rgba(255, 255, 255, 0.1);
-}
+/* Model count colors are now handled by CSS variables */
 
 :global(.dark-theme) .searchInput {
   background-color: #303134;
@@ -277,7 +264,7 @@
 .chatSummary {
   font-size: 0.82em;
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -289,7 +276,7 @@
 
 .chatDate {
   font-size: 0.7em;
-  color: #9aa0a6;
+  color: var(--text-secondary);
   white-space: nowrap;
   margin-right: 4px;
 }
@@ -407,7 +394,7 @@
   border-radius: 16px;
   border: 1px solid var(--border-color);
   background-color: var(--input-bg);
-  color: var(--text-color);
+  color: var(--text);
   font-size: 13px;
   outline: none;
   transition: border-color 0.2s;
@@ -446,7 +433,7 @@
   border-radius: 4px;
   border: 1px solid var(--primary);
   background-color: var(--input-bg);
-  color: var(--text-color);
+  color: var(--text);
   font-size: 14px;
   outline: none;
 }
@@ -454,7 +441,7 @@
 .noChats {
   text-align: center;
   padding: 24px;
-  color: #5f6368;
+  color: var(--text-secondary);
 }
 
 :global(.dark-theme) .actionButton:hover {
@@ -469,18 +456,4 @@
   background-color: rgba(138, 180, 248, 0.1);
 }
 
-:global(.dark-theme) .chatSummary {
-  color: #9aa0a6;
-}
-
-:global(.dark-theme) .chatDate {
-  color: #9aa0a6;
-}
-
-:global(.dark-theme) .actions {
-  border-bottom-color: #5f6368;
-}
-
-:global(.dark-theme) .header {
-  border-bottom-color: #5f6368;
-}
+/* Chat text colors are now handled by CSS variables */
