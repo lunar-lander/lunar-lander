@@ -343,42 +343,98 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
         <div className={styles.chatListHeader}>
           <div className={styles.chatListHeaderTop}>
             <h3 className={styles.sectionTitle}>Conversations</h3>
-            {chats.length > 0 && (
+            <div className={styles.backupActions}>
+              {chats.length > 0 && (
+                <button
+                  className={styles.exportAllButton}
+                  onClick={() => {
+                    const exportData = {
+                      version: "1.0",
+                      exportDate: new Date().toISOString(),
+                      totalChats: chats.length,
+                      chats: chats.map(chat => ({
+                        id: chat.id,
+                        title: chat.title,
+                        summary: chat.summary,
+                        createdAt: chat.createdAt,
+                        updatedAt: chat.updatedAt,
+                        messages: chat.messages,
+                        isStarred: chat.isStarred
+                      }))
+                    };
+
+                    const jsonString = JSON.stringify(exportData, null, 2);
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `lunar-lander-chats-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  title="Export all conversations as JSON"
+                >
+                  Export
+                </button>
+              )}
               <button
-                className={styles.exportAllButton}
+                className={styles.importAllButton}
                 onClick={() => {
-                  const exportData = {
-                    version: "1.0",
-                    exportDate: new Date().toISOString(),
-                    totalChats: chats.length,
-                    chats: chats.map(chat => ({
-                      id: chat.id,
-                      title: chat.title,
-                      summary: chat.summary,
-                      createdAt: chat.createdAt,
-                      updatedAt: chat.updatedAt,
-                      messages: chat.messages,
-                      isStarred: chat.isStarred
-                    }))
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.json';
+                  input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+
+                    try {
+                      const text = await file.text();
+                      const importData = JSON.parse(text);
+
+                      // Validate the imported data structure
+                      if (!importData.chats || !Array.isArray(importData.chats)) {
+                        alert('Invalid backup file format');
+                        return;
+                      }
+
+                      // Confirm import action
+                      const confirmMessage = `Import ${importData.chats.length} conversations?\n\nThis will add them to your existing conversations.`;
+                      if (!window.confirm(confirmMessage)) return;
+
+                      // Import each chat
+                      for (const chatData of importData.chats) {
+                        // Generate new ID to avoid conflicts
+                        const newChat = {
+                          ...chatData,
+                          id: `imported-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                          title: chatData.title || 'Imported Chat',
+                          summary: chatData.summary || 'Imported conversation',
+                          createdAt: chatData.createdAt || Date.now(),
+                          updatedAt: Date.now(),
+                          isStarred: chatData.isStarred || false,
+                          messages: chatData.messages || []
+                        };
+
+                        // Add to storage
+                        saveChat(newChat);
+                      }
+
+                      alert(`Successfully imported ${importData.chats.length} conversations!`);
+                    } catch (error) {
+                      console.error('Import error:', error);
+                      alert('Failed to import backup file. Please check the file format.');
+                    }
                   };
-
-                  const jsonString = JSON.stringify(exportData, null, 2);
-                  const blob = new Blob([jsonString], { type: 'application/json' });
-                  const url = URL.createObjectURL(blob);
-
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `lunar-lander-chats-${new Date().toISOString().split('T')[0]}.json`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
+                  input.click();
                 }}
-                title="Export all conversations as JSON"
+                title="Import conversations from JSON backup"
               >
-                Export all
+                Import
               </button>
-            )}
+            </div>
           </div>
           <div className={styles.searchContainer}>
             <input

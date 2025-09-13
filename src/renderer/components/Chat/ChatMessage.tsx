@@ -33,12 +33,20 @@ const processContent = (content: string): string => {
   if (!content) return "";
 
   // Optimization: Only process content that potentially contains LaTeX
-  if (!content.includes("$")) return content;
+  if (!content.includes("$") && !content.includes("\\(") && !content.includes("\\[")) return content;
 
   try {
     // Process the content for LaTeX rendering, handling common LLM formatting issues
     return (
       content
+        // Convert \(...\) to $...$ for inline math
+        .replace(/\\\(/g, "$")
+        .replace(/\\\)/g, "$")
+
+        // Convert \[...\] to $$...$$ for display math
+        .replace(/\\\[/g, "$$")
+        .replace(/\\\]/g, "$$")
+
         // Handle inline math with no space after the opening $
         .replace(/\$([^\s$\\])/g, "$ $1")
 
@@ -91,7 +99,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   const processedContent = useMemo(() => {
     // Only process content if it's not streaming or if we're dealing with user messages
     // For streaming messages, we want to defer expensive LaTeX processing until streaming is complete
-    if (isStreaming && !isUser && content.includes("$")) {
+    if (isStreaming && !isUser && (content.includes("$") || content.includes("\\(") || content.includes("\\["))) {
       return content; // Return unprocessed content during streaming
     }
     return processContent(content);

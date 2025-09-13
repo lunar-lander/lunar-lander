@@ -357,20 +357,38 @@
   margin-bottom: 8px;
 }
 
-.exportAllButton {
+.backupActions {
+  display: flex;
+  gap: 4px;
+  margin-right: 12px;
+}
+
+.exportAllButton,
+.importAllButton {
   font-size: 0.8em;
   padding: 4px 8px;
   border-radius: 4px;
-  background-color: rgba(34, 168, 83, 0.1);
-  color: var(--success);
   border: none;
   cursor: pointer;
-  margin-right: 12px;
   transition: background-color 0.2s;
+}
+
+.exportAllButton {
+  background-color: rgba(34, 168, 83, 0.1);
+  color: var(--success);
 }
 
 .exportAllButton:hover {
   background-color: rgba(34, 168, 83, 0.2);
+}
+
+.importAllButton {
+  background-color: rgba(26, 115, 232, 0.1);
+  color: var(--primary);
+}
+
+.importAllButton:hover {
+  background-color: rgba(26, 115, 232, 0.2);
 }
 
 .searchContainer {
