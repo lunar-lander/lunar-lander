@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { ChatMessage as ChatMessageType } from "../../../shared/types/chat";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -87,6 +87,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   const { id, sender, content, timestamp } = message;
   const isUser = sender === "user";
 
+  // Memoize processed content to avoid re-processing during streaming
+  const processedContent = useMemo(() => {
+    // Only process content if it's not streaming or if we're dealing with user messages
+    // For streaming messages, we want to defer expensive LaTeX processing until streaming is complete
+    if (isStreaming && !isUser && content.includes("$")) {
+      return content; // Return unprocessed content during streaming
+    }
+    return processContent(content);
+  }, [content, isStreaming, isUser]);
+
   const handleToggleVisibility = () => {
     if (onToggleVisibility) {
       onToggleVisibility(id);
@@ -158,7 +168,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               ),
             }}
           >
-            {processContent(content)}
+            {processedContent}
           </ReactMarkdown>
         </div>
       </div>

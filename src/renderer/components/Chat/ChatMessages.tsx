@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { ChatMessage as ChatMessageType } from "../../../shared/types/chat";
 import { Model } from "../../../shared/types/model";
 import ChatMessage from "./ChatMessage";
@@ -20,44 +20,40 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   onToggleMessageVisibility,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Scroll to bottom when messages change or streaming state changes
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      // Force scroll to bottom with a slight delay to ensure DOM is updated
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        });
-      }, 50);
+  // Optimized scroll function with throttling
+  const scrollToBottom = useCallback(() => {
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
     }
-  }, [messages, streamingMessageIds]);
 
-  // Also scroll when specific message content changes (like during streaming)
-  useEffect(() => {
-    const streamingMessages = messages.filter((msg) =>
-      streamingMessageIds.includes(msg.id)
-    );
-
-    if (streamingMessages.length > 0) {
+    scrollTimeoutRef.current = setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "end",
       });
-    }
-  }, [messages, streamingMessageIds]); // Simplified dependency array to avoid issues
+    }, 100); // Throttle scrolling to every 100ms max
+  }, []);
 
-  // Effect to handle scrolling when message content changes
+  // Single consolidated effect for all scrolling scenarios
   useEffect(() => {
-    // This is a separate effect just for content changes
-    if (streamingMessageIds.length > 0) {
-      messagesEndRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
+    const hasStreamingMessages = streamingMessageIds.length > 0;
+    const shouldScroll = messages.length > 0 && (hasStreamingMessages || messages.length > 0);
+
+    if (shouldScroll) {
+      scrollToBottom();
     }
-  }, [JSON.stringify(messages.map((m) => m.id + "-" + m.content.length))]);
+  }, [messages.length, streamingMessageIds.length, scrollToBottom]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Get model name from model ID
   const getModelName = (modelId?: string): string => {

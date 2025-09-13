@@ -175,8 +175,27 @@ export abstract class BaseChatHandler {
         throw new Error("Response body is not readable");
       }
 
+      let isStreamClosed = false;
+
+      // Cleanup function to ensure proper resource disposal
+      const cleanupStream = () => {
+        if (!isStreamClosed) {
+          isStreamClosed = true;
+          try {
+            reader.cancel();
+          } catch (cancelError) {
+            console.warn("Error canceling stream reader:", cancelError);
+          }
+        }
+      };
+
       let content = "";
       const decoder = new TextDecoder();
+      let lastUpdateTime = 0;
+      let lastDbUpdateTime = 0;
+      const UPDATE_THROTTLE_MS = 200; // Update UI less frequently for better performance
+      const DB_THROTTLE_MS = 500; // Update database even less frequently
+      let pendingContent = ""; // Buffer content between updates
 
       // Read stream chunks - returns a promise so we can catch errors outside
       const readStream = async (): Promise<void> => {
@@ -184,10 +203,32 @@ export abstract class BaseChatHandler {
           const { done, value } = await reader.read();
 
           if (done) {
-            // End of stream, remove from streaming list
+            // End of stream - ensure final content update with optimized approach
+            if (content) {
+              try {
+                const chatData = this.deps.getChat(chatId);
+                if (chatData) {
+                  const messageIndex = chatData.messages.findIndex(
+                    (msg) => msg.id === messageId
+                  );
+                  if (messageIndex !== -1) {
+                    // Direct in-place update to avoid memory allocation
+                    chatData.messages[messageIndex].content = content;
+                    this.deps.updateChat(chatData);
+                  }
+                }
+              } catch (finalUpdateError) {
+                console.error("Error in final content update:", finalUpdateError);
+              }
+            }
+
+            // Remove from streaming list
             this.streamHandlers.setStreamingMessageIds((prev) =>
               prev.filter((id) => id !== messageId)
             );
+
+            // Clean up stream resources
+            cleanupStream();
             return;
           }
 
@@ -221,88 +262,60 @@ export abstract class BaseChatHandler {
                   const delta = parsed.choices[0]?.delta?.content || "";
                   if (delta) {
                     content += delta;
+                    pendingContent += delta;
 
-                    // Update message content in the chat
+                    // Throttle UI updates to prevent excessive memory allocation
+                    const currentTime = Date.now();
+                    const shouldUpdateUi = currentTime - lastUpdateTime >= UPDATE_THROTTLE_MS || pendingContent.length >= 1000;
+                    const shouldUpdateDb = currentTime - lastDbUpdateTime >= DB_THROTTLE_MS || pendingContent.length >= 2000;
+
+                    if (!shouldUpdateUi && !shouldUpdateDb) {
+                      continue; // Skip this update to throttle rendering and DB writes
+                    }
+
+                    // Only update when we have significant content or enough time has passed
+                    if (shouldUpdateUi) lastUpdateTime = currentTime;
+                    if (shouldUpdateDb) lastDbUpdateTime = currentTime;
+
+                    const contentToUpdate = content;
+                    pendingContent = ""; // Reset pending buffer
+
+                    // OPTIMIZED: Direct message update without full chat reconstruction
                     try {
                       const chatData = this.deps.getChat(chatId);
                       if (!chatData) {
                         console.error(`Chat data not found for ID: ${chatId}`);
-                        return;
+                        continue; // Continue processing instead of returning
                       }
 
-                      // Find the message to make sure it exists
-                      const messageToUpdate = chatData.messages.find(
+                      // Find message index for direct update
+                      const messageIndex = chatData.messages.findIndex(
                         (msg) => msg.id === messageId
                       );
-                      if (!messageToUpdate) {
-                        console.error(
-                          `Message ${messageId} not found in chat ${chatId}`
-                        );
 
-                        // Recreate the missing message and add it to the chat
-                        console.log(
-                          `Attempting to recreate missing message ${messageId}`
-                        );
-
-                        // Extract model ID from messageId (format is msg_timestamp_modelId)
-                        const recreatedModelId =
-                          messageId.split("_").pop() || "";
-
+                      if (messageIndex === -1) {
+                        // Message doesn't exist - create it once and continue
+                        const recreatedModelId = messageId.split("_").pop() || "";
                         const recreatedMessage: ChatMessage = {
                           id: messageId,
                           sender: "assistant",
-                          content: content,
+                          content: contentToUpdate,
                           timestamp: Date.now(),
                           modelId: recreatedModelId,
                         };
-
-                        // Add recreated message to chat
                         this.deps.addMessageToChat(chatId, recreatedMessage);
-
-                        // Get updated chat data
-                        const refreshedChat = this.deps.getChat(chatId);
-                        if (!refreshedChat) {
-                          console.error(
-                            `Still can't retrieve chat ${chatId} after message recreation`
-                          );
-                          return;
-                        }
-
-                        // Check if message was successfully recreated
-                        if (
-                          !refreshedChat.messages.some(
-                            (msg) => msg.id === messageId
-                          )
-                        ) {
-                          console.error(
-                            `Failed to recreate message ${messageId}`
-                          );
-                          return;
-                        }
-
-                        return;
+                        continue;
                       }
 
-                      const updatedMessages = chatData.messages.map((msg) =>
-                        msg.id === messageId ? { ...msg, content } : msg
-                      );
+                      // CRITICAL FIX: Update message in-place instead of creating new arrays
+                      chatData.messages[messageIndex].content = contentToUpdate;
 
-                      const updatedChat = {
-                        ...chatData,
-                        messages: updatedMessages,
-                      };
-
-                      // Then update database
-                      this.deps.updateChat(updatedChat);
-
-                      console.log(
-                        `Updated message ${messageId}, new content length: ${content.length}`
-                      );
+                      // Only update database when throttling allows it
+                      if (shouldUpdateDb) {
+                        this.deps.updateChat(chatData);
+                      }
                     } catch (updateError) {
-                      console.error(
-                        `Error updating message content:`,
-                        updateError
-                      );
+                      console.error(`Error updating message content:`, updateError);
                     }
                   }
                 }
@@ -318,35 +331,30 @@ export abstract class BaseChatHandler {
             }
           }
 
-          // Continue reading
-          readStream();
+          // Continue reading with throttling to prevent CPU overload
+          requestAnimationFrame(readStream);
         } catch (error) {
           console.error("Error reading stream:", error);
+
+          // Clean up resources on error
+          cleanupStream();
 
           try {
             // Make sure we preserve the message even when the stream errors out
             const chatData = this.deps.getChat(chatId);
             if (chatData) {
-              // Find the message to make sure it exists
-              const messageToUpdate = chatData.messages.find(
+              const messageIndex = chatData.messages.findIndex(
                 (msg) => msg.id === messageId
               );
 
-              if (messageToUpdate) {
+              if (messageIndex !== -1) {
                 // Update with error indication but preserve any content we have
                 const errorMessage = `${content}\n\n[Error: Connection interrupted]`;
 
-                const updatedMessages = chatData.messages.map((msg) =>
-                  msg.id === messageId ? { ...msg, content: errorMessage } : msg
-                );
-
-                const updatedChat = { ...chatData, messages: updatedMessages };
-
-                // Then update database
-                this.deps.updateChat(updatedChat);
-                console.log(
-                  `Preserved message ${messageId} after stream error`
-                );
+                // Direct in-place update to avoid memory allocation
+                chatData.messages[messageIndex].content = errorMessage;
+                this.deps.updateChat(chatData);
+                console.log(`Preserved message ${messageId} after stream error`);
               }
             }
           } catch (preserveError) {
@@ -367,27 +375,26 @@ export abstract class BaseChatHandler {
       readStream().catch((error) => {
         console.error(`Unhandled error in readStream for ${modelId}:`, error);
 
+        // Ensure cleanup on unhandled errors
+        cleanupStream();
+
         try {
           // Ensure the message is preserved with error information
           const chatData = this.deps.getChat(chatId);
           if (chatData) {
-            const messageToUpdate = chatData.messages.find(
+            const messageIndex = chatData.messages.findIndex(
               (msg) => msg.id === messageId
             );
-            if (messageToUpdate) {
+            if (messageIndex !== -1) {
+              const currentContent = chatData.messages[messageIndex].content;
               // Include any existing content plus error message
-              const errorContent = messageToUpdate.content
-                ? `${messageToUpdate.content}\n\n[Error: ${
-                    error.message || "Unknown error"
-                  }]`
+              const errorContent = currentContent
+                ? `${currentContent}\n\n[Error: ${error.message || "Unknown error"}]`
                 : `[Error: ${error.message || "Unknown error"}]`;
 
-              const updatedMessages = chatData.messages.map((msg) =>
-                msg.id === messageId ? { ...msg, content: errorContent } : msg
-              );
-
-              const updatedChat = { ...chatData, messages: updatedMessages };
-              this.deps.updateChat(updatedChat);
+              // Direct in-place update to avoid memory allocation
+              chatData.messages[messageIndex].content = errorContent;
+              this.deps.updateChat(chatData);
             }
           }
         } catch (cleanupError) {
@@ -403,14 +410,15 @@ export abstract class BaseChatHandler {
       // Update the message with the error
       const chatData = this.deps.getChat(chatId);
       if (chatData) {
-        const errorMessage = `Error: Failed to get response from the model. ${error.message}`;
-
-        const updatedMessages = chatData.messages.map((msg) =>
-          msg.id === messageId ? { ...msg, content: errorMessage } : msg
+        const messageIndex = chatData.messages.findIndex(
+          (msg) => msg.id === messageId
         );
-
-        const updatedChat = { ...chatData, messages: updatedMessages };
-        this.deps.updateChat(updatedChat);
+        if (messageIndex !== -1) {
+          const errorMessage = `Error: Failed to get response from the model. ${error.message}`;
+          // Direct in-place update to avoid memory allocation
+          chatData.messages[messageIndex].content = errorMessage;
+          this.deps.updateChat(chatData);
+        }
       }
 
       // Remove from streaming list
