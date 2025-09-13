@@ -345,19 +345,38 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
             <h3 className={styles.sectionTitle}>Conversations</h3>
             {chats.length > 0 && (
               <button
-                className={styles.clearAllButton}
+                className={styles.exportAllButton}
                 onClick={() => {
-                  if (
-                    window.confirm(
-                      "Are you sure you want to delete ALL conversations? This cannot be undone."
-                    )
-                  ) {
-                    deleteAllChats();
-                  }
+                  const exportData = {
+                    version: "1.0",
+                    exportDate: new Date().toISOString(),
+                    totalChats: chats.length,
+                    chats: chats.map(chat => ({
+                      id: chat.id,
+                      title: chat.title,
+                      summary: chat.summary,
+                      createdAt: chat.createdAt,
+                      updatedAt: chat.updatedAt,
+                      messages: chat.messages,
+                      isStarred: chat.isStarred
+                    }))
+                  };
+
+                  const jsonString = JSON.stringify(exportData, null, 2);
+                  const blob = new Blob([jsonString], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `lunar-lander-chats-${new Date().toISOString().split('T')[0]}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
                 }}
-                title="Clear all conversations"
+                title="Export all conversations as JSON"
               >
-                Clear all
+                Export all
               </button>
             )}
           </div>

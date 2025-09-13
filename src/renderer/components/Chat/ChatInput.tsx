@@ -26,6 +26,11 @@ interface ChatInputProps {
   onModeChange: (mode: ChatMode) => void;
   disabled?: boolean;
   currentMode: ChatMode;
+  onExportChat?: () => void;
+  onToggleMessageVisibility?: () => void;
+  onRegenerateSummary?: () => void;
+  summaryModelId?: string;
+  chatMessagesLength?: number;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -36,14 +41,20 @@ const ChatInput: React.FC<ChatInputProps> = ({
   onModeChange,
   disabled = false,
   currentMode,
+  onExportChat,
+  onToggleMessageVisibility,
+  onRegenerateSummary,
+  summaryModelId,
+  chatMessagesLength = 0,
 }) => {
   const { inputHeight: configInputHeight, setInputHeightPersistent } = useConfig();
   const [message, setMessage] = useState("");
   const [temperature, setTemperature] = useState(1.0);
-  const [editorHeight, setEditorHeight] = useState(150);
+  const [editorHeight, setEditorHeight] = useState(80);
   const [isResizing, setIsResizing] = useState(false);
   const [startY, setStartY] = useState(0);
   const [startHeight, setStartHeight] = useState(0);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Sync with config
   useEffect(() => {
@@ -79,6 +90,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
     setTemperature(parseFloat(e.target.value));
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed(prev => !prev);
+  };
+
   const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
@@ -90,7 +105,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     if (!isResizing) return;
     
     const deltaY = e.clientY - startY;
-    const newHeight = Math.max(100, Math.min(400, startHeight + deltaY));
+    const newHeight = Math.max(60, Math.min(300, startHeight + deltaY));
     setEditorHeight(newHeight);
   }, [isResizing, startY, startHeight]);
 
@@ -117,6 +132,57 @@ const ChatInput: React.FC<ChatInputProps> = ({
       document.body.style.userSelect = '';
     };
   }, [isResizing, handleResizeMouseMove, handleResizeMouseUp]);
+
+  if (isCollapsed) {
+    return (
+      <div className={`${styles.container} ${styles.collapsed}`}>
+        <div className={styles.collapsedBar}>
+          <div className={styles.collapsedLeft}>
+            <button
+              className={styles.expandButton}
+              onClick={toggleCollapse}
+              title="Expand chat input"
+            >
+              ▲
+            </button>
+            <span className={styles.collapsedModels}>
+              {activeModelIds.length} model{activeModelIds.length !== 1 ? 's' : ''} selected
+            </span>
+          </div>
+          <div className={styles.collapsedActions}>
+            {onToggleMessageVisibility && (
+              <button
+                className={styles.actionButton}
+                title="Show/hide messages"
+                onClick={onToggleMessageVisibility}
+              >
+                👁️
+              </button>
+            )}
+            {onRegenerateSummary && (
+              <button
+                className={styles.actionButton}
+                title="Regenerate summary"
+                onClick={onRegenerateSummary}
+                disabled={!summaryModelId || chatMessagesLength === 0}
+              >
+                🔄
+              </button>
+            )}
+            {onExportChat && (
+              <button
+                className={styles.actionButton}
+                title="Export chat"
+                onClick={onExportChat}
+              >
+                📤
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -161,6 +227,44 @@ const ChatInput: React.FC<ChatInputProps> = ({
             <option value={ChatMode.ROUND_ROBIN}>Round Robin</option>
             <option value={ChatMode.CUSTOM}>Custom</option>
           </select>
+
+          <div className={styles.chatActions}>
+            <button
+              className={styles.collapseButton}
+              onClick={toggleCollapse}
+              title="Collapse input area"
+            >
+              ▼
+            </button>
+            {onToggleMessageVisibility && (
+              <button
+                className={styles.actionButton}
+                title="Show/hide messages"
+                onClick={onToggleMessageVisibility}
+              >
+                👁️
+              </button>
+            )}
+            {onRegenerateSummary && (
+              <button
+                className={styles.actionButton}
+                title="Regenerate summary"
+                onClick={onRegenerateSummary}
+                disabled={!summaryModelId || chatMessagesLength === 0}
+              >
+                🔄
+              </button>
+            )}
+            {onExportChat && (
+              <button
+                className={styles.actionButton}
+                title="Export chat"
+                onClick={onExportChat}
+              >
+                📤
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

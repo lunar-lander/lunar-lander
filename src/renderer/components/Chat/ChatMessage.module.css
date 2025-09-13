@@ -241,17 +241,39 @@
   overflow-x: auto;
   overflow-y: hidden;
   padding: 2px 0;
+  margin: 0.8em 0;
 }
 
 .messageText :global(.katex) {
   font-size: 1.1em;
+  color: var(--text) !important;
 }
 
 .messageText :global(.katex-error) {
-  color: #f44336;
+  color: var(--error) !important;
   background-color: rgba(244, 67, 54, 0.1);
   padding: 2px 4px;
   border-radius: 2px;
+}
+
+/* Theme-aware KaTeX styling */
+:global(.dark-theme) .messageText :global(.katex) {
+  color: var(--text) !important;
+}
+
+:global(.dark-theme) .messageText :global(.katex-display) {
+  color: var(--text) !important;
+}
+
+/* Ensure KaTeX elements inherit theme colors */
+.messageText :global(.katex .mord),
+.messageText :global(.katex .mbin),
+.messageText :global(.katex .mrel),
+.messageText :global(.katex .mopen),
+.messageText :global(.katex .mclose),
+.messageText :global(.katex .mpunct),
+.messageText :global(.katex .minner) {
+  color: inherit !important;
 }
 
 /* User message markdown (light on dark) */

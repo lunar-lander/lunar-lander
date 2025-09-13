@@ -1,8 +1,8 @@
 .container {
   border-top: 1px solid var(--border-color);
   padding: 16px;
-  background-color: var(--sidebar-color);
-  color: var(--text-color);
+  background-color: var(--sidebar);
+  color: var(--text);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -19,7 +19,7 @@
 }
 
 .resizeHandle:hover {
-  background-color: var(--primary-color);
+  background-color: var(--primary);
   opacity: 0.3;
 }
 
@@ -51,7 +51,7 @@
   font-size: 13px;
   background-color: var(--card-bg-color);
   border: 1px solid var(--border-color);
-  color: var(--text-color);
+  color: var(--text);
   cursor: pointer;
   transition: all 0.2s;
   user-select: none;
@@ -60,12 +60,12 @@
 
 .modelToggle:hover:not(.active) {
   background-color: var(--hover-bg-color);
-  border-color: var(--primary-color);
+  border-color: var(--primary);
 }
 
 .modelToggle.active {
   background-color: rgba(0,0,0,0.5);
-  border: 2px solid var(--success-color);
+  border: 2px solid var(--success);
   color: white;
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(var(--primary-color-rgb), 0.3);
@@ -77,12 +77,89 @@
   gap: 12px;
 }
 
+.chatActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background-color: var(--hover-bg-color);
+}
+
+.actionButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.collapseButton,
+.expandButton {
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: background-color 0.2s;
+}
+
+.collapseButton:hover,
+.expandButton:hover {
+  background-color: var(--hover-bg-color);
+  color: var(--text);
+}
+
+/* Collapsed state styles */
+.collapsed {
+  padding: 8px 16px !important;
+  border-top: 1px solid var(--border-color);
+}
+
+.collapsedBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+}
+
+.collapsedLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapsedModels {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.collapsedActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .modeSelect {
   padding: 6px 10px;
   border-radius: 4px;
   border: 1px solid var(--border-color);
   background-color: var(--input-bg);
-  color: var(--text-color);
+  color: var(--text);
   cursor: pointer;
   font-size: 13px;
 }
@@ -92,7 +169,7 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--text-color);
+  color: var(--text);
 }
 
 .temperatureSlider {
@@ -144,12 +221,39 @@
 }
 
 .mdEditor :global(.w-md-editor-text) {
-  color: var(--text-color);
+  color: var(--text) !important;
+  background-color: var(--input-bg) !important;
+}
+
+.mdEditor :global(.w-md-editor-text textarea) {
+  color: var(--text) !important;
+  background-color: var(--input-bg) !important;
+  caret-color: var(--text) !important;
 }
 
 .mdEditor :global(.w-md-editor-preview) {
-  background-color: var(--sidebar-color);
-  color: var(--text-color);
+  background-color: var(--sidebar);
+  color: var(--text);
+}
+
+/* Fix toolbar button colors */
+.mdEditor :global(.w-md-editor-toolbar) button {
+  color: var(--text-secondary) !important;
+  background: transparent !important;
+}
+
+.mdEditor :global(.w-md-editor-toolbar) button:hover {
+  background-color: var(--hover-bg-color) !important;
+  color: var(--text) !important;
+}
+
+/* Fix icons in dark theme */
+.mdEditor :global(.w-md-editor-toolbar svg) {
+  fill: var(--text-secondary) !important;
+}
+
+.mdEditor :global(.w-md-editor-toolbar button:hover svg) {
+  fill: var(--text) !important;
 }
 
 .sendButton {
@@ -162,7 +266,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--primary-color);
+  background-color: var(--primary);
   color: white;
   border: none;
   cursor: pointer;
@@ -170,7 +274,7 @@
 }
 
 .sendButton:hover {
-  background-color: var(--primary-hover-color);
+  background-color: var(--primary-hover);
 }
 
 .sendButton:disabled {

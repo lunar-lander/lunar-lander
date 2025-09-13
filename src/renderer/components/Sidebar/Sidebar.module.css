@@ -357,29 +357,20 @@
   margin-bottom: 8px;
 }
 
-.clearAllButton {
+.exportAllButton {
   font-size: 0.8em;
   padding: 4px 8px;
   border-radius: 4px;
-  background-color: rgba(var(--primary-rgb, 26, 115, 232), 0.1);
-  color: var(--primary);
+  background-color: rgba(34, 168, 83, 0.1);
+  color: var(--success);
   border: none;
   cursor: pointer;
   margin-right: 12px;
   transition: background-color 0.2s;
 }
 
-.clearAllButton:hover {
-  background-color: rgba(var(--primary-rgb, 26, 115, 232), 0.2);
-}
-
-:global(.dark-theme) .clearAllButton {
-  background-color: rgba(138, 180, 248, 0.1);
-  color: #8ab4f8;
-}
-
-:global(.dark-theme) .clearAllButton:hover {
-  background-color: rgba(138, 180, 248, 0.2);
+.exportAllButton:hover {
+  background-color: rgba(34, 168, 83, 0.2);
 }
 
 .searchContainer {

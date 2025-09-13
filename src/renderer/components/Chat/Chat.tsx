@@ -62,37 +62,6 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
     <div className={styles.container}>
       {chatId && chat ? (
         <>
-          <div className={styles.header}>
-            <h2 className={styles.title}>
-              {(!chat.title || chat.title === "New Chat") && 
-              chat.summary !== "Start a new conversation"
-                ? chat.summary
-                : chat.title || "New Conversation"}
-              {summarizing && (
-                <span className={styles.summarizing}> (Summarizing...)</span>
-              )}
-            </h2>
-            <div className={styles.headerActions}>
-              <button
-                className={styles.headerButton}
-                title="Clear hidden messages"
-                onClick={() => handleToggleMessageVisibility("")}
-              >
-                👁️
-              </button>
-              <button
-                className={styles.headerButton}
-                title="Regenerate Summary"
-                onClick={() => chat && chatId && generateChatSummary(chatId)}
-                disabled={!summaryModelId || chat.messages.length === 0}
-              >
-                🔄
-              </button>
-              <button className={styles.headerButton} title="Export chat">
-                📤
-              </button>
-            </div>
-          </div>
           <div className={styles.messagesContainer}>
             <ChatMessages
               messages={chat.messages}
@@ -110,6 +79,14 @@ const Chat: React.FC<ChatProps> = ({ chatId }) => {
             onModeChange={handleModeChange}
             disabled={isLoading || streamingMessageIds.length > 0}
             currentMode={chatMode}
+            onExportChat={() => {
+              // TODO: Implement export functionality
+              console.log('Export chat clicked');
+            }}
+            onToggleMessageVisibility={() => handleToggleMessageVisibility("")}
+            onRegenerateSummary={() => chat && chatId && generateChatSummary(chatId)}
+            summaryModelId={summaryModelId}
+            chatMessagesLength={chat.messages.length}
           />
         </>
       ) : (
