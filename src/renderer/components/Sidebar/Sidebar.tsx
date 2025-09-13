@@ -25,6 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
     deleteChat,
     deleteAllChats,
     updateChatSummaryManual,
+    updateChat,
   } = useAppContext();
 
   const { openCommandPalette } = useShortcuts();
@@ -400,12 +401,49 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                         return;
                       }
 
-                      // Confirm import action
-                      const confirmMessage = `Import ${importData.chats.length} conversations?\n\nThis will add them to your existing conversations.`;
+                      // Check for duplicates
+                      const newChats = [];
+                      const duplicates = [];
+
+                      for (const chatData of importData.chats) {
+                        // Check if chat already exists (match by summary and creation time)
+                        const isDuplicate = chats.some(existingChat => {
+                          // Match by summary and similar creation time (within 1 minute)
+                          const summaryMatch = existingChat.summary === chatData.summary;
+                          const timeMatch = chatData.createdAt &&
+                            Math.abs(existingChat.createdAt - chatData.createdAt) < 60000;
+
+                          // Also check if first message content matches (if available)
+                          const firstMessageMatch = existingChat.messages.length > 0 &&
+                            chatData.messages && chatData.messages.length > 0 &&
+                            existingChat.messages[0].content === chatData.messages[0].content;
+
+                          return summaryMatch && (timeMatch || firstMessageMatch);
+                        });
+
+                        if (isDuplicate) {
+                          duplicates.push(chatData.summary || 'Unnamed chat');
+                        } else {
+                          newChats.push(chatData);
+                        }
+                      }
+
+                      // Show confirmation with duplicate info
+                      let confirmMessage = `Import ${newChats.length} new conversations?`;
+                      if (duplicates.length > 0) {
+                        confirmMessage += `\n\n${duplicates.length} duplicate(s) found and will be skipped:\n${duplicates.slice(0, 3).join('\n')}${duplicates.length > 3 ? `\n...and ${duplicates.length - 3} more` : ''}`;
+                      }
+                      confirmMessage += '\n\nThis will add them to your existing conversations.';
+
+                      if (newChats.length === 0) {
+                        alert('No new conversations to import. All conversations already exist.');
+                        return;
+                      }
+
                       if (!window.confirm(confirmMessage)) return;
 
-                      // Import each chat
-                      for (const chatData of importData.chats) {
+                      // Import only new chats
+                      for (const chatData of newChats) {
                         // Generate new ID to avoid conflicts
                         const newChat = {
                           ...chatData,
@@ -419,10 +457,12 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
                         };
 
                         // Add to storage
-                        saveChat(newChat);
+                        updateChat(newChat);
                       }
 
-                      alert(`Successfully imported ${importData.chats.length} conversations!`);
+                      const successMessage = `Successfully imported ${newChats.length} conversations!` +
+                        (duplicates.length > 0 ? ` (${duplicates.length} duplicates skipped)` : '');
+                      alert(successMessage);
                     } catch (error) {
                       console.error('Import error:', error);
                       alert('Failed to import backup file. Please check the file format.');

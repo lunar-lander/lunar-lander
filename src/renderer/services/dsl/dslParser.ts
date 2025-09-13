@@ -28,11 +28,11 @@ export class DSLParser {
     const errors: DSLValidationError[] = [];
 
     // Required fields
-    if (!dsl.name || dsl.name.trim() === '') {
+    if (!dsl.name || String(dsl.name).trim() === '') {
       errors.push({ field: 'name', message: 'Name is required' });
     }
 
-    if (!dsl.description || dsl.description.trim() === '') {
+    if (!dsl.description || String(dsl.description).trim() === '') {
       errors.push({ field: 'description', message: 'Description is required' });
     }
 
@@ -43,46 +43,47 @@ export class DSLParser {
 
     // Validate each phase
     dsl.phases.forEach((phase, index) => {
-      if (!phase.name || phase.name.trim() === '') {
-        errors.push({ 
-          field: 'name', 
+      if (!phase.name || String(phase.name).trim() === '') {
+        errors.push({
+          field: 'name',
           message: 'Phase name is required',
           phase: index
         });
       }
 
-      if (!phase.models || phase.models.trim() === '') {
-        errors.push({ 
-          field: 'models', 
+      if (!phase.models || String(phase.models).trim() === '') {
+        errors.push({
+          field: 'models',
           message: 'Models specification is required',
           phase: index
         });
       } else {
         // Validate models format
         const validModelSpecs = ['all', 'first', 'last', 'random'];
-        const isValidSpec = validModelSpecs.includes(phase.models) || 
-                          /^\d+(,\d+)*$/.test(phase.models);
-        
+        const modelStr = String(phase.models);
+        const isValidSpec = validModelSpecs.includes(modelStr) ||
+                          /^\d+(,\d+)*$/.test(modelStr);
+
         if (!isValidSpec) {
-          errors.push({ 
-            field: 'models', 
+          errors.push({
+            field: 'models',
             message: 'Models must be "all", "first", "last", "random", or comma-separated indices (e.g., "1,3,5")',
             phase: index
           });
         }
       }
 
-      if (!phase.context || phase.context.trim() === '') {
-        errors.push({ 
-          field: 'context', 
+      if (!phase.context || String(phase.context).trim() === '') {
+        errors.push({
+          field: 'context',
           message: 'Context specification is required',
           phase: index
         });
       } else {
         const validContexts = ['user_only', 'all_previous', 'phase_previous'];
-        if (!validContexts.includes(phase.context)) {
-          errors.push({ 
-            field: 'context', 
+        if (!validContexts.includes(String(phase.context))) {
+          errors.push({
+            field: 'context',
             message: 'Context must be "user_only", "all_previous", or "phase_previous"',
             phase: index
           });
@@ -90,9 +91,10 @@ export class DSLParser {
       }
 
       if (phase.temperature !== undefined) {
-        if (typeof phase.temperature !== 'number' || phase.temperature < 0 || phase.temperature > 2) {
-          errors.push({ 
-            field: 'temperature', 
+        const temp = Number(phase.temperature);
+        if (isNaN(temp) || temp < 0 || temp > 2) {
+          errors.push({
+            field: 'temperature',
             message: 'Temperature must be a number between 0 and 2',
             phase: index
           });
@@ -115,20 +117,20 @@ export class DSLParser {
     }
 
     return {
-      name: parsed.name,
-      description: parsed.description,
-      version: parsed.version || '1.0',
-      author: parsed.author,
+      name: String(parsed.name),
+      description: String(parsed.description),
+      version: parsed.version ? String(parsed.version) : '1.0',
+      author: parsed.author ? String(parsed.author) : undefined,
       phases: parsed.phases.map((phase: any) => ({
-        name: phase.name,
-        models: phase.models,
-        context: phase.context,
-        prompt: phase.prompt,
+        name: String(phase.name),
+        models: String(phase.models),
+        context: String(phase.context),
+        prompt: phase.prompt ? String(phase.prompt) : undefined,
         roles: phase.roles,
         wait_for_completion: phase.wait_for_completion !== false, // Default to true
-        temperature: phase.temperature
+        temperature: phase.temperature !== undefined ? Number(phase.temperature) : undefined
       })),
-      global_prompt: parsed.global_prompt,
+      global_prompt: parsed.global_prompt ? String(parsed.global_prompt) : undefined,
       global_roles: parsed.global_roles
     };
   }
